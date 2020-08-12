@@ -1,0 +1,47 @@
+name: CBD Blog
+description: 好记性不如烂笔头,站在岸上学不会游泳
+url: icbd.github.com/blogs
+baseurl: /blogs
+avatar: https://pbs.twimg.com/profile_images/470928668433186818/7jYycVF8.jpeg
+favicon: https://pbs.twimg.com/profile_images/470928668433186818/7jYycVF8.jpeg
+navigation:
+  - name: 首页
+    url: /
+  - name: 关于
+    url: /about
+  - name: 归档
+    url: /archive
+  - name: 标签
+    url: /tags
+paginate: 10
+excerpt_separator: <!-- more -->
+footer-links:
+  twitter: https://www.twitter.com/CbdFocus
+  github: icbd
+  email: wwwicbd@gmail.com
+  linkedin:
+  rss: icbd
+
+footer-text: Copyright (c) 2020 CBD Blog
+disqus: cbdfocus
+google_analytics:
+permalink: /:title/
+paginate_path: /page:num/
+version: v1.2.0
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+sass:
+  style: :expanded
+plugins:
+  - jekyll-sitemap
+  - jekyll-feed
+  - jekyll-paginate
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - LICENSE
+  - README.md
+  - CNAME
