@@ -2,8 +2,8 @@ name: CBD Blog
 description: 好记性不如烂笔头,站在岸上学不会游泳
 url: icbd.github.com
 baseurl: /blogs
-avatar: https://pbs.twimg.com/profile_images/470928668433186818/7jYycVF8.jpeg
-favicon: https://pbs.twimg.com/profile_images/470928668433186818/7jYycVF8.jpeg
+avatar: /blogs/images/avatar.jpg
+favicon: /blogs/images/avatar.jpg
 navigation:
   - name: 首页
     url: /
@@ -43,3 +43,17 @@ exclude:
   - LICENSE
   - README.md
   - CNAME
+
+# shortcut variables:
+# {{ site.vars.key }}
+vars:
+  sp: |
+    <span style="display: inline-block; width: 1em">&nbsp;</span>
+  sp2: |
+    <span style="display: inline-block; width: 2em">&nbsp;</span>
+  sp4: |
+    <span style="display: inline-block; width: 4em">&nbsp;</span>
+  sub-block-open: |
+    <div align="right"><div align="left" style="display: inline-block; width: calc(100% - 4em);margin: 0px;">
+  sub-block-close: |
+    </div></div>
