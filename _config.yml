@@ -21,7 +21,7 @@ footer-links:
   rss: icbd
 
 footer-text: Copyright (c) 2020 CBD Blog
-disqus: cbdfocus
+disqus: "cbd-blog"
 google_analytics: G-F7YBKQTGB6
 permalink: /:title/
 paginate_path: /page:num/
