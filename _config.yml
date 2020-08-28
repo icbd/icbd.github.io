@@ -21,7 +21,10 @@ footer-links:
   rss: icbd
 
 footer-text: Copyright (c) 2020 CBD Blog
-disqus: "cbd-blog"
+#disqus: "cbd-blog"
+utteranc:
+  repo:  icbd/blogs
+  label: utteranc
 google_analytics: G-F7YBKQTGB6
 permalink: /:title/
 paginate_path: /page:num/
