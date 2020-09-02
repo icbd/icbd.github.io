@@ -210,6 +210,40 @@ process child pid: 5914
 
 如此修改, 父进程就不会因为信号的不可靠投递而遗漏处理.
 
+## `trap` More
+
+trap 平时很少使用, 几乎只用于常驻后台的程序.
+
+`trap(:INT)` 实际上是重新定义 `:INT` 信号的响应方式, 效果是全局的. 
+
+如果已经定义了 `:INT` 的处理方式, 想要在此基础上添加逻辑:
+
+```ruby
+puts "pid: #{Process.pid}"
+
+trap(:INT) do
+  puts "processing>>>"
+  exit
+end
+
+old_sigal = trap(:INT) do
+  puts "new processing..."
+
+  old_sigal.call if old_sigal.respond_to?(:call)
+end
+
+at_exit do
+  puts "Bye~"
+end
+
+sleep 100
+
+```
+
+由于 trap 的全局性, 并不推荐对同一个信号多次定义, 如果只想在退出前做点什么, 用 `at_exit` 就足够了.
+
+另外, 不能用这种方式调用信号的默认处理方式.
+
 ## 参考
 
 [https://man7.org/linux/man-pages/man2/signal.2.html](https://man7.org/linux/man-pages/man2/signal.2.html)
