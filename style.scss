@@ -15,6 +15,9 @@
 /* BASE RULES */
 /**************/
 
+$wrapper_sidebar_width: 20%;
+$wrapper_content_width: 80%;
+
 html {
   font-size: $base-font-size;
 }
@@ -27,7 +30,7 @@ body {
 
 .container {
   margin: 0 auto;
-  max-width: 1000px;
+  max-width: 1100px;
   padding: 0 20px;
   width: 100%;
 }
@@ -320,7 +323,7 @@ img {
 //
 
 .wrapper-sidebar {
-  width: 30%;
+  width: $wrapper_sidebar_width;
 	-webkit-background-size: cover;
 	background-size: cover;
 	background-color: $background-color;
@@ -430,7 +433,7 @@ nav {
 
 .wrapper-content {
   float: right;
-  width: 70%;
+  width: $wrapper_content_width;
 
   @include mobile {
     float: none;
@@ -533,7 +536,7 @@ nav {
 .toc {
   width: 240px;
   height: 100%;
-  left: 30%;
+  left: $wrapper_sidebar_width;
   position: fixed;
   z-index: 4;
   padding: 60px 20px 0 20px;
@@ -750,9 +753,12 @@ footer {
   }
 }
 
+// fix utterances
+.utterances{
+  margin-left: 0;
+}
+
 // Settled on moving the import of syntax highlighting to the bottom of the CSS
 // ... Otherwise it really bloats up the top of the CSS file and makes it difficult to find the start
 @import "highlights";
-@import "gitalk";
-
-
+// @import "gitalk";
