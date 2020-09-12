@@ -130,3 +130,23 @@ sudo ulimit -n 655360
 
 得到的 `writable` 是个数组, 内容是准备就绪的 socket 对象, 再次调用 `connect_nonblock` 来读取连接结果.
 如果抛出 `Errno::EISCONN` 则说明该 TCP 连接成功了, 该端口即为开放的端口.
+
+
+## 补充
+
+在 `initialize` 中我们提前进行了 DNS 查询:
+
+```ruby
+IPSocket.getaddress(host)
+```
+
+如果推迟到 `sockaddr_in` 中查询, 一方面是因为确实只需要查询一次 DNS, 再就是因为 MRI 的 DNS 是依赖 C 扩展的. 
+
+GIL 保证只有一个线程的 Ruby 代码在执行, 遇到 IO 会释放 GIL 从而提高 IO 整体的效率. 遇到 C 扩展时会一直持有 GIL , 不论 C 扩展中是否是 IO 操作. 这就是 DNS 查询多线程不友好的原因了.
+
+也有解决方案, 用 Ruby 实现的 DNS 替换默认的:
+
+```
+require 'resolv'
+require 'resolv-replace'
+```
