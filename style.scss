@@ -37,7 +37,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   line-height: 2em;
-  margin: 1em 0 16px;
+  margin: 1em 0 0.6em;
   padding: 0;
 
   @include mobile {
@@ -50,6 +50,7 @@ h1, h2, h3, h5 {
 }
 
 h1 {
+  margin: 1.5em 0 0.8em;
   font-size: 30px;
   a {
     color: inherit;
@@ -57,16 +58,22 @@ h1 {
 }
 
 h2 {
+  margin: 1.5em 0 0.8em;
   font-size: 24px;
+  background: linear-gradient(#fff 60%, #CBF8DF 40%);
 }
 
 h3 {
   font-size: 20px;
+  border-left: 8px solid #CBF8DF;
+  padding-left: 4px;
 }
 
 h4 {
   font-size: 20px;
   color: $base-lighten-color;
+  border-left: 8px solid #CBF8DF;
+  padding-left: 4px;
 }
 
 h6 {
