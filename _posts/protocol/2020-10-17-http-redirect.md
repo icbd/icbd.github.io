@@ -43,7 +43,7 @@ Referrer Policy: strict-origin-when-cross-origin
 
 这就是 301 的效果, **永久重定向**, 浏览器会缓存 301 的响应, 再次请求时会略过源 Location (`http://zhihu.com/`) 直接请求新 Location (`https://www.zhihu.com/`) .
 
-相对应的, 302 是 **临时重定向**, 浏览器不会缓存, 每次都走先请求源 Location, 然后根据响应继续后续的请求. 使用 302 的服务器可以随时修改新的目的 Location.
+相对应的, 302 是 **临时重定向**, 浏览器不会缓存, 每次都走先请求源 Location, 然后根据响应继续后续的请求. 使用 302 的服务器可以随时修改新的目的 Location, 比如 OAuth2 认证过程中, 使用临时重定向就更合适.
 
 对于一个 POST 请求, 很可能携带了请求体, 重定向之后, 浏览器会携带请求体去请求新的 Location .
 不过出于历史原因, POST 的请求在重定向 301 302 时, 可能会用 GET 去请求新的 Location, 为了避免这种歧义, 302 的后继 307 明确要求: 重定向请求不得修改 HTTP Method (301 没有对应的).
