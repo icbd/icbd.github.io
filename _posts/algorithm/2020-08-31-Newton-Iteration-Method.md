@@ -12,7 +12,7 @@ tags: [Algorithm]
 
 原函数: `f(x) = x^2`
 
-![Newton-Method.png](/blogs/images/Newton-Method.png)
+![Newton-Method.png](/images/Newton-Method.png)
 
 在函数图像上, 取 x0=1, 也就是点 `(1, 1)`, 做 `f(x)` 在这个点的切线.
 
@@ -22,7 +22,7 @@ tags: [Algorithm]
 
 `f(x) / (x0 - x) = f'(x)`, 即 `x0 - x = f(x) / f'(x)`.
 
-![NewtonIteration_Ani.gif](/blogs/images/NewtonIteration_Ani.gif)
+![NewtonIteration_Ani.gif](/images/NewtonIteration_Ani.gif)
 
 如 GIF 所示, 只要这样不停地逼近, 就能找到一个精度足够高的近似解.
 
