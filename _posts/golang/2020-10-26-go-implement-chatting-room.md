@@ -6,7 +6,7 @@ Author: CBD
 tags: [Golang]
 ---
 
-源码详见: [github.com/icbd/go_rough_chatting_room](github.com/icbd/go_rough_chatting_room) .
+源码详见: [https://github.com/icbd/go_rough_chatting_room](https://github.com/icbd/go_rough_chatting_room) .
 
 基本功能需求:
 
