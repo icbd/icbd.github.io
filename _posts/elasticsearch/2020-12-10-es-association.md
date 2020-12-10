@@ -172,7 +172,6 @@ ES:
 `GET /marks/_search`
 
 ```json
-GET /marks/_search
 {
   "query": {
     "terms": {
@@ -199,7 +198,6 @@ sql: `SELECT*FROM marks LIMIT 20 OFFSET 0`
 `GET /marks/_search`
 
 ```json
-GET /marks/_search
 {
   "query": {
     "bool": {
