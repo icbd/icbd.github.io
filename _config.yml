@@ -7,8 +7,8 @@ favicon: /images/avatar.jpg
 navigation:
   - name: 首页
     url: /
-  - name: 标签
-    url: /tags
+  - name: 归档
+    url: /archive
   - name: 关于
     url: /about
 paginate: 10
