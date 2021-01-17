@@ -32,7 +32,9 @@ func minDepth(root *TreeNode) int {
 		return 0
 	}
 
-	queue := []Node{{Tree: root, Depth: 1}}
+	queue := []Node{
+		{Tree: root, Depth: 1},
+		}
 
 	// 每次迭代之后, len(queue) 都会变化
 	for i := 0; i < len(queue); i++ {
