@@ -139,3 +139,7 @@ GPG 默认的 keyserver 在大陆访问有问题, 可以自行使用备选服务
 git config --global user.signingkey <你的公钥ID>
 git config --global commit.gpgsign true
 ```
+
+```zsh
+export GPG_TTY=$(tty)
+```
