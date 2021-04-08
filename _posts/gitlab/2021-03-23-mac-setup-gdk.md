@@ -6,9 +6,9 @@ Author: CBD
 tags:   [Gitlab]
 ---
 
-使用这个脚本会全自动安装和配置 GDK, 建议在新机器上使用, 详细参考:
+使用这个脚本会全自动安装和配置 GDK, 建议在新机器上使用.
 
-[https://gitlab.com/gitlab-org/gitlab-development-kit](https://gitlab.com/gitlab-org/gitlab-development-kit)
+自动安装借助 [asdf](https://asdf-vm.com/#/core-manage-asdf) 来安装依赖, 如果跟现有环境冲突请参考: [Install and configure GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/index.md)
 
 ```sh
 #! /bin/bash
