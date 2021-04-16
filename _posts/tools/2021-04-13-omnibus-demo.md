@@ -1,9 +1,8 @@
 ---
 layout: post
 title:  Package Script and Iterperter by Chef Omnibus
-date:   2021-04-14
 Author: CBD
-tags:   [Omnibus]
+tags:   [Omnibus, GitLab]
 ---
 
 This is a demo project to show how to package Ruby script and Ruby interpreter with [`chef/Omnibus`](https://github.com/chef/omnibus).
@@ -12,30 +11,30 @@ This is a demo project to show how to package Ruby script and Ruby interpreter w
 
 Development env is our local env, I'm on MacOS.
 
-1.Preparation
+1. Preparation
 
-  We need to prepare Ruby ( `>=2.6` ) in the development environment, and then
+    We need to prepare Ruby ( `>=2.6` ) in the development environment, and then
 
-  ```sh
-  gem install bundler:2.2.3
-  gem install omnibus
-  ```
+    ```sh
+    gem install bundler:2.2.3
+    gem install omnibus
+    ```
 
-2.Generate Omnibus code template
+2. Generate Omnibus code template
 
-  ```sh
-  omnibus new permutations
-  cd omnibus-permutations/
-  ```
+    ```sh
+    omnibus new permutations
+    cd omnibus-permutations/
+    ```
 
-3.Setup dependency and package scripts
+3. Setup dependency and package scripts
 
-* Setup project info in `config/projects/`
-* Add dependency to `config/software/`
-* Setup package scripts in `package-scripts/`
-* Commit code and add a version tag
+    * Setup project info in `config/projects/`
+    * Add dependency to `config/software/`
+    * Setup package scripts in `package-scripts/`
+    * Commit code and add a version tag
 
-More details: [https://gitlab.com/icbd/omnibus-permutations.git](https://gitlab.com/icbd/omnibus-permutations.git)
+    More details: [https://gitlab.com/icbd/omnibus-permutations.git](https://gitlab.com/icbd/omnibus-permutations.git)
 
 ## Building env
 
