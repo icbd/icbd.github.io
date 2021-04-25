@@ -127,7 +127,7 @@ GPG 默认的 keyserver 在大陆访问有问题, 可以自行使用备选服务
 
 可能有的人并不关心签名, 也可能没有 gpg, 特别是对公开发布的文件, 最好使用 `--detach-sign` 来签名, 这种方式会把签名文件独立保存.
 
-加密文件前, 先导如接收方的公钥, 然后 `gpg --recipient <朋友的公钥ID> --encrypt book.pdf` 得到加密并压缩的文件 `book.pdf.gpg` .
+加密文件前, 先导入接收方的公钥, 然后 `gpg --recipient <朋友的公钥ID> --encrypt book.pdf` 得到加密并压缩的文件 `book.pdf.gpg` .
 
 朋友收到文件后解压 `gpg book.pdf.gpg`, 因为需要用私钥解压, 这里他要输入自己的 passphrase .
 
