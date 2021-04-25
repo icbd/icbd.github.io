@@ -110,6 +110,21 @@ GPG 默认的 keyserver 在大陆访问有问题, 可以自行使用备选服务
 
 也就是说没有唯一的 keyserver, 选择是否信任又用户自己约定, 自行决定.
 
+### 用户导入公钥
+
+直接导入公钥文件:
+
+```sh
+gpg --import gpg.pub
+```
+
+通过公钥 ID 导入:
+
+```sh
+# gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 8D709DB50E5B773EF98E50AB04255F266E5C3842
+gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8D709DB50E5B773EF98E50AB04255F266E5C3842
+```
+
 ### 加密 解密 签名 验签
 
 非对称加密中, 大家把公钥互相公开, 各自保管自己的密钥:
@@ -119,9 +134,7 @@ GPG 默认的 keyserver 在大陆访问有问题, 可以自行使用备选服务
 
 `gpg --sign book.pdf` 会得到一个新文件 `book.pdf.gpg`, 这个文件包含了签名信息, 也会被自动压缩. 我们把 `book.pdf.gpg` 发给朋友, 并告诉他我的公钥或者公钥ID.
 
-如果朋友得到是公钥文件, 可以直接导入 `gpg --import gpg.pub` ;
-
-如果得到的是公钥ID, 则从 keyserver 上下载公钥 `gpg --keyserver hkp://keyserver.ubuntu.com:80  --receive-keys <你的公钥ID> book.pdf` .
+朋友需要导入公钥.
 
 然后 `gpg book.pdf.gpg`, gpg 会先验证签名, 再把文件解压, 得到 `book.pdf`.
 
