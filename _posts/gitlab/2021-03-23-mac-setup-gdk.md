@@ -40,3 +40,13 @@ gdk install
 另外, `gdk install` 可以追加参数 `shallow_clone=true` 来减少 clone 深度,
 
 也可以追加参数 `gitlab_repo=YOUR_REPO_URL` 拉取指定的 repo .
+
+## Tips
+
+`Reason: image not found - /Users/cbd/.asdf/installs/ruby/2.7.2/lib/ruby/gems/2.7.0/gems/charlock_holmes-0.7.7/lib/charlock_holmes/charlock_holmes.bundle`
+
+如果在 MacOS 11.3 上遇到这个问题, 尝试使用下面命令解决:
+
+```zsh
+gem pristine charlock_holmes
+```
