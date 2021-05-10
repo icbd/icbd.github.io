@@ -50,3 +50,10 @@ gdk install
 ```zsh
 gem pristine charlock_holmes
 ```
+
+## How to debug GitLab Rails App
+
+1. `gdk stop`
+2. Goto `Procfile` file and comment line of `rails-web:`
+3. `gdk start`
+4. `cd gitlab; bundle exec thin --socket=../gitlab.socket start`
