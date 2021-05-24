@@ -41,6 +41,40 @@ gdk install
 
 也可以追加参数 `gitlab_repo=YOUR_REPO_URL` 拉取指定的 repo .
 
+## How to debug GitLab Rails App
+
+1. `gdk stop`
+2. 注释掉 `Procfile` 中的 `rails-web:` 一行
+3. `gdk start`
+4. `cd gitlab`
+5. `bundle exec thin --socket=../gitlab.socket start`  或者 `bundle exec rails server`
+
+## Update GDK Config
+
+修改完配置文件 `gdk.yml` 后, 需要执行
+
+```zsh
+gdk reconfigure
+```
+
+## Update GDK
+
+```zsh
+gdk update
+```
+
+在 2021-05 的升级中, GDK 升级了 PostgreSQL 到 12, 开发环境会报:
+
+```text
+ERROR: PostgreSQL data directory is version 11 and must be upgraded to version 12.6 before GDK can be updated.
+```
+
+需要额外执行: `./support/upgrade-postgresql`. 这个脚本会帮你自动完成迁移:
+
+1. 备份 PG 11 的数据
+2. 初始化 PG 12 并导入数据
+3. `dgk reconfigure`
+
 ## Tips
 
 `Reason: image not found - /Users/cbd/.asdf/installs/ruby/2.7.2/lib/ruby/gems/2.7.0/gems/charlock_holmes-0.7.7/lib/charlock_holmes/charlock_holmes.bundle`
@@ -50,10 +84,3 @@ gdk install
 ```zsh
 gem pristine charlock_holmes
 ```
-
-## How to debug GitLab Rails App
-
-1. `gdk stop`
-2. Goto `Procfile` file and comment line of `rails-web:`
-3. `gdk start`
-4. `cd gitlab; bundle exec thin --socket=../gitlab.socket start`
