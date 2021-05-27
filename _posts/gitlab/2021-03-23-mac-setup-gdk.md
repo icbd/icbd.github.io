@@ -49,6 +49,20 @@ gdk install
 4. `cd gitlab`
 5. `bundle exec thin --socket=../gitlab.socket start`  或者 `bundle exec rails server`
 
+为了方便 byebug, 可以考虑修改 puma 的配置:
+
+```ruby
+threads 1, 1
+workers 1
+worker_timeout 600
+```
+
+设置环境变量:
+
+```text
+DISABLE_PUMA_WORKER_KILLER=true
+```
+
 ## Update GDK Config
 
 修改完配置文件 `gdk.yml` 后, 需要执行
