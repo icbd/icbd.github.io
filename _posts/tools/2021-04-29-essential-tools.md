@@ -23,6 +23,10 @@ echo -e "\n. $(brew --prefix asdf)/asdf.sh" >> ${ZDOTDIR:-~}/.zshrc
 # Blazing 💥 fast terminal-ui for git written in rust 🦀
 brew install gitui
 
+# https://direnv.net/
+# direnv is an extension for your shell.
+brew install direnv
+
 ```
 
 ## App
@@ -47,3 +51,4 @@ brew install gitui
 - [ ] Navicat
 - [ ] Charles
 - [ ] IINA
+- [ ] direnv
