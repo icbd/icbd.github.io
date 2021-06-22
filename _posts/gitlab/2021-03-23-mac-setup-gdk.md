@@ -39,7 +39,13 @@ gdk install
 
 另外, `gdk install` 可以追加参数 `shallow_clone=true` 来减少 clone 深度,
 
-也可以追加参数 `gitlab_repo=YOUR_REPO_URL` 拉取指定的 repo .
+也可以追加参数 `gitlab_repo=YOUR_GITLAB_REPO gitaly_repo=YOUR_GITALY_REPO` 拉取指定的 repo .
+
+我的安装参数如下:
+
+```zsh
+gdk install gitlab_repo=git@gitlab.com:icbd/gitlab.git gitaly_repo=git@gitlab.com:icbd/gitaly.git
+```
 
 ## How to debug GitLab Rails App
 
