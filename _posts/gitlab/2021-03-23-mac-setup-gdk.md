@@ -104,3 +104,20 @@ ERROR: PostgreSQL data directory is version 11 and must be upgraded to version 1
 ```zsh
 gem pristine charlock_holmes
 ```
+
+## Setup CI runner
+
+虽然可以使用 brew 安装和管理 `gitlab-runner`, 但是强烈建议手动安装.
+
+务必要在 `user-mode` 下使用 `gitlab-runner register` ( 不要用 `sudo` ).
+
+为了让 docker 能 clone 你的 repo, 使用内网 IP 是个简单办法:
+
+> `gdk.yml`
+
+```text
+listen_address: "0.0.0.0"
+hostname: "192.168.0.132"
+```
+
+修改之后记得刷新配置: `gdk reconfigure`.
