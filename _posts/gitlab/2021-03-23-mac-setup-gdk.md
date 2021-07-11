@@ -121,3 +121,5 @@ hostname: "192.168.0.132"
 ```
 
 修改之后记得刷新配置: `gdk reconfigure`.
+
+Ref: [Using GitLab Runner with GDK](https://gitlab.devworks.gr/gitlab-org/gitlab-development-kit/blob/f2247534217d23523f0e3495ad72162805dc7b38/doc/howto/runner.md)
