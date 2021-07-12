@@ -29,6 +29,10 @@ brew install direnv
 
 ```
 
+## Extensions
+
+[https://plugins.jetbrains.com/plugin/8183-gitlink](https://plugins.jetbrains.com/plugin/8183-gitlink)
+
 ## App
 
 - [ ] Chrome
