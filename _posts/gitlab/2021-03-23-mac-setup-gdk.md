@@ -3,7 +3,7 @@ layout: post
 title:  Setup Gitlab Development Kit on Mac
 date:   2021-03-23
 Author: CBD
-tags:   [Gitlab]
+tags:   [GitLab]
 ---
 
 使用这个脚本会全自动安装和配置 GDK, 建议在新机器上使用.
