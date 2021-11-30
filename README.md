@@ -4,10 +4,6 @@ CBD Blog
 
 ```shell
 cd blogs
-gem install jekyll
-gem install jekyll-sitemap
-gem install jekyll-feed
-gem install jekyll-paginate
-
+bundle install
 jekyll server --host=0.0.0.0
 ```
