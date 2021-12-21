@@ -34,6 +34,16 @@ make 不带参数时, 即以第一组任务为默认任务, make 会解析并执
 
 如果想把 target 当作标签使用, 但是又存在一个同名文件时, 需要使用 `.PHONY: target` 声明 target 为虚拟的.
 
+make 的工作方式:
+
+1. 读入所有的Makefile.
+1. 读入被include的其它Makefile.
+1. 初始化文件中的变量.
+1. 推导隐晦规则, 并分析所有规则.
+1. 为所有的目标文件创建依赖关系链.
+1. 根据依赖关系, 决定哪些目标要重新生成.
+1. 执行生成命令.
+
 ## Reference
 
 [B站: 正月点灯笼](https://www.bilibili.com/video/BV1Mx411m7fm)
