@@ -96,7 +96,14 @@ index 793405c1916..603138b5b7c 100644
 
 ## 其他配置
 
+## Allow use of licensed EE features
+
 以 root 用户登录, 来到页面 `/admin/application_settings/general#account-settings`,
-勾选 `Allow use of licensed EE features`.
+勾选 `Allow use of licensed EE features` .
 
 > Licensed Enterprise Edition features can be used if the project namespace's plan includes the feature, or if the project is public.
+
+## Allow requests to the local network from web hooks and services
+
+以 root 用户登录, 来到页面 `/admin/application_settings/network#js-outbound-settings`,
+勾选 `Allow requests to the local network from web hooks and services` .
