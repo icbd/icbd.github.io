@@ -3,7 +3,7 @@ layout: post
 title:  Git 仓库结构布局
 date:   2022-02-21
 Author: CBD
-tags:   [git]
+tags:   [Git]
 ---
 
 [https://git-scm.com/docs/gitrepository-layout](https://git-scm.com/docs/gitrepository-layout)

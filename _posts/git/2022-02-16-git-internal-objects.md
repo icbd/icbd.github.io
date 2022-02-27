@@ -3,7 +3,7 @@ layout: post
 title:  Git internal objects
 date:   2022-02-16
 Author: CBD
-tags:   [git]
+tags:   [Git]
 ---
 
 ## 示例项目

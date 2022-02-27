@@ -3,7 +3,7 @@ layout: post
 title:  Git 解压缩 pack
 date:   2022-02-26
 Author: CBD
-tags:   [git]
+tags:   [Git]
 ---
 
 在日常的工作流中, 几乎不会用到这个命令 `git unpack-objects`, 研究 Git 内部原理的时, 这是个有用的工具.
