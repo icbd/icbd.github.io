@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  git catfile and object file compress
+title:  git catfile and object file frame
 date:   2022-02-26
 Author: CBD
 tags:   [Git]
