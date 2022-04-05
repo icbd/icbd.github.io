@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>git catfile and object file frame – CBD Blog – 好记性不如烂笔头,站在岸上学不会游泳</title>
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="在仓库的 .git/objects 目录下, 保存着 git 的 object.
+
+后面以这个 Demo Repo 为例.
+
+.git/objects
+├── 11
+│   └── ef4924f8f1e21e6d7412040973f5e868559ac7
+├── 16
+│   └── 796efecb4599c92244ac8bafb217e20009008e
+├── 20
+│   └── 61bac5e1a292b380f98072ef5ffbc2fc3eefa9
+├── 53
+│   └── 33c1763419c89486091d80b6ba430d30b321a0
+├── 67
+│   └── 89c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+├── 69
+│   └── 15089af93052dc6f67fd7245037230a6b1894b
+├── d0
+│   └── 38440f5c27d52fed6b6c5eb7d180f1645ab724
+├── f2
+│   └── 0b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+├── info
+└── pack
+
+
+cat-file
+
+查看 object 的类型:
+
+git cat-file -t 16796efecb4599c92244ac8bafb217e20009008e
+
+
+blob
+
+
+查看 object 的内容:
+
+git cat-file -p 16796efecb4599c92244ac8bafb217e20009008e
+
+
+# Help
+
+
+
+save object to disk
+
+Git object 有几个类型:
+
+
+  blob
+  tree
+  commit
+
+
+Git object 内部以文本为基础, 经过特殊的编排, 再经过压缩, 最终得到的是二进制文件.
+
+为了查看其内部的原始文本, 第一步就是需要接开压缩.
+
+我们定义一个解压脚本, 参数是 Git object 的文件路径:
+
+alias inflate="ruby -r zlib -e \"ARGV.each {|path| puts Zlib::Inflate.inflate File.read(path) }\""
+
+
+后面还会用到 hexdump, 它会帮我们以 16 进制的形式来展示内容本来的面目, 特别注意那些不能打印的字符.
+
+常见字符对照:
+
+
+  
+    
+      16 进制
+      字符
+    
+  
+  
+    
+      00
+      NULL 空
+    
+    
+      20
+      空格
+    
+    
+      21
+      叹号 !
+    
+    
+      22
+      引号 "
+    
+    
+      23
+      井号 #
+    
+    
+      2E
+      句号 .
+    
+    
+      30
+      数字 0
+    
+    
+      39
+      数字 9
+    
+    
+      41
+      字母 A
+    
+    
+      5A
+      字母 Z
+    
+    
+      61
+      字母 a
+    
+    
+      7A
+      字母 z
+    
+    
+      0A
+      换行 line feed
+    
+    
+      0D
+      回车 carriage return
+    
+  
+
+
+hexdump -C 既会打印 16 进制的内容, 也会打印对应的可视字符(不可打印的用 . 表示).
+
+blob
+
+git cat-file -p 16796efecb4599c92244ac8bafb217e20009008e
+
+# Help
+
+
+
+inflate .git/objects/16/796efecb4599c92244ac8bafb217e20009008e | hexdump -C
+
+00000000  62 6c 6f 62 20 38 00 23  20 48 65 6c 70 0a 0a     |blob 8.# Help..|
+0000000f
+
+
+blob 编码结构:
+
+
+  
+    
+      blob
+      空格
+      内容长度
+      NULL
+      文件内容
+    
+  
+
+
+tree
+
+git cat-file -p 11ef4924f8f1e21e6d7412040973f5e868559ac7
+
+100644 blob 16796efecb4599c92244ac8bafb217e20009008e	help.md
+100644 blob f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5	info.md
+
+
+inflate .git/objects/11/ef4924f8f1e21e6d7412040973f5e868559ac7 | hexdump -C
+
+00000000  74 72 65 65 20 37 30 00  31 30 30 36 34 34 20 68  |tree 70.100644 h|
+00000010  65 6c 70 2e 6d 64 00 16  79 6e fe cb 45 99 c9 22  |elp.md..yn..E.."|
+00000020  44 ac 8b af b2 17 e2 00  09 00 8e 31 30 30 36 34  |D..........10064|
+00000030  34 20 69 6e 66 6f 2e 6d  64 00 f2 0b 9e d4 f8 ba  |4 info.md.......|
+00000040  4e 99 df 6a 24 91 bb ed  85 e8 da f5 26 d5 0a     |N..j$.......&amp;..|
+0000004f
+
+
+tree 编码结构:
+
+
+  
+    
+      tree
+      空格
+      内容长度
+      NULL
+      
+      
+      换行 LF
+    
+  
+
+
+文件名编码结构:
+
+
+  
+    
+      文件权限, 10064
+      空格
+      文件名
+      空格
+      blob SHA, 40位 hex
+    
+  
+
+
+commit
+
+git cat-file -p 6915089af93052dc6f67fd7245037230a6b1894b
+
+tree 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+author Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+committer Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+
+Init
+
+
+inflate .git/objects/69/15089af93052dc6f67fd7245037230a6b1894b | hexdump -C
+
+00000000  63 6f 6d 6d 69 74 20 31  35 39 00 74 72 65 65 20  |commit 159.tree |
+00000010  36 37 38 39 63 39 39 63  62 65 34 61 32 35 65 63  |6789c99cbe4a25ec|
+00000020  63 39 65 36 39 65 62 31  65 36 36 64 66 38 31 39  |c9e69eb1e66df819|
+00000030  64 64 66 61 62 32 65 35  0a 61 75 74 68 6f 72 20  |ddfab2e5.author |
+00000040  42 61 6f 64 6f 6e 67 20  3c 77 77 77 69 63 62 64  |Baodong &lt;wwwicbd|
+00000050  40 67 6d 61 69 6c 2e 63  6f 6d 3e 20 31 36 34 35  |@gmail.com&gt; 1645|
+00000060  30 31 35 34 34 38 20 2b  30 38 30 30 0a 63 6f 6d  |015448 +0800.com|
+00000070  6d 69 74 74 65 72 20 42  61 6f 64 6f 6e 67 20 3c  |mitter Baodong &lt;|
+00000080  77 77 77 69 63 62 64 40  67 6d 61 69 6c 2e 63 6f  |wwwicbd@gmail.co|
+00000090  6d 3e 20 31 36 34 35 30  31 35 34 34 38 20 2b 30  |m&gt; 1645015448 +0|
+000000a0  38 30 30 0a 0a 49 6e 69  74 0a                    |800..Init.|
+000000aa
+
+
+commit 编码结构:
+
+
+  
+    
+      commit
+      空格
+      内容长度
+      NULL
+    
+  
+
+
+
+  
+    
+      tree
+      空格
+      object SHA
+      换行 LF
+    
+  
+
+
+
+  
+    
+      author
+      空格
+      作者名字
+      空格
+      &lt;
+      作者 email
+      &gt;
+      空格
+      时间戳
+      空格
+      时区, +0800
+      换行 LF
+    
+  
+
+
+
+  
+    
+      committer
+      空格
+      提交者名字
+      空格
+      &lt;
+      作者 email
+      &gt;
+      空格
+      时间戳
+      空格
+      时区, +0800
+      换行 LF
+    
+  
+
+
+
+  
+    
+      换行 LF
+      commit message
+      换行 LF
+    
+  
+
+" />
+    <meta property="og:description" content="在仓库的 .git/objects 目录下, 保存着 git 的 object.
+
+后面以这个 Demo Repo 为例.
+
+.git/objects
+├── 11
+│   └── ef4924f8f1e21e6d7412040973f5e868559ac7
+├── 16
+│   └── 796efecb4599c92244ac8bafb217e20009008e
+├── 20
+│   └── 61bac5e1a292b380f98072ef5ffbc2fc3eefa9
+├── 53
+│   └── 33c1763419c89486091d80b6ba430d30b321a0
+├── 67
+│   └── 89c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+├── 69
+│   └── 15089af93052dc6f67fd7245037230a6b1894b
+├── d0
+│   └── 38440f5c27d52fed6b6c5eb7d180f1645ab724
+├── f2
+│   └── 0b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+├── info
+└── pack
+
+
+cat-file
+
+查看 object 的类型:
+
+git cat-file -t 16796efecb4599c92244ac8bafb217e20009008e
+
+
+blob
+
+
+查看 object 的内容:
+
+git cat-file -p 16796efecb4599c92244ac8bafb217e20009008e
+
+
+# Help
+
+
+
+save object to disk
+
+Git object 有几个类型:
+
+
+  blob
+  tree
+  commit
+
+
+Git object 内部以文本为基础, 经过特殊的编排, 再经过压缩, 最终得到的是二进制文件.
+
+为了查看其内部的原始文本, 第一步就是需要接开压缩.
+
+我们定义一个解压脚本, 参数是 Git object 的文件路径:
+
+alias inflate="ruby -r zlib -e \"ARGV.each {|path| puts Zlib::Inflate.inflate File.read(path) }\""
+
+
+后面还会用到 hexdump, 它会帮我们以 16 进制的形式来展示内容本来的面目, 特别注意那些不能打印的字符.
+
+常见字符对照:
+
+
+  
+    
+      16 进制
+      字符
+    
+  
+  
+    
+      00
+      NULL 空
+    
+    
+      20
+      空格
+    
+    
+      21
+      叹号 !
+    
+    
+      22
+      引号 "
+    
+    
+      23
+      井号 #
+    
+    
+      2E
+      句号 .
+    
+    
+      30
+      数字 0
+    
+    
+      39
+      数字 9
+    
+    
+      41
+      字母 A
+    
+    
+      5A
+      字母 Z
+    
+    
+      61
+      字母 a
+    
+    
+      7A
+      字母 z
+    
+    
+      0A
+      换行 line feed
+    
+    
+      0D
+      回车 carriage return
+    
+  
+
+
+hexdump -C 既会打印 16 进制的内容, 也会打印对应的可视字符(不可打印的用 . 表示).
+
+blob
+
+git cat-file -p 16796efecb4599c92244ac8bafb217e20009008e
+
+# Help
+
+
+
+inflate .git/objects/16/796efecb4599c92244ac8bafb217e20009008e | hexdump -C
+
+00000000  62 6c 6f 62 20 38 00 23  20 48 65 6c 70 0a 0a     |blob 8.# Help..|
+0000000f
+
+
+blob 编码结构:
+
+
+  
+    
+      blob
+      空格
+      内容长度
+      NULL
+      文件内容
+    
+  
+
+
+tree
+
+git cat-file -p 11ef4924f8f1e21e6d7412040973f5e868559ac7
+
+100644 blob 16796efecb4599c92244ac8bafb217e20009008e	help.md
+100644 blob f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5	info.md
+
+
+inflate .git/objects/11/ef4924f8f1e21e6d7412040973f5e868559ac7 | hexdump -C
+
+00000000  74 72 65 65 20 37 30 00  31 30 30 36 34 34 20 68  |tree 70.100644 h|
+00000010  65 6c 70 2e 6d 64 00 16  79 6e fe cb 45 99 c9 22  |elp.md..yn..E.."|
+00000020  44 ac 8b af b2 17 e2 00  09 00 8e 31 30 30 36 34  |D..........10064|
+00000030  34 20 69 6e 66 6f 2e 6d  64 00 f2 0b 9e d4 f8 ba  |4 info.md.......|
+00000040  4e 99 df 6a 24 91 bb ed  85 e8 da f5 26 d5 0a     |N..j$.......&amp;..|
+0000004f
+
+
+tree 编码结构:
+
+
+  
+    
+      tree
+      空格
+      内容长度
+      NULL
+      
+      
+      换行 LF
+    
+  
+
+
+文件名编码结构:
+
+
+  
+    
+      文件权限, 10064
+      空格
+      文件名
+      空格
+      blob SHA, 40位 hex
+    
+  
+
+
+commit
+
+git cat-file -p 6915089af93052dc6f67fd7245037230a6b1894b
+
+tree 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+author Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+committer Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+
+Init
+
+
+inflate .git/objects/69/15089af93052dc6f67fd7245037230a6b1894b | hexdump -C
+
+00000000  63 6f 6d 6d 69 74 20 31  35 39 00 74 72 65 65 20  |commit 159.tree |
+00000010  36 37 38 39 63 39 39 63  62 65 34 61 32 35 65 63  |6789c99cbe4a25ec|
+00000020  63 39 65 36 39 65 62 31  65 36 36 64 66 38 31 39  |c9e69eb1e66df819|
+00000030  64 64 66 61 62 32 65 35  0a 61 75 74 68 6f 72 20  |ddfab2e5.author |
+00000040  42 61 6f 64 6f 6e 67 20  3c 77 77 77 69 63 62 64  |Baodong &lt;wwwicbd|
+00000050  40 67 6d 61 69 6c 2e 63  6f 6d 3e 20 31 36 34 35  |@gmail.com&gt; 1645|
+00000060  30 31 35 34 34 38 20 2b  30 38 30 30 0a 63 6f 6d  |015448 +0800.com|
+00000070  6d 69 74 74 65 72 20 42  61 6f 64 6f 6e 67 20 3c  |mitter Baodong &lt;|
+00000080  77 77 77 69 63 62 64 40  67 6d 61 69 6c 2e 63 6f  |wwwicbd@gmail.co|
+00000090  6d 3e 20 31 36 34 35 30  31 35 34 34 38 20 2b 30  |m&gt; 1645015448 +0|
+000000a0  38 30 30 0a 0a 49 6e 69  74 0a                    |800..Init.|
+000000aa
+
+
+commit 编码结构:
+
+
+  
+    
+      commit
+      空格
+      内容长度
+      NULL
+    
+  
+
+
+
+  
+    
+      tree
+      空格
+      object SHA
+      换行 LF
+    
+  
+
+
+
+  
+    
+      author
+      空格
+      作者名字
+      空格
+      &lt;
+      作者 email
+      &gt;
+      空格
+      时间戳
+      空格
+      时区, +0800
+      换行 LF
+    
+  
+
+
+
+  
+    
+      committer
+      空格
+      提交者名字
+      空格
+      &lt;
+      作者 email
+      &gt;
+      空格
+      时间戳
+      空格
+      时区, +0800
+      换行 LF
+    
+  
+
+
+
+  
+    
+      换行 LF
+      commit message
+      换行 LF
+    
+  
+
+" />
+    
+    <meta name="author" content="CBD Blog" />
+
+    
+    <meta property="og:title" content="git catfile and object file frame" />
+    <meta property="twitter:title" content="git catfile and object file frame" />
+    
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="CBD Blog - 好记性不如烂笔头,站在岸上学不会游泳" href="/feed.xml" />
+  <link rel="shortcut icon" href="/images/avatar.jpg">
+<!--  <script src="https://lib.baomitu.com/gitalk/1.6.2/gitalk.min.js"></script>-->
+  <script src="https://lib.baomitu.com/feather-icons/latest/feather.min.js"></script>
+  <script type="text/javascript" async src="https://lib.baomitu.com/mathjax/2.7.7/MathJax.js?...">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?9dfbb5850b35a184a60c9a4a1b08d7e3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+  <meta name="google-site-verification" content="ZqVpjmLHnwuJ0qbh4QrpcofglQe6XEjjF7X1AB7yXus" />
+</head>
+
+  <body>
+    <div class="wrapper-sidebar">
+  <header class="sidebar clearfix">
+    <div class="site-info">
+      
+        <a href="/" class="site-avatar"><img src="/images/avatar.jpg" /></a>
+       
+      <h1 class="site-name"><a href="/">CBD Blog</a></h1>
+      <p class="site-description">好记性不如烂笔头,站在岸上学不会游泳</p>
+    </div>
+  </header>
+
+  <div class="navlist">
+    <nav>
+      
+      
+      <a href="/">首页</a>
+      
+      
+      
+      <a href="/archive">归档</a>
+      
+      
+      
+      <a href="/about">关于</a>
+      
+      
+    </nav>
+  </div>
+
+  <div class="wrapper-footer-desktop">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+  </div>
+</div>
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">git catfile and object file frame</a>
+    <ul>
+      <li><a href="#cat-file">cat-file</a></li>
+      <li><a href="#save-object-to-disk">save object to disk</a>
+        <ul>
+          <li><a href="#blob">blob</a></li>
+          <li><a href="#tree">tree</a></li>
+        </ul>
+      </li>
+      <li><a href="#commit">commit</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <h1>git catfile and object file frame</h1>
+
+  <div clsss="meta">
+    <span class="author">
+      
+    </span>
+
+    <span class="date">
+      2022-02-26
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="https://icbd.github.io/tags#Git">
+          Git
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>在仓库的 <code class="language-plaintext highlighter-rouge">.git/objects</code> 目录下, 保存着 git 的 object.</p>
+
+<p>后面以这个 <a href="https://jihulab.com/show/git_objects_demo">Demo Repo</a> 为例.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.git/objects
+├── 11
+│   └── ef4924f8f1e21e6d7412040973f5e868559ac7
+├── 16
+│   └── 796efecb4599c92244ac8bafb217e20009008e
+├── 20
+│   └── 61bac5e1a292b380f98072ef5ffbc2fc3eefa9
+├── 53
+│   └── 33c1763419c89486091d80b6ba430d30b321a0
+├── 67
+│   └── 89c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+├── 69
+│   └── 15089af93052dc6f67fd7245037230a6b1894b
+├── d0
+│   └── 38440f5c27d52fed6b6c5eb7d180f1645ab724
+├── f2
+│   └── 0b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+├── info
+└── pack
+</code></pre></div></div>
+
+<h2 id="cat-file">cat-file</h2>
+
+<p>查看 object 的类型:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git cat-file <span class="nt">-t</span> 16796efecb4599c92244ac8bafb217e20009008e
+</code></pre></div></div>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>blob
+</code></pre></div></div>
+
+<p>查看 object 的内容:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git cat-file <span class="nt">-p</span> 16796efecb4599c92244ac8bafb217e20009008e
+</code></pre></div></div>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Help
+
+</code></pre></div></div>
+
+<h2 id="save-object-to-disk">save object to disk</h2>
+
+<p>Git object 有几个类型:</p>
+
+<ul>
+  <li>blob</li>
+  <li>tree</li>
+  <li>commit</li>
+</ul>
+
+<p>Git object 内部以文本为基础, 经过特殊的编排, 再经过压缩, 最终得到的是二进制文件.</p>
+
+<p>为了查看其内部的原始文本, 第一步就是需要接开压缩.</p>
+
+<p>我们定义一个解压脚本, 参数是 Git object 的文件路径:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">alias </span><span class="nv">inflate</span><span class="o">=</span><span class="s2">"ruby -r zlib -e </span><span class="se">\"</span><span class="s2">ARGV.each {|path| puts Zlib::Inflate.inflate File.read(path) }</span><span class="se">\"</span><span class="s2">"</span>
+</code></pre></div></div>
+
+<p>后面还会用到 <code class="language-plaintext highlighter-rouge">hexdump</code>, 它会帮我们以 16 进制的形式来展示内容本来的面目, 特别注意那些不能打印的字符.</p>
+
+<p>常见字符对照:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>16 进制</th>
+      <th>字符</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">00</code></td>
+      <td>NULL 空</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">20</code></td>
+      <td>空格</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">21</code></td>
+      <td>叹号 <code class="language-plaintext highlighter-rouge">!</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">22</code></td>
+      <td>引号 <code class="language-plaintext highlighter-rouge">"</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">23</code></td>
+      <td>井号 <code class="language-plaintext highlighter-rouge">#</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">2E</code></td>
+      <td>句号 <code class="language-plaintext highlighter-rouge">.</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">30</code></td>
+      <td>数字 <code class="language-plaintext highlighter-rouge">0</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">39</code></td>
+      <td>数字 <code class="language-plaintext highlighter-rouge">9</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">41</code></td>
+      <td>字母 <code class="language-plaintext highlighter-rouge">A</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">5A</code></td>
+      <td>字母 <code class="language-plaintext highlighter-rouge">Z</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">61</code></td>
+      <td>字母 <code class="language-plaintext highlighter-rouge">a</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">7A</code></td>
+      <td>字母 <code class="language-plaintext highlighter-rouge">z</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">0A</code></td>
+      <td>换行 line feed</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">0D</code></td>
+      <td>回车 carriage return</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><code class="language-plaintext highlighter-rouge">hexdump -C</code> 既会打印 16 进制的内容, 也会打印对应的可视字符(不可打印的用 <code class="language-plaintext highlighter-rouge">.</code> 表示).</p>
+
+<h3 id="blob">blob</h3>
+
+<p><code class="language-plaintext highlighter-rouge">git cat-file -p 16796efecb4599c92244ac8bafb217e20009008e</code></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Help
+
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">inflate .git/objects/16/796efecb4599c92244ac8bafb217e20009008e | hexdump -C</code></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>00000000  62 6c 6f 62 20 38 00 23  20 48 65 6c 70 0a 0a     |blob 8.# Help..|
+0000000f
+</code></pre></div></div>
+
+<p>blob 编码结构:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>blob</td>
+      <td>空格</td>
+      <td>内容长度</td>
+      <td>NULL</td>
+      <td>文件内容</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="tree">tree</h3>
+
+<p><code class="language-plaintext highlighter-rouge">git cat-file -p 11ef4924f8f1e21e6d7412040973f5e868559ac7</code></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>100644 blob 16796efecb4599c92244ac8bafb217e20009008e	help.md
+100644 blob f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5	info.md
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">inflate .git/objects/11/ef4924f8f1e21e6d7412040973f5e868559ac7 | hexdump -C</code></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>00000000  74 72 65 65 20 37 30 00  31 30 30 36 34 34 20 68  |tree 70.100644 h|
+00000010  65 6c 70 2e 6d 64 00 16  79 6e fe cb 45 99 c9 22  |elp.md..yn..E.."|
+00000020  44 ac 8b af b2 17 e2 00  09 00 8e 31 30 30 36 34  |D..........10064|
+00000030  34 20 69 6e 66 6f 2e 6d  64 00 f2 0b 9e d4 f8 ba  |4 info.md.......|
+00000040  4e 99 df 6a 24 91 bb ed  85 e8 da f5 26 d5 0a     |N..j$.......&amp;..|
+0000004f
+</code></pre></div></div>
+
+<p>tree 编码结构:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>tree</td>
+      <td>空格</td>
+      <td>内容长度</td>
+      <td>NULL</td>
+      <td><文件名a编码></文件名a编码></td>
+      <td><文件名b编码></文件名b编码></td>
+      <td>换行 LF</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>文件名编码结构:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>文件权限, 10064</td>
+      <td>空格</td>
+      <td>文件名</td>
+      <td>空格</td>
+      <td>blob SHA, 40位 hex</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="commit">commit</h2>
+
+<p><code class="language-plaintext highlighter-rouge">git cat-file -p 6915089af93052dc6f67fd7245037230a6b1894b</code></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tree 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+author Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+committer Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+
+Init
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">inflate .git/objects/69/15089af93052dc6f67fd7245037230a6b1894b | hexdump -C</code></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>00000000  63 6f 6d 6d 69 74 20 31  35 39 00 74 72 65 65 20  |commit 159.tree |
+00000010  36 37 38 39 63 39 39 63  62 65 34 61 32 35 65 63  |6789c99cbe4a25ec|
+00000020  63 39 65 36 39 65 62 31  65 36 36 64 66 38 31 39  |c9e69eb1e66df819|
+00000030  64 64 66 61 62 32 65 35  0a 61 75 74 68 6f 72 20  |ddfab2e5.author |
+00000040  42 61 6f 64 6f 6e 67 20  3c 77 77 77 69 63 62 64  |Baodong &lt;wwwicbd|
+00000050  40 67 6d 61 69 6c 2e 63  6f 6d 3e 20 31 36 34 35  |@gmail.com&gt; 1645|
+00000060  30 31 35 34 34 38 20 2b  30 38 30 30 0a 63 6f 6d  |015448 +0800.com|
+00000070  6d 69 74 74 65 72 20 42  61 6f 64 6f 6e 67 20 3c  |mitter Baodong &lt;|
+00000080  77 77 77 69 63 62 64 40  67 6d 61 69 6c 2e 63 6f  |wwwicbd@gmail.co|
+00000090  6d 3e 20 31 36 34 35 30  31 35 34 34 38 20 2b 30  |m&gt; 1645015448 +0|
+000000a0  38 30 30 0a 0a 49 6e 69  74 0a                    |800..Init.|
+000000aa
+</code></pre></div></div>
+
+<p>commit 编码结构:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>commit</td>
+      <td>空格</td>
+      <td>内容长度</td>
+      <td>NULL</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td>tree</td>
+      <td>空格</td>
+      <td>object SHA</td>
+      <td>换行 LF</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td>author</td>
+      <td>空格</td>
+      <td>作者名字</td>
+      <td>空格</td>
+      <td>&lt;</td>
+      <td>作者 email</td>
+      <td>&gt;</td>
+      <td>空格</td>
+      <td>时间戳</td>
+      <td>空格</td>
+      <td>时区, +0800</td>
+      <td>换行 LF</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td>committer</td>
+      <td>空格</td>
+      <td>提交者名字</td>
+      <td>空格</td>
+      <td>&lt;</td>
+      <td>作者 email</td>
+      <td>&gt;</td>
+      <td>空格</td>
+      <td>时间戳</td>
+      <td>空格</td>
+      <td>时区, +0800</td>
+      <td>换行 LF</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td>换行 LF</td>
+      <td>commit message</td>
+      <td>换行 LF</td>
+    </tr>
+  </tbody>
+</table>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="icbd/blogs"
+        issue-term="pathname"
+        label="utteranc"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="https://icbd.github.io/gitrepository-layout/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="https://icbd.github.io/git-unpack-objects/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+</html>

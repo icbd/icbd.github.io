@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Golang Implemnt Chatting Room – CBD Blog – 好记性不如烂笔头,站在岸上学不会游泳</title>
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="源码详见: https://github.com/icbd/go_rough_chatting_room .
+
+基本功能需求:
+
+
+  在客户端中键入消息, 客户端把消息发送给服务端;
+  服务端把消息广播给所有客户端, 客户端收到广播显示消息.
+
+
+Client
+
+//func Copy(dst Writer, src Reader) (written int64, err error)
+
+// 收集键入的消息
+io.Copy(c.conn, os.Stdin)
+
+// 展示广播消息
+io.Copy(os.Stdout, c.conn)
+
+
+io.Copy 把标准输入/输出直接跟连接进行绑定.
+
+
+  一旦 os.Stdin 有新的内容, 就复制给连接;
+  一旦 连接中有新的内容, 就复制给 os.Stdout.
+
+
+因为连接是全双工的, 这两个动作可以同时进行.
+
+io.Copy 内部的实现就是一个大的无限循环, 也就让 io.Copy 表现出阻塞的特点.
+
+os.Stdin 遇到 EOF 会主动跳出阻塞; os.Stdout 不会主动跳出阻塞, 除非连接已经断开.
+
+这样思路就清楚了, 由于输入方向和输出方向需要同时工作, 所以把其中一个方向的工作放到单独的 goroutine 中.
+
+由于 Stdin的 Copy 会根据 EOF 主动跳出, 所以由 Stdin 这个方向来负责连接的关闭.
+
+Stdout 这方在会因为连接关闭而触发异常, 他应该识别这个情况, 并且在完成善后工作之后, 告诉主 goroutine 已经全部做好了, 可以退出了, 这个通信我们借由一个 channel 来实现.
+
+最终的核心代码:
+
+	go c.printMsgFromConn() // c.allDown &lt;- struct{}{}
+	c.typeMsgToConn() // EOF trigger. then close connection
+	&lt;-c.allDown
+
+
+Server
+
+服务端的核心是把消息广播给各个客户端, 我们需要一个集合来存储所有在线的客户端, 然后遍历给他们发消息, 这显然不能用阻塞的 io.Copy, 而是用写入即返回的 fmt.Fprintln(conn, msg).
+
+定义一个无缓存通道: type clientChan chan string.
+
+为每个连接创建各自的 clientChan, 在单独的 goroutine 中, 通过 range clientChan 来监听新消息的传入, 一旦有新消息就取出来送给连接, 发送给客户去显示.
+
+每当服务器监听到新的连接, 就把他收集起来, 再发送一个新用户上线的广播.
+
+每当用户下线, 就发送一个下线广播, 从集合里踢出这个用户, 关闭该用户的 clientChan, 最后断开连接.
+
+服务端还需要注意, 不能因为一个用户的连接异常而影响其他连接, 输出 log 而不是直接 panic.
+
+核心方法:
+
+func (s *server) broadcast() {
+	for {
+		select {
+		case c := &lt;-s.entering:
+			s.clients[c] = true
+		case c := &lt;-s.leaving:
+			delete(s.clients, c)
+			close(c)
+		case msg := &lt;-s.microphone:
+			log.Println("[msg]" + msg)
+			for c := range s.clients {
+				c &lt;- msg
+			}
+		}
+	}
+}
+
+
+func (s *server) handle(conn net.Conn) {
+	c := make(clientChan)
+	go c.sendMsg(conn)
+
+	who := conn.RemoteAddr().String()
+	c &lt;- "你的ID: " + who
+	s.microphone &lt;- who + "上线了!"
+	s.entering &lt;- c
+
+	input := bufio.NewScanner(conn)
+	for input.Scan() {
+		s.microphone &lt;- "\t\t" + who + ":" + input.Text()
+	}
+	// conn disconnected
+	s.leaving &lt;- c
+	s.microphone &lt;- who + "下线了."
+	if err := conn.Close(); err != nil {
+		log.Println("[Err]" + err.Error())
+	}
+}
+
+func (cC clientChan) sendMsg(conn net.Conn) {
+	for msg := range cC {
+		if _, err := fmt.Fprintln(conn, msg); err != nil {
+			log.Println("[Err]" + err.Error())
+		}
+	}
+}
+
+" />
+    <meta property="og:description" content="源码详见: https://github.com/icbd/go_rough_chatting_room .
+
+基本功能需求:
+
+
+  在客户端中键入消息, 客户端把消息发送给服务端;
+  服务端把消息广播给所有客户端, 客户端收到广播显示消息.
+
+
+Client
+
+//func Copy(dst Writer, src Reader) (written int64, err error)
+
+// 收集键入的消息
+io.Copy(c.conn, os.Stdin)
+
+// 展示广播消息
+io.Copy(os.Stdout, c.conn)
+
+
+io.Copy 把标准输入/输出直接跟连接进行绑定.
+
+
+  一旦 os.Stdin 有新的内容, 就复制给连接;
+  一旦 连接中有新的内容, 就复制给 os.Stdout.
+
+
+因为连接是全双工的, 这两个动作可以同时进行.
+
+io.Copy 内部的实现就是一个大的无限循环, 也就让 io.Copy 表现出阻塞的特点.
+
+os.Stdin 遇到 EOF 会主动跳出阻塞; os.Stdout 不会主动跳出阻塞, 除非连接已经断开.
+
+这样思路就清楚了, 由于输入方向和输出方向需要同时工作, 所以把其中一个方向的工作放到单独的 goroutine 中.
+
+由于 Stdin的 Copy 会根据 EOF 主动跳出, 所以由 Stdin 这个方向来负责连接的关闭.
+
+Stdout 这方在会因为连接关闭而触发异常, 他应该识别这个情况, 并且在完成善后工作之后, 告诉主 goroutine 已经全部做好了, 可以退出了, 这个通信我们借由一个 channel 来实现.
+
+最终的核心代码:
+
+	go c.printMsgFromConn() // c.allDown &lt;- struct{}{}
+	c.typeMsgToConn() // EOF trigger. then close connection
+	&lt;-c.allDown
+
+
+Server
+
+服务端的核心是把消息广播给各个客户端, 我们需要一个集合来存储所有在线的客户端, 然后遍历给他们发消息, 这显然不能用阻塞的 io.Copy, 而是用写入即返回的 fmt.Fprintln(conn, msg).
+
+定义一个无缓存通道: type clientChan chan string.
+
+为每个连接创建各自的 clientChan, 在单独的 goroutine 中, 通过 range clientChan 来监听新消息的传入, 一旦有新消息就取出来送给连接, 发送给客户去显示.
+
+每当服务器监听到新的连接, 就把他收集起来, 再发送一个新用户上线的广播.
+
+每当用户下线, 就发送一个下线广播, 从集合里踢出这个用户, 关闭该用户的 clientChan, 最后断开连接.
+
+服务端还需要注意, 不能因为一个用户的连接异常而影响其他连接, 输出 log 而不是直接 panic.
+
+核心方法:
+
+func (s *server) broadcast() {
+	for {
+		select {
+		case c := &lt;-s.entering:
+			s.clients[c] = true
+		case c := &lt;-s.leaving:
+			delete(s.clients, c)
+			close(c)
+		case msg := &lt;-s.microphone:
+			log.Println("[msg]" + msg)
+			for c := range s.clients {
+				c &lt;- msg
+			}
+		}
+	}
+}
+
+
+func (s *server) handle(conn net.Conn) {
+	c := make(clientChan)
+	go c.sendMsg(conn)
+
+	who := conn.RemoteAddr().String()
+	c &lt;- "你的ID: " + who
+	s.microphone &lt;- who + "上线了!"
+	s.entering &lt;- c
+
+	input := bufio.NewScanner(conn)
+	for input.Scan() {
+		s.microphone &lt;- "\t\t" + who + ":" + input.Text()
+	}
+	// conn disconnected
+	s.leaving &lt;- c
+	s.microphone &lt;- who + "下线了."
+	if err := conn.Close(); err != nil {
+		log.Println("[Err]" + err.Error())
+	}
+}
+
+func (cC clientChan) sendMsg(conn net.Conn) {
+	for msg := range cC {
+		if _, err := fmt.Fprintln(conn, msg); err != nil {
+			log.Println("[Err]" + err.Error())
+		}
+	}
+}
+
+" />
+    
+    <meta name="author" content="CBD Blog" />
+
+    
+    <meta property="og:title" content="Golang Implemnt Chatting Room" />
+    <meta property="twitter:title" content="Golang Implemnt Chatting Room" />
+    
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="CBD Blog - 好记性不如烂笔头,站在岸上学不会游泳" href="/feed.xml" />
+  <link rel="shortcut icon" href="/images/avatar.jpg">
+<!--  <script src="https://lib.baomitu.com/gitalk/1.6.2/gitalk.min.js"></script>-->
+  <script src="https://lib.baomitu.com/feather-icons/latest/feather.min.js"></script>
+  <script type="text/javascript" async src="https://lib.baomitu.com/mathjax/2.7.7/MathJax.js?...">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?9dfbb5850b35a184a60c9a4a1b08d7e3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+  <meta name="google-site-verification" content="ZqVpjmLHnwuJ0qbh4QrpcofglQe6XEjjF7X1AB7yXus" />
+</head>
+
+  <body>
+    <div class="wrapper-sidebar">
+  <header class="sidebar clearfix">
+    <div class="site-info">
+      
+        <a href="/" class="site-avatar"><img src="/images/avatar.jpg" /></a>
+       
+      <h1 class="site-name"><a href="/">CBD Blog</a></h1>
+      <p class="site-description">好记性不如烂笔头,站在岸上学不会游泳</p>
+    </div>
+  </header>
+
+  <div class="navlist">
+    <nav>
+      
+      
+      <a href="/">首页</a>
+      
+      
+      
+      <a href="/archive">归档</a>
+      
+      
+      
+      <a href="/about">关于</a>
+      
+      
+    </nav>
+  </div>
+
+  <div class="wrapper-footer-desktop">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+  </div>
+</div>
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">Golang Implemnt Chatting Room</a>
+    <ul>
+      <li><a href="#client">Client</a></li>
+      <li><a href="#server">Server</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <h1>Golang Implemnt Chatting Room</h1>
+
+  <div clsss="meta">
+    <span class="author">
+      
+    </span>
+
+    <span class="date">
+      2020-10-26
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="https://icbd.github.io/tags#Golang">
+          Golang
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>源码详见: <a href="https://github.com/icbd/go_rough_chatting_room">https://github.com/icbd/go_rough_chatting_room</a> .</p>
+
+<p>基本功能需求:</p>
+
+<ul>
+  <li>在客户端中键入消息, 客户端把消息发送给服务端;</li>
+  <li>服务端把消息广播给所有客户端, 客户端收到广播显示消息.</li>
+</ul>
+
+<h2 id="client">Client</h2>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//func Copy(dst Writer, src Reader) (written int64, err error)</span>
+
+<span class="c">// 收集键入的消息</span>
+<span class="n">io</span><span class="o">.</span><span class="n">Copy</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">conn</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">Stdin</span><span class="p">)</span>
+
+<span class="c">// 展示广播消息</span>
+<span class="n">io</span><span class="o">.</span><span class="n">Copy</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">Stdout</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">conn</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">io.Copy</code> 把标准输入/输出直接跟连接进行绑定.</p>
+
+<ul>
+  <li>一旦 <code class="language-plaintext highlighter-rouge">os.Stdin</code> 有新的内容, 就复制给连接;</li>
+  <li>一旦 连接中有新的内容, 就复制给 <code class="language-plaintext highlighter-rouge">os.Stdout</code>.</li>
+</ul>
+
+<p>因为连接是全双工的, 这两个动作可以同时进行.</p>
+
+<p><code class="language-plaintext highlighter-rouge">io.Copy</code> 内部的实现就是一个大的无限循环, 也就让 <code class="language-plaintext highlighter-rouge">io.Copy</code> 表现出阻塞的特点.</p>
+
+<p><code class="language-plaintext highlighter-rouge">os.Stdin</code> 遇到 <code class="language-plaintext highlighter-rouge">EOF</code> 会主动跳出阻塞; <code class="language-plaintext highlighter-rouge">os.Stdout</code> 不会主动跳出阻塞, 除非连接已经断开.</p>
+
+<p>这样思路就清楚了, 由于输入方向和输出方向需要同时工作, 所以把其中一个方向的工作放到单独的 goroutine 中.</p>
+
+<p>由于 <code class="language-plaintext highlighter-rouge">Stdin</code>的 <code class="language-plaintext highlighter-rouge">Copy</code> 会根据 <code class="language-plaintext highlighter-rouge">EOF</code> 主动跳出, 所以由 <code class="language-plaintext highlighter-rouge">Stdin</code> 这个方向来负责连接的关闭.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Stdout</code> 这方在会因为连接关闭而触发异常, 他应该识别这个情况, 并且在完成善后工作之后, 告诉主 goroutine 已经全部做好了, 可以退出了, 这个通信我们借由一个 channel 来实现.</p>
+
+<p>最终的核心代码:</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="k">go</span> <span class="n">c</span><span class="o">.</span><span class="n">printMsgFromConn</span><span class="p">()</span> <span class="c">// c.allDown &lt;- struct{}{}</span>
+	<span class="n">c</span><span class="o">.</span><span class="n">typeMsgToConn</span><span class="p">()</span> <span class="c">// EOF trigger. then close connection</span>
+	<span class="o">&lt;-</span><span class="n">c</span><span class="o">.</span><span class="n">allDown</span>
+</code></pre></div></div>
+
+<h2 id="server">Server</h2>
+
+<p>服务端的核心是把消息广播给各个客户端, 我们需要一个集合来存储所有在线的客户端, 然后遍历给他们发消息, 这显然不能用阻塞的 <code class="language-plaintext highlighter-rouge">io.Copy</code>, 而是用写入即返回的 <code class="language-plaintext highlighter-rouge">fmt.Fprintln(conn, msg)</code>.</p>
+
+<p>定义一个无缓存通道: <code class="language-plaintext highlighter-rouge">type clientChan chan string</code>.</p>
+
+<p>为每个连接创建各自的 clientChan, 在单独的 goroutine 中, 通过 <code class="language-plaintext highlighter-rouge">range clientChan</code> 来监听新消息的传入, 一旦有新消息就取出来送给连接, 发送给客户去显示.</p>
+
+<p>每当服务器监听到新的连接, 就把他收集起来, 再发送一个新用户上线的广播.</p>
+
+<p>每当用户下线, 就发送一个下线广播, 从集合里踢出这个用户, 关闭该用户的 <code class="language-plaintext highlighter-rouge">clientChan</code>, 最后断开连接.</p>
+
+<p>服务端还需要注意, 不能因为一个用户的连接异常而影响其他连接, 输出 log 而不是直接 panic.</p>
+
+<p>核心方法:</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="n">broadcast</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="p">{</span>
+		<span class="k">select</span> <span class="p">{</span>
+		<span class="k">case</span> <span class="n">c</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="n">s</span><span class="o">.</span><span class="n">entering</span><span class="o">:</span>
+			<span class="n">s</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="no">true</span>
+		<span class="k">case</span> <span class="n">c</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="n">s</span><span class="o">.</span><span class="n">leaving</span><span class="o">:</span>
+			<span class="nb">delete</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">clients</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+			<span class="nb">close</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+		<span class="k">case</span> <span class="n">msg</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="n">s</span><span class="o">.</span><span class="n">microphone</span><span class="o">:</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"[msg]"</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">c</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">s</span><span class="o">.</span><span class="n">clients</span> <span class="p">{</span>
+				<span class="n">c</span> <span class="o">&lt;-</span> <span class="n">msg</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">func</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="n">handle</span><span class="p">(</span><span class="n">conn</span> <span class="n">net</span><span class="o">.</span><span class="n">Conn</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">c</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="n">clientChan</span><span class="p">)</span>
+	<span class="k">go</span> <span class="n">c</span><span class="o">.</span><span class="n">sendMsg</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+
+	<span class="n">who</span> <span class="o">:=</span> <span class="n">conn</span><span class="o">.</span><span class="n">RemoteAddr</span><span class="p">()</span><span class="o">.</span><span class="n">String</span><span class="p">()</span>
+	<span class="n">c</span> <span class="o">&lt;-</span> <span class="s">"你的ID: "</span> <span class="o">+</span> <span class="n">who</span>
+	<span class="n">s</span><span class="o">.</span><span class="n">microphone</span> <span class="o">&lt;-</span> <span class="n">who</span> <span class="o">+</span> <span class="s">"上线了!"</span>
+	<span class="n">s</span><span class="o">.</span><span class="n">entering</span> <span class="o">&lt;-</span> <span class="n">c</span>
+
+	<span class="n">input</span> <span class="o">:=</span> <span class="n">bufio</span><span class="o">.</span><span class="n">NewScanner</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">input</span><span class="o">.</span><span class="n">Scan</span><span class="p">()</span> <span class="p">{</span>
+		<span class="n">s</span><span class="o">.</span><span class="n">microphone</span> <span class="o">&lt;-</span> <span class="s">"</span><span class="se">\t\t</span><span class="s">"</span> <span class="o">+</span> <span class="n">who</span> <span class="o">+</span> <span class="s">":"</span> <span class="o">+</span> <span class="n">input</span><span class="o">.</span><span class="n">Text</span><span class="p">()</span>
+	<span class="p">}</span>
+	<span class="c">// conn disconnected</span>
+	<span class="n">s</span><span class="o">.</span><span class="n">leaving</span> <span class="o">&lt;-</span> <span class="n">c</span>
+	<span class="n">s</span><span class="o">.</span><span class="n">microphone</span> <span class="o">&lt;-</span> <span class="n">who</span> <span class="o">+</span> <span class="s">"下线了."</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">conn</span><span class="o">.</span><span class="n">Close</span><span class="p">();</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"[Err]"</span> <span class="o">+</span> <span class="n">err</span><span class="o">.</span><span class="n">Error</span><span class="p">())</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">cC</span> <span class="n">clientChan</span><span class="p">)</span> <span class="n">sendMsg</span><span class="p">(</span><span class="n">conn</span> <span class="n">net</span><span class="o">.</span><span class="n">Conn</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="n">msg</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">cC</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="n">_</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Fprintln</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"[Err]"</span> <span class="o">+</span> <span class="n">err</span><span class="o">.</span><span class="n">Error</span><span class="p">())</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="icbd/blogs"
+        issue-term="pathname"
+        label="utteranc"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="https://icbd.github.io/golang-fragment/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="https://icbd.github.io/golang-useful-closed-channel/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+</html>

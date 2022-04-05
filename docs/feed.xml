@@ -1,0 +1,1464 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://icbd.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://icbd.github.io/" rel="alternate" type="text/html" /><updated>2022-04-06T01:01:46+08:00</updated><id>https://icbd.github.io/feed.xml</id><title type="html">CBD Blog</title><subtitle>好记性不如烂笔头,站在岸上学不会游泳</subtitle><entry><title type="html">Hello Reveal.js</title><link href="https://icbd.github.io/hello-revealjs/" rel="alternate" type="text/html" title="Hello Reveal.js" /><published>2022-04-05T00:00:00+08:00</published><updated>2022-04-05T00:00:00+08:00</updated><id>https://icbd.github.io/hello-revealjs</id><content type="html" xml:base="https://icbd.github.io/hello-revealjs/">&lt;h1 id=&quot;markdown-demo&quot;&gt;Markdown Demo&lt;/h1&gt;
+
+&lt;h2 id=&quot;external-11&quot;&gt;External 1.1&lt;/h2&gt;
+
+&lt;p&gt;Content 1.1&lt;/p&gt;
+
+&lt;p&gt;Note: This will only appear in the speaker notes window.&lt;/p&gt;
+
+&lt;h2 id=&quot;external-12&quot;&gt;External 1.2&lt;/h2&gt;
+
+&lt;p&gt;Content 1.2&lt;/p&gt;
+
+&lt;h2 id=&quot;external-2&quot;&gt;External 2&lt;/h2&gt;
+
+&lt;p&gt;Content 2.1&lt;/p&gt;
+
+&lt;h2 id=&quot;external-31&quot;&gt;External 3.1&lt;/h2&gt;
+
+&lt;p&gt;Content 3.1&lt;/p&gt;
+
+&lt;h2 id=&quot;external-32&quot;&gt;External 3.2&lt;/h2&gt;
+
+&lt;p&gt;Content 3.2&lt;/p&gt;
+
+&lt;h2 id=&quot;external-33-image&quot;&gt;External 3.3 (Image)&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://s3.amazonaws.com/static.slid.es/logo/v2/slides-symbol-512x512.png&quot; alt=&quot;External Image&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;external-34-math&quot;&gt;External 3.4 (Math)&lt;/h2&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;\[ J(\theta_0,\theta_1) = \sum_{i=0} \]&lt;/code&gt;&lt;/p&gt;</content><author><name></name></author><category term="Slide" /><summary type="html">Markdown Demo External 1.1 Content 1.1 Note: This will only appear in the speaker notes window. External 1.2 Content 1.2 External 2 Content 2.1 External 3.1 Content 3.1 External 3.2 Content 3.2 External 3.3 (Image) External 3.4 (Math) \[ J(\theta_0,\theta_1) = \sum_{i=0} \]</summary></entry><entry><title type="html">RubyMine debug ruby script</title><link href="https://icbd.github.io/RubyMine-debug-ruby-script/" rel="alternate" type="text/html" title="RubyMine debug ruby script" /><published>2022-03-09T00:00:00+08:00</published><updated>2022-03-09T00:00:00+08:00</updated><id>https://icbd.github.io/RubyMine-debug-ruby-script</id><content type="html" xml:base="https://icbd.github.io/RubyMine-debug-ruby-script/">&lt;p&gt;除了常用的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;byebug&lt;/code&gt;, IDE 内置的 debug 功能也值得一试.&lt;/p&gt;
+
+&lt;h2 id=&quot;rails-server&quot;&gt;rails server&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/rubymine-rails-server.png&quot; alt=&quot;rails-s&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;rails-method&quot;&gt;rails method&lt;/h2&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# bin/ttt.rb&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Nomal rails method&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# ...&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/rubymine-rails-script.png&quot; alt=&quot;rails-script&quot; /&gt;&lt;/p&gt;</content><author><name></name></author><category term="Ruby" /><summary type="html">除了常用的 byebug, IDE 内置的 debug 功能也值得一试. rails server rails method # bin/ttt.rb # Nomal rails method # ...</summary></entry><entry><title type="html">Git 解压缩 pack</title><link href="https://icbd.github.io/git-unpack-objects/" rel="alternate" type="text/html" title="Git 解压缩 pack" /><published>2022-02-26T00:00:00+08:00</published><updated>2022-02-26T00:00:00+08:00</updated><id>https://icbd.github.io/git-unpack-objects</id><content type="html" xml:base="https://icbd.github.io/git-unpack-objects/">&lt;p&gt;在日常的工作流中, 几乎不会用到这个命令 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git unpack-objects&lt;/code&gt;, 研究 Git 内部原理的时, 这是个有用的工具.&lt;/p&gt;
+
+&lt;p&gt;我们想以 &lt;a href=&quot;https://jihulab.com/show/git_objects_demo&quot;&gt;Demo Repository&lt;/a&gt; 为例, 解释 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.git/objects&lt;/code&gt; 的原理.&lt;/p&gt;
+
+&lt;p&gt;该 repo 托管在远端的服务器, clone 下来之后, 发现 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.git/objects&lt;/code&gt; 目录下, 竟然没有任何的 object 文件, 却多了 pack 目录下的 pack 和 idx 文件:&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.git/objects
+├── info
+└── pack
+    ├── pack-884fb3533060bd5ded71bebc8fc576546614d86c.idx
+    └── pack-884fb3533060bd5ded71bebc8fc576546614d86c.pack
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这是 因为 Git 会把众多 object 打包压缩成 pack 和 idx, 提高存储和传输效率.&lt;/p&gt;
+
+&lt;h2 id=&quot;解开-pack-文件&quot;&gt;解开 pack 文件&lt;/h2&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git unpack-objects&lt;/code&gt; 的参数是 pack 文件的内容, 可以 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cat *.pack | git unpack-objects&lt;/code&gt; 或者 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git unpack-objects &amp;lt; *.pack&lt;/code&gt; .&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unpack-objects&lt;/code&gt; 命令的意图主要是为了从外部恢复 objects 使用, 所以 , 如果 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.git/objects/pack&lt;/code&gt; 下已经存在了 pack 文件, 那么这个命令就什么也不做, 不会把 objects 展开到 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.git/objects&lt;/code&gt; 下面.&lt;/p&gt;
+
+&lt;p&gt;我们可以先把 pack 文件移走, 再执行展开:&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;git_objects_demo
+&lt;span class=&quot;nb&quot;&gt;mv&lt;/span&gt; .git/objects/pack/&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;.pack &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+git unpack-objects &amp;lt; &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;.pack
+&lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; .git/objects/pack/&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;.idx
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;解压之后就跟本地的效果一致了.&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.git/objects
+├── 11
+│   └── ef4924f8f1e21e6d7412040973f5e868559ac7
+├── 16
+│   └── 796efecb4599c92244ac8bafb217e20009008e
+├── 20
+│   └── 61bac5e1a292b380f98072ef5ffbc2fc3eefa9
+├── 53
+│   └── 33c1763419c89486091d80b6ba430d30b321a0
+├── 67
+│   └── 89c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+├── 69
+│   └── 15089af93052dc6f67fd7245037230a6b1894b
+├── d0
+│   └── 38440f5c27d52fed6b6c5eb7d180f1645ab724
+├── f2
+│   └── 0b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+├── info
+└── pack
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="Git" /><summary type="html">在日常的工作流中, 几乎不会用到这个命令 git unpack-objects, 研究 Git 内部原理的时, 这是个有用的工具. 我们想以 Demo Repository 为例, 解释 .git/objects 的原理. 该 repo 托管在远端的服务器, clone 下来之后, 发现 .git/objects 目录下, 竟然没有任何的 object 文件, 却多了 pack 目录下的 pack 和 idx 文件: .git/objects ├── info └── pack ├── pack-884fb3533060bd5ded71bebc8fc576546614d86c.idx └── pack-884fb3533060bd5ded71bebc8fc576546614d86c.pack 这是 因为 Git 会把众多 object 打包压缩成 pack 和 idx, 提高存储和传输效率. 解开 pack 文件 git unpack-objects 的参数是 pack 文件的内容, 可以 cat *.pack | git unpack-objects 或者 git unpack-objects &amp;lt; *.pack . unpack-objects 命令的意图主要是为了从外部恢复 objects 使用, 所以 , 如果 .git/objects/pack 下已经存在了 pack 文件, 那么这个命令就什么也不做, 不会把 objects 展开到 .git/objects 下面. 我们可以先把 pack 文件移走, 再执行展开: cd git_objects_demo mv .git/objects/pack/*.pack . git unpack-objects &amp;lt; *.pack rm -f .git/objects/pack/*.idx 解压之后就跟本地的效果一致了. .git/objects ├── 11 │   └── ef4924f8f1e21e6d7412040973f5e868559ac7 ├── 16 │   └── 796efecb4599c92244ac8bafb217e20009008e ├── 20 │   └── 61bac5e1a292b380f98072ef5ffbc2fc3eefa9 ├── 53 │   └── 33c1763419c89486091d80b6ba430d30b321a0 ├── 67 │   └── 89c99cbe4a25ecc9e69eb1e66df819ddfab2e5 ├── 69 │   └── 15089af93052dc6f67fd7245037230a6b1894b ├── d0 │   └── 38440f5c27d52fed6b6c5eb7d180f1645ab724 ├── f2 │   └── 0b9ed4f8ba4e99df6a2491bbed85e8daf526d5 ├── info └── pack</summary></entry><entry><title type="html">git catfile and object file frame</title><link href="https://icbd.github.io/git-cat-file-and-object-frame/" rel="alternate" type="text/html" title="git catfile and object file frame" /><published>2022-02-26T00:00:00+08:00</published><updated>2022-02-26T00:00:00+08:00</updated><id>https://icbd.github.io/git-cat-file-and-object-frame</id><content type="html" xml:base="https://icbd.github.io/git-cat-file-and-object-frame/">&lt;p&gt;在仓库的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.git/objects&lt;/code&gt; 目录下, 保存着 git 的 object.&lt;/p&gt;
+
+&lt;p&gt;后面以这个 &lt;a href=&quot;https://jihulab.com/show/git_objects_demo&quot;&gt;Demo Repo&lt;/a&gt; 为例.&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.git/objects
+├── 11
+│   └── ef4924f8f1e21e6d7412040973f5e868559ac7
+├── 16
+│   └── 796efecb4599c92244ac8bafb217e20009008e
+├── 20
+│   └── 61bac5e1a292b380f98072ef5ffbc2fc3eefa9
+├── 53
+│   └── 33c1763419c89486091d80b6ba430d30b321a0
+├── 67
+│   └── 89c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+├── 69
+│   └── 15089af93052dc6f67fd7245037230a6b1894b
+├── d0
+│   └── 38440f5c27d52fed6b6c5eb7d180f1645ab724
+├── f2
+│   └── 0b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+├── info
+└── pack
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;cat-file&quot;&gt;cat-file&lt;/h2&gt;
+
+&lt;p&gt;查看 object 的类型:&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git cat-file &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; 16796efecb4599c92244ac8bafb217e20009008e
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;blob
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查看 object 的内容:&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git cat-file &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; 16796efecb4599c92244ac8bafb217e20009008e
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# Help
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;save-object-to-disk&quot;&gt;save object to disk&lt;/h2&gt;
+
+&lt;p&gt;Git object 有几个类型:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;blob&lt;/li&gt;
+  &lt;li&gt;tree&lt;/li&gt;
+  &lt;li&gt;commit&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Git object 内部以文本为基础, 经过特殊的编排, 再经过压缩, 最终得到的是二进制文件.&lt;/p&gt;
+
+&lt;p&gt;为了查看其内部的原始文本, 第一步就是需要接开压缩.&lt;/p&gt;
+
+&lt;p&gt;我们定义一个解压脚本, 参数是 Git object 的文件路径:&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;alias &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;inflate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;ruby -r zlib -e &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;ARGV.each {|path| puts Zlib::Inflate.inflate File.read(path) }&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;后面还会用到 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;hexdump&lt;/code&gt;, 它会帮我们以 16 进制的形式来展示内容本来的面目, 特别注意那些不能打印的字符.&lt;/p&gt;
+
+&lt;p&gt;常见字符对照:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;16 进制&lt;/th&gt;
+      &lt;th&gt;字符&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;00&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;NULL 空&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;20&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;21&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;叹号 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;!&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;22&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;引号 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&quot;&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;23&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;井号 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;#&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;2E&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;句号 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;30&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;数字 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;39&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;数字 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;9&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;41&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;字母 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;A&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;5A&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;字母 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Z&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;61&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;字母 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;7A&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;字母 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;z&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0A&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;换行 line feed&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0D&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;回车 carriage return&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;hexdump -C&lt;/code&gt; 既会打印 16 进制的内容, 也会打印对应的可视字符(不可打印的用 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.&lt;/code&gt; 表示).&lt;/p&gt;
+
+&lt;h3 id=&quot;blob&quot;&gt;blob&lt;/h3&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git cat-file -p 16796efecb4599c92244ac8bafb217e20009008e&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# Help
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;inflate .git/objects/16/796efecb4599c92244ac8bafb217e20009008e | hexdump -C&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;00000000  62 6c 6f 62 20 38 00 23  20 48 65 6c 70 0a 0a     |blob 8.# Help..|
+0000000f
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;blob 编码结构:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;blob&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;内容长度&lt;/td&gt;
+      &lt;td&gt;NULL&lt;/td&gt;
+      &lt;td&gt;文件内容&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;tree&quot;&gt;tree&lt;/h3&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git cat-file -p 11ef4924f8f1e21e6d7412040973f5e868559ac7&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;100644 blob 16796efecb4599c92244ac8bafb217e20009008e	help.md
+100644 blob f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5	info.md
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;inflate .git/objects/11/ef4924f8f1e21e6d7412040973f5e868559ac7 | hexdump -C&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;00000000  74 72 65 65 20 37 30 00  31 30 30 36 34 34 20 68  |tree 70.100644 h|
+00000010  65 6c 70 2e 6d 64 00 16  79 6e fe cb 45 99 c9 22  |elp.md..yn..E..&quot;|
+00000020  44 ac 8b af b2 17 e2 00  09 00 8e 31 30 30 36 34  |D..........10064|
+00000030  34 20 69 6e 66 6f 2e 6d  64 00 f2 0b 9e d4 f8 ba  |4 info.md.......|
+00000040  4e 99 df 6a 24 91 bb ed  85 e8 da f5 26 d5 0a     |N..j$.......&amp;amp;..|
+0000004f
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;tree 编码结构:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;tree&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;内容长度&lt;/td&gt;
+      &lt;td&gt;NULL&lt;/td&gt;
+      &lt;td&gt;&lt;文件名a编码&gt;&lt;/文件名a编码&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;文件名b编码&gt;&lt;/文件名b编码&gt;&lt;/td&gt;
+      &lt;td&gt;换行 LF&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;文件名编码结构:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;文件权限, 10064&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;文件名&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;blob SHA, 40位 hex&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;commit&quot;&gt;commit&lt;/h2&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git cat-file -p 6915089af93052dc6f67fd7245037230a6b1894b&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;tree 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+author Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645015448 +0800
+committer Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645015448 +0800
+
+Init
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;inflate .git/objects/69/15089af93052dc6f67fd7245037230a6b1894b | hexdump -C&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;00000000  63 6f 6d 6d 69 74 20 31  35 39 00 74 72 65 65 20  |commit 159.tree |
+00000010  36 37 38 39 63 39 39 63  62 65 34 61 32 35 65 63  |6789c99cbe4a25ec|
+00000020  63 39 65 36 39 65 62 31  65 36 36 64 66 38 31 39  |c9e69eb1e66df819|
+00000030  64 64 66 61 62 32 65 35  0a 61 75 74 68 6f 72 20  |ddfab2e5.author |
+00000040  42 61 6f 64 6f 6e 67 20  3c 77 77 77 69 63 62 64  |Baodong &amp;lt;wwwicbd|
+00000050  40 67 6d 61 69 6c 2e 63  6f 6d 3e 20 31 36 34 35  |@gmail.com&amp;gt; 1645|
+00000060  30 31 35 34 34 38 20 2b  30 38 30 30 0a 63 6f 6d  |015448 +0800.com|
+00000070  6d 69 74 74 65 72 20 42  61 6f 64 6f 6e 67 20 3c  |mitter Baodong &amp;lt;|
+00000080  77 77 77 69 63 62 64 40  67 6d 61 69 6c 2e 63 6f  |wwwicbd@gmail.co|
+00000090  6d 3e 20 31 36 34 35 30  31 35 34 34 38 20 2b 30  |m&amp;gt; 1645015448 +0|
+000000a0  38 30 30 0a 0a 49 6e 69  74 0a                    |800..Init.|
+000000aa
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;commit 编码结构:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;commit&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;内容长度&lt;/td&gt;
+      &lt;td&gt;NULL&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;tree&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;object SHA&lt;/td&gt;
+      &lt;td&gt;换行 LF&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;author&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;作者名字&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;&amp;lt;&lt;/td&gt;
+      &lt;td&gt;作者 email&lt;/td&gt;
+      &lt;td&gt;&amp;gt;&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;时间戳&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;时区, +0800&lt;/td&gt;
+      &lt;td&gt;换行 LF&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;committer&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;提交者名字&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;&amp;lt;&lt;/td&gt;
+      &lt;td&gt;作者 email&lt;/td&gt;
+      &lt;td&gt;&amp;gt;&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;时间戳&lt;/td&gt;
+      &lt;td&gt;空格&lt;/td&gt;
+      &lt;td&gt;时区, +0800&lt;/td&gt;
+      &lt;td&gt;换行 LF&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;换行 LF&lt;/td&gt;
+      &lt;td&gt;commit message&lt;/td&gt;
+      &lt;td&gt;换行 LF&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</content><author><name></name></author><category term="Git" /><summary type="html">在仓库的 .git/objects 目录下, 保存着 git 的 object. 后面以这个 Demo Repo 为例. .git/objects ├── 11 │   └── ef4924f8f1e21e6d7412040973f5e868559ac7 ├── 16 │   └── 796efecb4599c92244ac8bafb217e20009008e ├── 20 │   └── 61bac5e1a292b380f98072ef5ffbc2fc3eefa9 ├── 53 │   └── 33c1763419c89486091d80b6ba430d30b321a0 ├── 67 │   └── 89c99cbe4a25ecc9e69eb1e66df819ddfab2e5 ├── 69 │   └── 15089af93052dc6f67fd7245037230a6b1894b ├── d0 │   └── 38440f5c27d52fed6b6c5eb7d180f1645ab724 ├── f2 │   └── 0b9ed4f8ba4e99df6a2491bbed85e8daf526d5 ├── info └── pack cat-file 查看 object 的类型: git cat-file -t 16796efecb4599c92244ac8bafb217e20009008e blob 查看 object 的内容: git cat-file -p 16796efecb4599c92244ac8bafb217e20009008e # Help save object to disk Git object 有几个类型: blob tree commit Git object 内部以文本为基础, 经过特殊的编排, 再经过压缩, 最终得到的是二进制文件. 为了查看其内部的原始文本, 第一步就是需要接开压缩. 我们定义一个解压脚本, 参数是 Git object 的文件路径: alias inflate=&quot;ruby -r zlib -e \&quot;ARGV.each {|path| puts Zlib::Inflate.inflate File.read(path) }\&quot;&quot; 后面还会用到 hexdump, 它会帮我们以 16 进制的形式来展示内容本来的面目, 特别注意那些不能打印的字符. 常见字符对照: 16 进制 字符 00 NULL 空 20 空格 21 叹号 ! 22 引号 &quot; 23 井号 # 2E 句号 . 30 数字 0 39 数字 9 41 字母 A 5A 字母 Z 61 字母 a 7A 字母 z 0A 换行 line feed 0D 回车 carriage return hexdump -C 既会打印 16 进制的内容, 也会打印对应的可视字符(不可打印的用 . 表示). blob git cat-file -p 16796efecb4599c92244ac8bafb217e20009008e # Help inflate .git/objects/16/796efecb4599c92244ac8bafb217e20009008e | hexdump -C 00000000 62 6c 6f 62 20 38 00 23 20 48 65 6c 70 0a 0a |blob 8.# Help..| 0000000f blob 编码结构: blob 空格 内容长度 NULL 文件内容 tree git cat-file -p 11ef4924f8f1e21e6d7412040973f5e868559ac7 100644 blob 16796efecb4599c92244ac8bafb217e20009008e help.md 100644 blob f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5 info.md inflate .git/objects/11/ef4924f8f1e21e6d7412040973f5e868559ac7 | hexdump -C 00000000 74 72 65 65 20 37 30 00 31 30 30 36 34 34 20 68 |tree 70.100644 h| 00000010 65 6c 70 2e 6d 64 00 16 79 6e fe cb 45 99 c9 22 |elp.md..yn..E..&quot;| 00000020 44 ac 8b af b2 17 e2 00 09 00 8e 31 30 30 36 34 |D..........10064| 00000030 34 20 69 6e 66 6f 2e 6d 64 00 f2 0b 9e d4 f8 ba |4 info.md.......| 00000040 4e 99 df 6a 24 91 bb ed 85 e8 da f5 26 d5 0a |N..j$.......&amp;amp;..| 0000004f tree 编码结构: tree 空格 内容长度 NULL 换行 LF 文件名编码结构: 文件权限, 10064 空格 文件名 空格 blob SHA, 40位 hex commit git cat-file -p 6915089af93052dc6f67fd7245037230a6b1894b tree 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5 author Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645015448 +0800 committer Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645015448 +0800 Init inflate .git/objects/69/15089af93052dc6f67fd7245037230a6b1894b | hexdump -C 00000000 63 6f 6d 6d 69 74 20 31 35 39 00 74 72 65 65 20 |commit 159.tree | 00000010 36 37 38 39 63 39 39 63 62 65 34 61 32 35 65 63 |6789c99cbe4a25ec| 00000020 63 39 65 36 39 65 62 31 65 36 36 64 66 38 31 39 |c9e69eb1e66df819| 00000030 64 64 66 61 62 32 65 35 0a 61 75 74 68 6f 72 20 |ddfab2e5.author | 00000040 42 61 6f 64 6f 6e 67 20 3c 77 77 77 69 63 62 64 |Baodong &amp;lt;wwwicbd| 00000050 40 67 6d 61 69 6c 2e 63 6f 6d 3e 20 31 36 34 35 |@gmail.com&amp;gt; 1645| 00000060 30 31 35 34 34 38 20 2b 30 38 30 30 0a 63 6f 6d |015448 +0800.com| 00000070 6d 69 74 74 65 72 20 42 61 6f 64 6f 6e 67 20 3c |mitter Baodong &amp;lt;| 00000080 77 77 77 69 63 62 64 40 67 6d 61 69 6c 2e 63 6f |wwwicbd@gmail.co| 00000090 6d 3e 20 31 36 34 35 30 31 35 34 34 38 20 2b 30 |m&amp;gt; 1645015448 +0| 000000a0 38 30 30 0a 0a 49 6e 69 74 0a |800..Init.| 000000aa commit 编码结构: commit 空格 内容长度 NULL tree 空格 object SHA 换行 LF author 空格 作者名字 空格 &amp;lt; 作者 email &amp;gt; 空格 时间戳 空格 时区, +0800 换行 LF committer 空格 提交者名字 空格 &amp;lt; 作者 email &amp;gt; 空格 时间戳 空格 时区, +0800 换行 LF 换行 LF commit message 换行 LF</summary></entry><entry><title type="html">Git 仓库结构布局</title><link href="https://icbd.github.io/gitrepository-layout/" rel="alternate" type="text/html" title="Git 仓库结构布局" /><published>2022-02-21T00:00:00+08:00</published><updated>2022-02-21T00:00:00+08:00</updated><id>https://icbd.github.io/gitrepository-layout</id><content type="html" xml:base="https://icbd.github.io/gitrepository-layout/">&lt;p&gt;&lt;a href=&quot;https://git-scm.com/docs/gitrepository-layout&quot;&gt;https://git-scm.com/docs/gitrepository-layout&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Git 仓库有两种风格:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;位于工作目录下的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.git&lt;/code&gt;;&lt;/li&gt;
+  &lt;li&gt;独立的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;project&amp;gt;.git&lt;/code&gt; 目录, 这是一个裸仓库, 没有自己的工作区, 用于跟其他人同步历史记录.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;em&gt;注意&lt;/em&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.git&lt;/code&gt; 也可以是工作区下的一个普通文件, 其内容是 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gitdir: &amp;lt;path&amp;gt;&lt;/code&gt; 来指向仓库的实际目录.
+这个机制常用在子模块的 checkout, 为的是让父项目 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git checkout&lt;/code&gt; 到一个不含子模块的分支的时候,
+不会丢失子模块的仓库, 因为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;checkout&lt;/code&gt; 会清空整个子模块的工作区.&lt;/p&gt;
+
+&lt;p&gt;Git 仓库中的常见元素.&lt;/p&gt;
+
+&lt;h3 id=&quot;objects&quot;&gt;objects&lt;/h3&gt;
+
+&lt;p&gt;该目录为仓库的对象库.
+  通常来说, 每个对象都指向存储内的一个对象, 但也有几个例外.&lt;/p&gt;
+
+&lt;p&gt;通过浅 clone , 能获得一个可用但不完整的本地仓库;
+  可以借助 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;objects/info/alternates&lt;/code&gt; 或者 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$GIT_ALTERNATE_OBJECT_DIRECTORIES&lt;/code&gt; 机制从其他对象库里”借”一些对象;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/objects` .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;objects0-9a-f0-9a-f&quot;&gt;objects/[0-9a-f][0-9a-f]&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;对象文件.   所有的对象会被分摊到 256 个子目录中, 目录的名字取自对象的 SHA1 字符串的前两位.   从这里查找对象一般称作 &quot;拆箱&quot; (unpacked / loose) 对象.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;objectspack&quot;&gt;objects/pack&lt;/h2&gt;
+
+&lt;p&gt;该目录存储压缩的对象和索引, 以便随机访问.&lt;/p&gt;
+
+&lt;h2 id=&quot;objectsinfo&quot;&gt;objects/info&lt;/h2&gt;
+
+&lt;p&gt;该目录保存对象库的额外信息.&lt;/p&gt;
+
+&lt;h2 id=&quot;objectsinfopacks&quot;&gt;objects/info/packs&lt;/h2&gt;
+
+&lt;p&gt;该文件为哑传输记录对象库可用的打包.
+  如果仓库通过哑传输发布, 一旦打包被新加或者移除, 都应该执行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git update-server-info&lt;/code&gt; 来更新该文件.
+  &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git repack&lt;/code&gt; 会默认这样做.&lt;/p&gt;
+
+&lt;h2 id=&quot;objectsinfoalternates&quot;&gt;objects/info/alternates&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件记录对象库中所 &quot;借&quot; 对象的来源, 每条记录占一行.
+不仅原生的 Git 工具在本地使用它, HTTP 访问的也会远程访问它.
+一般使用相对路径. 如果是绝对路径, 需要满足跟 web URL 相匹配.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;objectsinfohttp-alternates&quot;&gt;objects/info/http-alternates&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件记录了对象库中所 &quot;借&quot; 对象的来源, 这些记录是 URL 的形式.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;refs&quot;&gt;refs&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;引用存储在这个目录的子目录下.
+
+如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/refs` .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;refsheadsname&quot;&gt;refs/heads/&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;name&lt;/code&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件记录分支最上面那个 commit 对象.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;refstagsname&quot;&gt;refs/tags/&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;name&lt;/code&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件记录 tag 指向的对象. 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;refsremotesname&quot;&gt;refs/remotes/&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;name&lt;/code&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件远端分支最上面的 commit 对象.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;refsreplaceobj-sha1&quot;&gt;refs/replace/&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;obj-sha1&amp;gt;&lt;/code&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;records the SHA-1 of the object that replaces `&amp;lt;obj-sha1&amp;gt;`.
+This is similar to info/grafts and is internally used and
+maintained by linkgit:git-replace[1]. Such refs can be exchanged
+between repositories while grafts are not.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;packed-refs&quot;&gt;packed-refs&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;records the same information as refs/heads/, refs/tags/,
+and friends record in a more efficient way.  See
+linkgit:git-pack-refs[1]. This file is ignored if $GIT_COMMON_DIR
+is set and &quot;$GIT_COMMON_DIR/packed-refs&quot; will be used instead.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;head&quot;&gt;HEAD&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;改文件是当前活跃分支 `refs/heads/` 的符号引用.
+
+当仓库没有关联工作区时, 它没有实际的意义, 但对于一个合法的仓库来说, HEAD 是必须存在的.
+
+上层命令可能会用它来猜测默认分支(通常是 &quot;master&quot;).
+
+HEAD 也能直接对应一个 commit, 也就是 &quot;分离头指针&quot;.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;config&quot;&gt;config&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;仓库的配置文件.
+
+如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/config` .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;configworktree&quot;&gt;config.worktree&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Working directory specific configuration file for the main
+working directory in multiple working directory setup
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;branches&quot;&gt;branches&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;已过时.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;hooks&quot;&gt;hooks&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该目录保存 Git 命令的自定义钩子.
+所有的钩子默认关闭. 移除文件名中的 `.sample` 来启用钩子.
+
+如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/hooks` .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;common&quot;&gt;common&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;When multiple working trees are used, most of files in
+$GIT_DIR are per-worktree with a few known exceptions. All
+files under 'common' however will be shared between all
+working trees.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;index&quot;&gt;index&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;仓库索引. 
+通常不会出现在裸仓库中.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;sharedindex&quot;&gt;sharedindex.&lt;SHA-1&gt;&lt;/SHA-1&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;共享索引.
+只在分离索引模式下生效.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;info&quot;&gt;info&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;改目录仓储仓库的额外信息.
+
+如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/info` .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;inforefs&quot;&gt;info/refs&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件帮助哑传输发现仓库中可用的引用.
+一旦该仓库以哑传输发布, 每当标签或分支有创建和修改, 都应当执行 `git update-server-info` 来重新生成该文件.
+
+当你 `git push` 仓库后, `git-receive-pack` 会调用 `hooks/update` 钩子来完成这个操作.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;infografts&quot;&gt;info/grafts&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件记录伪造的 commit 祖先信息. 
+
+已过时.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;infoexclude&quot;&gt;info/exclude&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件保存排除的匹配模式列表.
+`.gitignore` 逐个目录地忽略文件.
+'git status', 'git add', 'git rm' and 'git clean' 检查它, 但 Git 核心命令不检查.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;infoattributes&quot;&gt;info/attributes&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Defines which attributes to assign to a path, similar to per-directory `.gitattributes` files.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;infosparse-checkout&quot;&gt;info/sparse-checkout&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件保存稀疏 checkout 的匹配模式.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;remotes&quot;&gt;remotes&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;保存远端仓库的 URL 和 默认引用名称.
+属于历史遗留, 现代仓库中很少见了.
+
+如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略这个目录, 使用 `$GIT_COMMON_DIR/remotes`.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;logs&quot;&gt;logs&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该目录记录引用的变更.
+
+如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/logs` .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;logsrefsheadsname&quot;&gt;logs/refs/heads/&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;name&lt;/code&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;分支的变更.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;logsrefstagsname&quot;&gt;logs/refs/tags/&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;name&lt;/code&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;tag 的变更.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;shallow&quot;&gt;shallow&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;用于浅 clone , 跟 `info/grafts` 类似.
+
+如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该文件, 使用 `$GIT_COMMON_DIR/shallow` .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;commondir&quot;&gt;commondir&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;当文件存在时, 如果环境变量 `$GIT_COMMON_DIR` 没有被显示地设置过, 那么就根据该文件的值来设置 `$GIT_COMMON_DIR`.
+
+如果保存的路径是相对路径, 则相对于 `$GIT_DIR` .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;modules&quot;&gt;modules&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该目录保存子模块.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;worktrees&quot;&gt;worktrees&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该目录保存了工作区的数据.
+
+如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略这个目录, 使用 `$GIT_COMMON_DIR/worktrees`.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;worktreesgitdir&quot;&gt;worktrees/&lt;id&gt;/gitdir&lt;/id&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件保存了 `.git` 的绝对路径.
+
+用于检查链接的存储库是否已被手动删除了, 并且不再需要保留此目录.
+每当链接的仓库被访问, 就应当更新该文件的 mtime .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;worktreeslocked&quot;&gt;worktrees/&lt;id&gt;/locked&lt;/id&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;如果该文件存在, 那么对应的工作区不可用. 
+同时, 会阻止自动或手动触发的 prune .
+它的内容是字符串, 解释仓库被锁定的原因.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;worktreesconfigworktree&quot;&gt;worktrees/&lt;id&gt;/config.worktree&lt;/id&gt;&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;该文件保存了工作区特定的配置.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="Git" /><summary type="html">https://git-scm.com/docs/gitrepository-layout Git 仓库有两种风格: 位于工作目录下的 .git; 独立的 &amp;lt;project&amp;gt;.git 目录, 这是一个裸仓库, 没有自己的工作区, 用于跟其他人同步历史记录. 注意: .git 也可以是工作区下的一个普通文件, 其内容是 gitdir: &amp;lt;path&amp;gt; 来指向仓库的实际目录. 这个机制常用在子模块的 checkout, 为的是让父项目 git checkout 到一个不含子模块的分支的时候, 不会丢失子模块的仓库, 因为 checkout 会清空整个子模块的工作区. Git 仓库中的常见元素. objects 该目录为仓库的对象库. 通常来说, 每个对象都指向存储内的一个对象, 但也有几个例外. 通过浅 clone , 能获得一个可用但不完整的本地仓库; 可以借助 objects/info/alternates 或者 $GIT_ALTERNATE_OBJECT_DIRECTORIES 机制从其他对象库里”借”一些对象; 如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/objects` . objects/[0-9a-f][0-9a-f] 对象文件. 所有的对象会被分摊到 256 个子目录中, 目录的名字取自对象的 SHA1 字符串的前两位. 从这里查找对象一般称作 &quot;拆箱&quot; (unpacked / loose) 对象. objects/pack 该目录存储压缩的对象和索引, 以便随机访问. objects/info 该目录保存对象库的额外信息. objects/info/packs 该文件为哑传输记录对象库可用的打包. 如果仓库通过哑传输发布, 一旦打包被新加或者移除, 都应该执行 git update-server-info 来更新该文件. git repack 会默认这样做. objects/info/alternates 该文件记录对象库中所 &quot;借&quot; 对象的来源, 每条记录占一行. 不仅原生的 Git 工具在本地使用它, HTTP 访问的也会远程访问它. 一般使用相对路径. 如果是绝对路径, 需要满足跟 web URL 相匹配. objects/info/http-alternates 该文件记录了对象库中所 &quot;借&quot; 对象的来源, 这些记录是 URL 的形式. refs 引用存储在这个目录的子目录下. 如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/refs` . refs/heads/name 该文件记录分支最上面那个 commit 对象. refs/tags/name 该文件记录 tag 指向的对象. refs/remotes/name 该文件远端分支最上面的 commit 对象. refs/replace/&amp;lt;obj-sha1&amp;gt; records the SHA-1 of the object that replaces `&amp;lt;obj-sha1&amp;gt;`. This is similar to info/grafts and is internally used and maintained by linkgit:git-replace[1]. Such refs can be exchanged between repositories while grafts are not. packed-refs records the same information as refs/heads/, refs/tags/, and friends record in a more efficient way. See linkgit:git-pack-refs[1]. This file is ignored if $GIT_COMMON_DIR is set and &quot;$GIT_COMMON_DIR/packed-refs&quot; will be used instead. HEAD 改文件是当前活跃分支 `refs/heads/` 的符号引用. 当仓库没有关联工作区时, 它没有实际的意义, 但对于一个合法的仓库来说, HEAD 是必须存在的. 上层命令可能会用它来猜测默认分支(通常是 &quot;master&quot;). HEAD 也能直接对应一个 commit, 也就是 &quot;分离头指针&quot;. config 仓库的配置文件. 如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/config` . config.worktree Working directory specific configuration file for the main working directory in multiple working directory setup branches 已过时. hooks 该目录保存 Git 命令的自定义钩子. 所有的钩子默认关闭. 移除文件名中的 `.sample` 来启用钩子. 如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/hooks` . common When multiple working trees are used, most of files in $GIT_DIR are per-worktree with a few known exceptions. All files under 'common' however will be shared between all working trees. index 仓库索引. 通常不会出现在裸仓库中. sharedindex. 共享索引. 只在分离索引模式下生效. info 改目录仓储仓库的额外信息. 如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/info` . info/refs 该文件帮助哑传输发现仓库中可用的引用. 一旦该仓库以哑传输发布, 每当标签或分支有创建和修改, 都应当执行 `git update-server-info` 来重新生成该文件. 当你 `git push` 仓库后, `git-receive-pack` 会调用 `hooks/update` 钩子来完成这个操作. info/grafts 该文件记录伪造的 commit 祖先信息. 已过时. info/exclude 该文件保存排除的匹配模式列表. `.gitignore` 逐个目录地忽略文件. 'git status', 'git add', 'git rm' and 'git clean' 检查它, 但 Git 核心命令不检查. info/attributes Defines which attributes to assign to a path, similar to per-directory `.gitattributes` files. info/sparse-checkout 该文件保存稀疏 checkout 的匹配模式. remotes 保存远端仓库的 URL 和 默认引用名称. 属于历史遗留, 现代仓库中很少见了. 如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略这个目录, 使用 `$GIT_COMMON_DIR/remotes`. logs 该目录记录引用的变更. 如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该目录, 使用 `$GIT_COMMON_DIR/logs` . logs/refs/heads/name 分支的变更. logs/refs/tags/name tag 的变更. shallow 用于浅 clone , 跟 `info/grafts` 类似. 如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略该文件, 使用 `$GIT_COMMON_DIR/shallow` . commondir 当文件存在时, 如果环境变量 `$GIT_COMMON_DIR` 没有被显示地设置过, 那么就根据该文件的值来设置 `$GIT_COMMON_DIR`. 如果保存的路径是相对路径, 则相对于 `$GIT_DIR` . modules 该目录保存子模块. worktrees 该目录保存了工作区的数据. 如果设置了环境变量 `$GIT_COMMON_DIR`, 则忽略这个目录, 使用 `$GIT_COMMON_DIR/worktrees`. worktrees//gitdir 该文件保存了 `.git` 的绝对路径. 用于检查链接的存储库是否已被手动删除了, 并且不再需要保留此目录. 每当链接的仓库被访问, 就应当更新该文件的 mtime . worktrees//locked 如果该文件存在, 那么对应的工作区不可用. 同时, 会阻止自动或手动触发的 prune . 它的内容是字符串, 解释仓库被锁定的原因. worktrees//config.worktree 该文件保存了工作区特定的配置.</summary></entry><entry><title type="html">Git internal objects</title><link href="https://icbd.github.io/git-internal-objects/" rel="alternate" type="text/html" title="Git internal objects" /><published>2022-02-16T00:00:00+08:00</published><updated>2022-02-16T00:00:00+08:00</updated><id>https://icbd.github.io/git-internal-objects</id><content type="html" xml:base="https://icbd.github.io/git-internal-objects/">&lt;h2 id=&quot;示例项目&quot;&gt;示例项目&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://jihulab.com/show/git_objects_demo&quot;&gt;https://jihulab.com/show/git_objects_demo&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;该项目共包含一个 commit, 包含的文件结构如下:&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;git objects 目录下, 共 8 个文件:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;find .git/objects -type f&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.git/objects/69/15089af93052dc6f67fd7245037230a6b1894b
+.git/objects/67/89c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+.git/objects/d0/38440f5c27d52fed6b6c5eb7d180f1645ab724
+.git/objects/f2/0b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+.git/objects/20/61bac5e1a292b380f98072ef5ffbc2fc3eefa9
+.git/objects/11/ef4924f8f1e21e6d7412040973f5e868559ac7
+.git/objects/16/796efecb4599c92244ac8bafb217e20009008e
+.git/objects/53/33c1763419c89486091d80b6ba430d30b321a0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Hash&lt;/th&gt;
+      &lt;th&gt;Type&lt;/th&gt;
+      &lt;th&gt;Content&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;6915089af93052dc6f67fd7245037230a6b1894b&lt;/td&gt;
+      &lt;td&gt;commit&lt;/td&gt;
+      &lt;td&gt; 
+&lt;pre&gt;
+tree 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+author Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645015448 +0800
+committer Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645015448 +0800
+
+Init
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5&lt;/td&gt;
+      &lt;td&gt;tree&lt;/td&gt;
+      &lt;td&gt;
+&lt;pre&gt;
+040000 tree d038440f5c27d52fed6b6c5eb7d180f1645ab724	doc
+100644 blob 5333c1763419c89486091d80b6ba430d30b321a0	readme.md
+040000 tree 11ef4924f8f1e21e6d7412040973f5e868559ac7	wiki
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;d038440f5c27d52fed6b6c5eb7d180f1645ab724&lt;/td&gt;
+      &lt;td&gt;tree&lt;/td&gt;
+      &lt;td&gt;
+&lt;pre&gt;
+100644 blob 2061bac5e1a292b380f98072ef5ffbc2fc3eefa9	index.md
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5&lt;/td&gt;
+      &lt;td&gt;blob&lt;/td&gt;
+      &lt;td&gt;
+&lt;pre&gt;
+# Info
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2061bac5e1a292b380f98072ef5ffbc2fc3eefa9&lt;/td&gt;
+      &lt;td&gt;blob&lt;/td&gt;
+      &lt;td&gt;
+&lt;pre&gt;
+# Index
+
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;11ef4924f8f1e21e6d7412040973f5e868559ac7&lt;/td&gt;
+      &lt;td&gt;tree&lt;/td&gt;
+      &lt;td&gt;
+&lt;pre&gt;
+100644 blob 16796efecb4599c92244ac8bafb217e20009008e	help.md
+100644 blob f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5	info.md
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;16796efecb4599c92244ac8bafb217e20009008e&lt;/td&gt;
+      &lt;td&gt;blob&lt;/td&gt;
+      &lt;td&gt;
+&lt;pre&gt;
+# Help
+
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;5333c1763419c89486091d80b6ba430d30b321a0&lt;/td&gt;
+      &lt;td&gt;blob&lt;/td&gt;
+      &lt;td&gt;
+&lt;pre&gt;
+# Readme
+
+```text
+.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+```
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;上面 8 个 Hash 中,&lt;/p&gt;
+
+&lt;p&gt;有 1 个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;commit&lt;/code&gt; 类型的, 对应 repo 中唯一的 commit;&lt;/p&gt;
+
+&lt;p&gt;有 3 个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tree&lt;/code&gt; 类型的, 对应 repo 中 3 个目录: 根目录 / doc 目录 / wiki 目录.&lt;/p&gt;
+
+&lt;p&gt;有 4 个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;blob&lt;/code&gt; 类型的, 对应 repo 中 4 个 md 文件.&lt;/p&gt;
+
+&lt;h2 id=&quot;文件修改&quot;&gt;文件修改&lt;/h2&gt;
+
+&lt;p&gt;在上面的 repo 的基础上, 对 readme 新加一行, 并提交到了新的 repo:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://jihulab.com/show/git_objects_demo_2&quot;&gt;https://jihulab.com/show/git_objects_demo_2&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;此时, objects 新增了三个 Hash:&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.git/objects/92/60de33334266d9ab1e8c8333ccc0898865748f
+.git/objects/b3/c84f0cfa3b38c0bd9f8c1713536dc144077199
+.git/objects/cb/e1f2b84138ece7363749e9a31193a62104262d
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Hash&lt;/th&gt;
+      &lt;th&gt;Type&lt;/th&gt;
+      &lt;th&gt;Content&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;9260de33334266d9ab1e8c8333ccc0898865748f&lt;/td&gt;
+      &lt;td&gt;commit&lt;/td&gt;
+      &lt;td&gt; 
+&lt;pre&gt;
+tree cbe1f2b84138ece7363749e9a31193a62104262d
+parent 6915089af93052dc6f67fd7245037230a6b1894b
+author Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645018274 +0800
+committer Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645018274 +0800
+
+Add blog link
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+
+        &lt;tr&gt;
+      &lt;td&gt;b3c84f0cfa3b38c0bd9f8c1713536dc144077199&lt;/td&gt;
+      &lt;td&gt;blob&lt;/td&gt;
+      &lt;td&gt; 
+&lt;pre&gt;
+# Readme
+
+[https://icbd.github.io/git-internal-objects/](https://icbd.github.io/git-internal-objects/)
+
+```text
+.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+```
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+
+        &lt;tr&gt;
+      &lt;td&gt;cbe1f2b84138ece7363749e9a31193a62104262d&lt;/td&gt;
+      &lt;td&gt;tree&lt;/td&gt;
+      &lt;td&gt; 
+&lt;pre&gt;
+040000 tree d038440f5c27d52fed6b6c5eb7d180f1645ab724	doc
+100644 blob b3c84f0cfa3b38c0bd9f8c1713536dc144077199	readme.md
+040000 tree 11ef4924f8f1e21e6d7412040973f5e868559ac7	wiki
+&lt;/pre&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;该 repo 共包含 11 个 git objects, 相比于之前新增了 3 个,&lt;/p&gt;
+
+&lt;p&gt;有 1 个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;commit&lt;/code&gt; 类型的, 对应新增的 commit;&lt;/p&gt;
+
+&lt;p&gt;有 1 个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tree&lt;/code&gt; 类型的, 对应被修改的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;readme.md&lt;/code&gt; 所在的目录 (目录下有文件发送变化, 目录本身的 tree 也发送变化);&lt;/p&gt;
+
+&lt;p&gt;有 1 个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;blob&lt;/code&gt; 类型的, 对应被修改的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;readme.md&lt;/code&gt; 文件 (虽然只修改了其中一行, blob 还是保存了完整的文件内容).&lt;/p&gt;</content><author><name></name></author><category term="Git" /><summary type="html">示例项目 https://jihulab.com/show/git_objects_demo 该项目共包含一个 commit, 包含的文件结构如下: . ├── doc │   └── index.md ├── readme.md └── wiki ├── help.md └── info.md git objects 目录下, 共 8 个文件: find .git/objects -type f .git/objects/69/15089af93052dc6f67fd7245037230a6b1894b .git/objects/67/89c99cbe4a25ecc9e69eb1e66df819ddfab2e5 .git/objects/d0/38440f5c27d52fed6b6c5eb7d180f1645ab724 .git/objects/f2/0b9ed4f8ba4e99df6a2491bbed85e8daf526d5 .git/objects/20/61bac5e1a292b380f98072ef5ffbc2fc3eefa9 .git/objects/11/ef4924f8f1e21e6d7412040973f5e868559ac7 .git/objects/16/796efecb4599c92244ac8bafb217e20009008e .git/objects/53/33c1763419c89486091d80b6ba430d30b321a0 Hash Type Content 6915089af93052dc6f67fd7245037230a6b1894b commit tree 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5 author Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645015448 +0800 committer Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645015448 +0800 Init 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5 tree 040000 tree d038440f5c27d52fed6b6c5eb7d180f1645ab724 doc 100644 blob 5333c1763419c89486091d80b6ba430d30b321a0 readme.md 040000 tree 11ef4924f8f1e21e6d7412040973f5e868559ac7 wiki d038440f5c27d52fed6b6c5eb7d180f1645ab724 tree 100644 blob 2061bac5e1a292b380f98072ef5ffbc2fc3eefa9 index.md f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5 blob # Info 2061bac5e1a292b380f98072ef5ffbc2fc3eefa9 blob # Index 11ef4924f8f1e21e6d7412040973f5e868559ac7 tree 100644 blob 16796efecb4599c92244ac8bafb217e20009008e help.md 100644 blob f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5 info.md 16796efecb4599c92244ac8bafb217e20009008e blob # Help 5333c1763419c89486091d80b6ba430d30b321a0 blob # Readme ```text . ├── doc │   └── index.md ├── readme.md └── wiki ├── help.md └── info.md ``` 上面 8 个 Hash 中, 有 1 个 commit 类型的, 对应 repo 中唯一的 commit; 有 3 个 tree 类型的, 对应 repo 中 3 个目录: 根目录 / doc 目录 / wiki 目录. 有 4 个 blob 类型的, 对应 repo 中 4 个 md 文件. 文件修改 在上面的 repo 的基础上, 对 readme 新加一行, 并提交到了新的 repo: https://jihulab.com/show/git_objects_demo_2 此时, objects 新增了三个 Hash: .git/objects/92/60de33334266d9ab1e8c8333ccc0898865748f .git/objects/b3/c84f0cfa3b38c0bd9f8c1713536dc144077199 .git/objects/cb/e1f2b84138ece7363749e9a31193a62104262d Hash Type Content 9260de33334266d9ab1e8c8333ccc0898865748f commit tree cbe1f2b84138ece7363749e9a31193a62104262d parent 6915089af93052dc6f67fd7245037230a6b1894b author Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645018274 +0800 committer Baodong &amp;lt;wwwicbd@gmail.com&amp;gt; 1645018274 +0800 Add blog link b3c84f0cfa3b38c0bd9f8c1713536dc144077199 blob # Readme [https://icbd.github.io/git-internal-objects/](https://icbd.github.io/git-internal-objects/) ```text . ├── doc │   └── index.md ├── readme.md └── wiki ├── help.md └── info.md ``` cbe1f2b84138ece7363749e9a31193a62104262d tree 040000 tree d038440f5c27d52fed6b6c5eb7d180f1645ab724 doc 100644 blob b3c84f0cfa3b38c0bd9f8c1713536dc144077199 readme.md 040000 tree 11ef4924f8f1e21e6d7412040973f5e868559ac7 wiki 该 repo 共包含 11 个 git objects, 相比于之前新增了 3 个, 有 1 个 commit 类型的, 对应新增的 commit; 有 1 个 tree 类型的, 对应被修改的 readme.md 所在的目录 (目录下有文件发送变化, 目录本身的 tree 也发送变化); 有 1 个 blob 类型的, 对应被修改的 readme.md 文件 (虽然只修改了其中一行, blob 还是保存了完整的文件内容).</summary></entry><entry><title type="html">Prepend private method</title><link href="https://icbd.github.io/prepend-private-method/" rel="alternate" type="text/html" title="Prepend private method" /><published>2022-01-28T00:00:00+08:00</published><updated>2022-01-28T00:00:00+08:00</updated><id>https://icbd.github.io/prepend-private-method</id><content type="html" xml:base="https://icbd.github.io/prepend-private-method/">&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;User&lt;/span&gt;
+  &lt;span class=&quot;kp&quot;&gt;private&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;foo&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;private User#foo&quot;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;no&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;foo&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;显然, 显式调用 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;private&lt;/code&gt; 的方法会抛出异常:&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private method `foo' called for #&amp;lt;User:0x00007fba2d1103e8&amp;gt; (NoMethodError)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;探测方法的定义&quot;&gt;探测方法的定义&lt;/h2&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;no&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;method_defined?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# false&lt;/span&gt;
+
+&lt;span class=&quot;no&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;public_method_defined?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# false&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;protected_method_defined?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# false&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;private_method_defined?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Module#method_defined?&lt;/code&gt; 探测 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;protected&lt;/code&gt; 的方法, 其他三个方法只探测对应的方法.&lt;/p&gt;
+
+&lt;p&gt;四个方法都有第二个默认参数 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;inherit=true&lt;/code&gt;, 默认会去 ancestor 链上查找.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;m&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Object#method&lt;/code&gt; 用来获取方法对象, 它对 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;protected&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;private&lt;/code&gt; 的方法都有效.&lt;/p&gt;
+
+&lt;p&gt;在复杂项目里, 知道被调用的方法定义的具体位置会非常有帮助:&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;no&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;source_location&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;=begin
+[ 
+  &quot;m.rb&quot;, # souce location file path
+  12 # line number
+]
+=end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;prepend-private-method&quot;&gt;prepend private method&lt;/h2&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;M&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;foo&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;public M#foo&quot;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;User&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;prepend&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;M&lt;/span&gt;
+
+  &lt;span class=&quot;kp&quot;&gt;private&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;foo&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;private User#foo&quot;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;no&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;public_method_defined?&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:foo&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;回到主题, 当 prepend 的 M 中的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;foo&lt;/code&gt; 为 public 时, 将 M prepend 进 User 之后,&lt;/p&gt;
+
+&lt;p&gt;User 查找到的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;foo&lt;/code&gt; 也就变成了 M 的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;foo&lt;/code&gt;, 级别也变成了 M 的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;foo&lt;/code&gt; 的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;如果想让 prepend 后的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;foo&lt;/code&gt; 依然保持 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;private&lt;/code&gt;, 那么应该让 M 把 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;foo&lt;/code&gt; 也定义为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;private&lt;/code&gt; .&lt;/p&gt;</content><author><name></name></author><category term="Ruby" /><summary type="html">class User private def foo p &quot;private User#foo&quot; end end User.new.foo 显然, 显式调用 private 的方法会抛出异常: private method `foo' called for #&amp;lt;User:0x00007fba2d1103e8&amp;gt; (NoMethodError) 探测方法的定义 User.method_defined?(:foo) # false User.public_method_defined?(:foo) # false User.protected_method_defined?(:foo) # false User.private_method_defined?(:foo) # true Module#method_defined? 探测 public 和 protected 的方法, 其他三个方法只探测对应的方法. 四个方法都有第二个默认参数 inherit=true, 默认会去 ancestor 链上查找. m = User.new.method(:foo) Object#method 用来获取方法对象, 它对 public 和 protected 和 private 的方法都有效. 在复杂项目里, 知道被调用的方法定义的具体位置会非常有帮助: User.new.method(:foo).source_location =begin [ &quot;m.rb&quot;, # souce location file path 12 # line number ] =end prepend private method module M def foo p &quot;public M#foo&quot; end end class User prepend M private def foo p &quot;private User#foo&quot; end end User.public_method_defined? :foo # true 回到主题, 当 prepend 的 M 中的 foo 为 public 时, 将 M prepend 进 User 之后, User 查找到的 foo 也就变成了 M 的 foo, 级别也变成了 M 的 foo 的 public. 如果想让 prepend 后的 foo 依然保持 private, 那么应该让 M 把 foo 也定义为 private .</summary></entry><entry><title type="html">Let gitlab run locally in SaaS mode</title><link href="https://icbd.github.io/gitlab-run-as-saas/" rel="alternate" type="text/html" title="Let gitlab run locally in SaaS mode" /><published>2022-01-05T00:00:00+08:00</published><updated>2022-01-05T00:00:00+08:00</updated><id>https://icbd.github.io/gitlab-run-as-saas</id><content type="html" xml:base="https://icbd.github.io/gitlab-run-as-saas/">&lt;h2 id=&quot;mock-本地方法&quot;&gt;Mock 本地方法&lt;/h2&gt;
+
+&lt;p&gt;先直奔主题, GitLab 通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gitlab.com?&lt;/code&gt; 来判断当前是否是 SaaS 环境, 最直接的办法就是修改掉这个方法, 让他直接返回 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;true&lt;/code&gt; .&lt;/p&gt;
+
+&lt;div class=&quot;language-diff highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gh&quot;&gt;diff --git a/lib/gitlab.rb b/lib/gitlab.rb
+index 2449554d3c0..35b52ce13b6 100644
+&lt;/span&gt;&lt;span class=&quot;gd&quot;&gt;--- a/lib/gitlab.rb
+&lt;/span&gt;&lt;span class=&quot;gi&quot;&gt;+++ b/lib/gitlab.rb
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;@@ -50,8 +50,7 @@&lt;/span&gt; def self.revision
+   HTTP_PROXY_ENV_VARS = %w(http_proxy https_proxy HTTP_PROXY HTTPS_PROXY).freeze
+ 
+   def self.com?
+&lt;span class=&quot;gd&quot;&gt;-    # Check `gl_subdomain?` as well to keep parity with gitlab.com
+-    Gitlab.config.gitlab.url == Gitlab::Saas.com_url || gl_subdomain?
+&lt;/span&gt;&lt;span class=&quot;gi&quot;&gt;+    true
+&lt;/span&gt;   end
+ 
+   def self.com
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;如果你只是需要 Debug 一些前端的显示, 这样就足够了.&lt;/p&gt;
+
+&lt;h2 id=&quot;内网穿透&quot;&gt;内网穿透&lt;/h2&gt;
+
+&lt;p&gt;如果还需要让它更像 SaaS 一些, 比如让它跟第三方 API 对接, 那么你需要配置内网穿透, 让它能接受来自公网的请求.&lt;/p&gt;
+
+&lt;p&gt;大家常用的工具是 &lt;a href=&quot;https://ngrok.com/&quot;&gt;ngrok&lt;/a&gt;, 国内的替代产品是 &lt;a href=&quot;https://natapp.cn/&quot;&gt;natapp&lt;/a&gt; .&lt;/p&gt;
+
+&lt;p&gt;这里以 natapp 为例, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;icbd.natapp1.cc&lt;/code&gt; 是他为我分配的公网域名.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/natapp.png&quot; alt=&quot;内网穿透&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;因为本地 GDK 中的 Rails 默认工作在 3000 端口, 我们还需要在 natapp 的 Dashboard 配置 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;本地端口&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/natapp-dashboard.png&quot; alt=&quot;natapp-dashboard&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;接下来是 gitlab 的配置:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;config/gitlab.yml&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-yml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;production&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;&amp;amp;base&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;#&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# 1. GitLab app settings&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# ==========================&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;## GitLab settings&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;gitlab&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;## Fill the value of: Gitlab.config.gitlab.url&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;http://icbd.natapp1.cc&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;## Web server settings (note: host is the FQDN, do not include http://)&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;icbd.natapp1.cc&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;3000&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;https&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;false&lt;/span&gt;
+
+    &lt;span class=&quot;na&quot;&gt;relative_url_root&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;注意, 我们并没有在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gdk.yml&lt;/code&gt; 中修改 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;hostname&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;这里修改 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;url&lt;/code&gt; 的目的是预先填充 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gitlab.config.gitlab.url&lt;/code&gt; 的值, 否则由 Settings 生成的 url 会携带额外的端口信息, 从而影响 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;com?&lt;/code&gt; 方法的判断. 修改 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;url&lt;/code&gt; 跟上面 mock &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;com?&lt;/code&gt; 是等效的, 可以二选一.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;config/initializers/1_settings.rb&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;no&quot;&gt;Settings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;gitlab&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'url'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Settings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;__send__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:build_gitlab_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;然后修改 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;com_url&lt;/code&gt; 中的地址:&lt;/p&gt;
+
+&lt;div class=&quot;language-diff highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gh&quot;&gt;diff --git a/jh/lib/jh/gitlab/saas.rb b/jh/lib/jh/gitlab/saas.rb
+index 793405c1916..603138b5b7c 100644
+&lt;/span&gt;&lt;span class=&quot;gd&quot;&gt;--- a/jh/lib/jh/gitlab/saas.rb
+&lt;/span&gt;&lt;span class=&quot;gi&quot;&gt;+++ b/jh/lib/jh/gitlab/saas.rb
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;@@ -10,7 +10,8 @@&lt;/span&gt; module Saas
+ 
+         override :com_url
+         def com_url
+&lt;span class=&quot;gd&quot;&gt;-          'https://jihulab.com'
+&lt;/span&gt;&lt;span class=&quot;gi&quot;&gt;+          # 'https://jihulab.com'
++          'http://icbd.natapp1.cc'
+&lt;/span&gt;         end
+ 
+         override :staging_com_url
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;其他配置&quot;&gt;其他配置&lt;/h2&gt;
+
+&lt;h2 id=&quot;allow-use-of-licensed-ee-features&quot;&gt;Allow use of licensed EE features&lt;/h2&gt;
+
+&lt;p&gt;以 root 用户登录, 来到页面 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/admin/application_settings/general#account-settings&lt;/code&gt;,
+勾选 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Allow use of licensed EE features&lt;/code&gt; .&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Licensed Enterprise Edition features can be used if the project namespace’s plan includes the feature, or if the project is public.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;allow-requests-to-the-local-network-from-web-hooks-and-services&quot;&gt;Allow requests to the local network from web hooks and services&lt;/h2&gt;
+
+&lt;p&gt;以 root 用户登录, 来到页面 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/admin/application_settings/network#js-outbound-settings&lt;/code&gt;,
+勾选 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Allow requests to the local network from web hooks and services&lt;/code&gt; .&lt;/p&gt;</content><author><name></name></author><category term="GitLab" /><summary type="html">Mock 本地方法 先直奔主题, GitLab 通过 Gitlab.com? 来判断当前是否是 SaaS 环境, 最直接的办法就是修改掉这个方法, 让他直接返回 true . diff --git a/lib/gitlab.rb b/lib/gitlab.rb index 2449554d3c0..35b52ce13b6 100644 --- a/lib/gitlab.rb +++ b/lib/gitlab.rb @@ -50,8 +50,7 @@ def self.revision HTTP_PROXY_ENV_VARS = %w(http_proxy https_proxy HTTP_PROXY HTTPS_PROXY).freeze def self.com? - # Check `gl_subdomain?` as well to keep parity with gitlab.com - Gitlab.config.gitlab.url == Gitlab::Saas.com_url || gl_subdomain? + true end def self.com 如果你只是需要 Debug 一些前端的显示, 这样就足够了. 内网穿透 如果还需要让它更像 SaaS 一些, 比如让它跟第三方 API 对接, 那么你需要配置内网穿透, 让它能接受来自公网的请求. 大家常用的工具是 ngrok, 国内的替代产品是 natapp . 这里以 natapp 为例, icbd.natapp1.cc 是他为我分配的公网域名. 因为本地 GDK 中的 Rails 默认工作在 3000 端口, 我们还需要在 natapp 的 Dashboard 配置 本地端口: 接下来是 gitlab 的配置: config/gitlab.yml production: &amp;amp;base # # 1. GitLab app settings # ========================== ## GitLab settings gitlab: ## Fill the value of: Gitlab.config.gitlab.url url: http://icbd.natapp1.cc ## Web server settings (note: host is the FQDN, do not include http://) host: icbd.natapp1.cc port: 3000 https: false relative_url_root: &quot;&quot; 注意, 我们并没有在 gdk.yml 中修改 hostname. 这里修改 url 的目的是预先填充 Gitlab.config.gitlab.url 的值, 否则由 Settings 生成的 url 会携带额外的端口信息, 从而影响 com? 方法的判断. 修改 url 跟上面 mock com? 是等效的, 可以二选一. config/initializers/1_settings.rb Settings.gitlab['url'] ||= Settings.__send__(:build_gitlab_url) 然后修改 com_url 中的地址: diff --git a/jh/lib/jh/gitlab/saas.rb b/jh/lib/jh/gitlab/saas.rb index 793405c1916..603138b5b7c 100644 --- a/jh/lib/jh/gitlab/saas.rb +++ b/jh/lib/jh/gitlab/saas.rb @@ -10,7 +10,8 @@ module Saas override :com_url def com_url - 'https://jihulab.com' + # 'https://jihulab.com' + 'http://icbd.natapp1.cc' end override :staging_com_url 其他配置 Allow use of licensed EE features 以 root 用户登录, 来到页面 /admin/application_settings/general#account-settings, 勾选 Allow use of licensed EE features . Licensed Enterprise Edition features can be used if the project namespace’s plan includes the feature, or if the project is public. Allow requests to the local network from web hooks and services 以 root 用户登录, 来到页面 /admin/application_settings/network#js-outbound-settings, 勾选 Allow requests to the local network from web hooks and services .</summary></entry><entry><title type="html">Makefile Basic</title><link href="https://icbd.github.io/makefile-basic/" rel="alternate" type="text/html" title="Makefile Basic" /><published>2021-12-20T00:00:00+08:00</published><updated>2021-12-20T00:00:00+08:00</updated><id>https://icbd.github.io/makefile-basic</id><content type="html" xml:base="https://icbd.github.io/makefile-basic/">&lt;p&gt;GitLab 除了一个的基于 Ruby on Rails 的 Repo, 还有多个用 Golang 写的组件/中间件, 这些项目通常用 make 来管理编译和测试.&lt;/p&gt;
+
+&lt;p&gt;这里我们介绍一下读懂 make 必须知道的基础知识.&lt;/p&gt;
+
+&lt;p&gt;makefile 的文件名可以是 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;makefile&lt;/code&gt; 或者 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Makefile&lt;/code&gt;.
+在含有 makefile 的目录下, 使用 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;make&lt;/code&gt; 来触发默认任务, 或者 类似 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;make clean&lt;/code&gt; 来触发特殊的任务.&lt;/p&gt;
+
+&lt;p&gt;基本语法:&lt;/p&gt;
+
+&lt;div class=&quot;language-makefile highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nl&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;prerequisite&lt;/span&gt;
+  &lt;span class=&quot;err&quot;&gt;command&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;makefile 的缩进使用 tab 而不是空格.&lt;/p&gt;
+
+&lt;p&gt;在这样一组任务中, target 可以写一个或者多个; prerequisite 是可选的, 可以不写或者写一个/多个; command 就是 shell 命令.&lt;/p&gt;
+
+&lt;p&gt;target 可以是目标文件, 也可以是可执行文件, 还可以是一个标签.&lt;/p&gt;
+
+&lt;p&gt;当任务没有 prerequisite 时, 也就是说 target 没有依赖, 那么对应的 command 就不会自动执行.&lt;/p&gt;
+
+&lt;p&gt;当任务需要执行时, 如果 prerequisite 的变化早于 target, 那么就执行 command, 否则就跳过 command.&lt;/p&gt;
+
+&lt;p&gt;make 不带参数时, 即以第一组任务为默认任务, make 会解析并执行所需要的 prerequisite .&lt;/p&gt;
+
+&lt;p&gt;如果想把 target 当作标签使用, 但是又存在一个同名文件时, 需要使用 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.PHONY: target&lt;/code&gt; 声明 target 为虚拟的.&lt;/p&gt;
+
+&lt;p&gt;make 的工作方式:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;读入所有的Makefile.&lt;/li&gt;
+  &lt;li&gt;读入被include的其它Makefile.&lt;/li&gt;
+  &lt;li&gt;初始化文件中的变量.&lt;/li&gt;
+  &lt;li&gt;推导隐晦规则, 并分析所有规则.&lt;/li&gt;
+  &lt;li&gt;为所有的目标文件创建依赖关系链.&lt;/li&gt;
+  &lt;li&gt;根据依赖关系, 决定哪些目标要重新生成.&lt;/li&gt;
+  &lt;li&gt;执行生成命令.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;reference&quot;&gt;Reference&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.bilibili.com/video/BV1Mx411m7fm&quot;&gt;B站: 正月点灯笼&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://seisman.github.io/how-to-write-makefile/introduction.html&quot;&gt;https://seisman.github.io/how-to-write-makefile/introduction.html&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><category term="make" /><summary type="html">GitLab 除了一个的基于 Ruby on Rails 的 Repo, 还有多个用 Golang 写的组件/中间件, 这些项目通常用 make 来管理编译和测试. 这里我们介绍一下读懂 make 必须知道的基础知识. makefile 的文件名可以是 makefile 或者 Makefile. 在含有 makefile 的目录下, 使用 make 来触发默认任务, 或者 类似 make clean 来触发特殊的任务. 基本语法: target: prerequisite command makefile 的缩进使用 tab 而不是空格. 在这样一组任务中, target 可以写一个或者多个; prerequisite 是可选的, 可以不写或者写一个/多个; command 就是 shell 命令. target 可以是目标文件, 也可以是可执行文件, 还可以是一个标签. 当任务没有 prerequisite 时, 也就是说 target 没有依赖, 那么对应的 command 就不会自动执行. 当任务需要执行时, 如果 prerequisite 的变化早于 target, 那么就执行 command, 否则就跳过 command. make 不带参数时, 即以第一组任务为默认任务, make 会解析并执行所需要的 prerequisite . 如果想把 target 当作标签使用, 但是又存在一个同名文件时, 需要使用 .PHONY: target 声明 target 为虚拟的. make 的工作方式: 读入所有的Makefile. 读入被include的其它Makefile. 初始化文件中的变量. 推导隐晦规则, 并分析所有规则. 为所有的目标文件创建依赖关系链. 根据依赖关系, 决定哪些目标要重新生成. 执行生成命令. Reference B站: 正月点灯笼 https://seisman.github.io/how-to-write-makefile/introduction.html</summary></entry><entry><title type="html">Ruby Bundler</title><link href="https://icbd.github.io/bundle-cli/" rel="alternate" type="text/html" title="Ruby Bundler" /><published>2021-09-01T00:00:00+08:00</published><updated>2021-09-01T00:00:00+08:00</updated><id>https://icbd.github.io/bundle-cli</id><content type="html" xml:base="https://icbd.github.io/bundle-cli/">&lt;p&gt;&lt;a href=&quot;https://bundler.io&quot;&gt;https://bundler.io&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;最常用的命令是 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle install&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle exec&lt;/code&gt;, 最近遇到了相关问题正好做个整理.&lt;/p&gt;
+
+&lt;p&gt;首先需要澄清的是, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gem&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundler&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rubygems&lt;/code&gt; 的关系.&lt;/p&gt;
+
+&lt;p&gt;MacOC 随系统默认安装了以下的命令:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;command&lt;/th&gt;
+      &lt;th&gt;version&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/bin/ruby&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;2.6.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/bin/gem&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;3.0.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/bin/bundle&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;1.17.2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/bin/bundler&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;1.17.2&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/bin/ruby&lt;/code&gt; 是个二进制文件, 其他几个都是可读的 Ruby 脚本.&lt;/p&gt;
+
+&lt;p&gt;gem 用来安装和管理单个 Gem 包, 我们暂且不表.&lt;/p&gt;
+
+&lt;p&gt;bundler 其实是 bundle 的别名:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;bundler/exe/bundler&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# frozen_string_literal: true&lt;/span&gt;
+
+&lt;span class=&quot;nb&quot;&gt;load&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;expand_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;../bundle&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;__FILE__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;没考证过为什么需要这样的 alias, 我的猜测是 bundle 和 bundler 都是单词, 为了不让大家费神记住哪个是正确的命令, 就干脆都实现了, 喜欢哪个用哪个.&lt;/p&gt;
+
+&lt;p&gt;大家当然都用短的, 所以后面也就叫它 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle&lt;/code&gt; .&lt;/p&gt;
+
+&lt;p&gt;但看起来 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundler&lt;/code&gt; 才是更正式的名字, bundle 本身也是一个 gem, 它的名字是 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundler&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;默认安装的 bundle 是 1.x 的版本, 目前主流已经升级到 2.x , 需要用 gem 安装最新的包:&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gem &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;bundler
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;bundle 原来的 repository 是 &lt;a href=&quot;https://github.com/rubygems/bundler&quot;&gt;https://github.com/rubygems/bundler&lt;/a&gt;, 后来 bundle 被收入 rubygems 统一管理, 最新的 repository 是 &lt;a href=&quot;https://github.com/rubygems/rubygems&quot;&gt;https://github.com/rubygems/rubygems&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;rubygems 通常指的是 &lt;a href=&quot;https://rubygems.org/&quot;&gt;https://rubygems.org/&lt;/a&gt;, 他是一个中心化的 Gem 托管服务.&lt;/p&gt;
+
+&lt;p&gt;bundle 和 rubygems 都是社区贡献被官方吸纳的例子.&lt;/p&gt;
+
+&lt;h2 id=&quot;basic-flow&quot;&gt;Basic flow&lt;/h2&gt;
+
+&lt;p&gt;以 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;debug_bundle&lt;/code&gt; 项目为例, 它的逻辑代码只有一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main.rb&lt;/code&gt; 文件:&lt;/p&gt;
+
+&lt;p&gt;(从 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/bin/bundle&lt;/code&gt; 抄来的)&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'rubygems'&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'byebug'&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;byebug&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;load&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Gem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;activate_bin_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'bundler'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'bundle'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&amp;gt;= 0.a&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rubygems&lt;/code&gt; 不需要额外安装, 已经包含在 Ruby 标准库中了. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;byebug&lt;/code&gt; 是需要安装的第三方库.&lt;/p&gt;
+
+&lt;p&gt;初始化 bundle:&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bundle init
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这个命令创建出 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gemfile&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gemfile.lock&lt;/code&gt; .&lt;/p&gt;
+
+&lt;p&gt;把 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gem &quot;byebug&quot;&lt;/code&gt; 添加到 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gemfile&lt;/code&gt; 文件末尾 .&lt;/p&gt;
+
+&lt;p&gt;安装依赖:&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bundle
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle install&lt;/code&gt; 可以简写为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;这个命令安装 Gemfile 中列出的所有依赖, 并更新 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gemfile.lock&lt;/code&gt; 文件.&lt;/p&gt;
+
+&lt;p&gt;Reference More: &lt;a href=&quot;https://bundler.io/v2.2/guides/using_bundler_in_applications.html&quot;&gt;https://bundler.io/v2.2/guides/using_bundler_in_applications.html&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;安装新的依赖库&quot;&gt;安装新的依赖库&lt;/h2&gt;
+
+&lt;p&gt;以 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;byebug&lt;/code&gt; 为例, 当前最新的几个版本为:&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;11.1.3 - April 23, 2020 (82.5 KB)
+11.1.2 - April 17, 2020 (82.5 KB)
+11.1.1 - January 24, 2020 (82.5 KB)
+11.1.0 - January 19, 2020 (82.0 KB)
+11.0.1 - March 18, 2019 (82.0 KB)
+11.0.0 - February 15, 2019 (81.5 KB)
+10.0.2 - March 30, 2018 (80.0 KB)
+10.0.1 - March 21, 2018 (80.0 KB)
+10.0.0 - January 26, 2018 (80.0 KB)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;列举本机某个 Gem 的所有版本:&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gem list byebug
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;*** LOCAL GEMS ***
+
+byebug (11.1.3, 11.1.2, 11.1.1, 11.1.0, 11.0.1, 11.0.0, 10.0.2, 10.0.1, 10.0.0, 9.0.5)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;例子&lt;/th&gt;
+      &lt;th&gt;解释&lt;/th&gt;
+      &lt;th&gt;installed version&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;gem “byebug”&lt;/td&gt;
+      &lt;td&gt;安装最新版&lt;/td&gt;
+      &lt;td&gt;11.1.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;gem “byebug”, “11.1.1”&lt;/td&gt;
+      &lt;td&gt;指定版本&lt;/td&gt;
+      &lt;td&gt;11.1.1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;gem “byebug”, “11.1”&lt;/td&gt;
+      &lt;td&gt;指定版本, 小版本缺失时补零&lt;/td&gt;
+      &lt;td&gt;11.1.0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;gem “byebug”, “11”&lt;/td&gt;
+      &lt;td&gt;指定版本, 小版本缺失时补零&lt;/td&gt;
+      &lt;td&gt;11.0.0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;gem ‘byebug’, ‘~&amp;gt; 10.0.1’&lt;/td&gt;
+      &lt;td&gt;大于等于 10.0.1 , 并且 小于 10.1.0 , 使用符合条件的较新版&lt;/td&gt;
+      &lt;td&gt;10.0.2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;gem ‘byebug’, ‘~&amp;gt; 11.0’&lt;/td&gt;
+      &lt;td&gt;大于等于 11.0.0 , 并且 小于 12.0.0, 使用符合条件的较新版&lt;/td&gt;
+      &lt;td&gt;11.1.3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;gem ‘byebug’, ‘~&amp;gt; 11.0’, ‘&amp;lt; 11.1.3’&lt;/td&gt;
+      &lt;td&gt;在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~&amp;gt; 11.0&lt;/code&gt; 的基础上, 并且小于 11.1.3&lt;/td&gt;
+      &lt;td&gt;11.1.2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;gem ‘byebug’, ‘~&amp;gt; 11.0’, ‘&amp;gt;= 11.1.1’&lt;/td&gt;
+      &lt;td&gt;在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~&amp;gt; 11.0&lt;/code&gt; 的基础上, 并且大于等于 11.1.1&lt;/td&gt;
+      &lt;td&gt;11.1.3&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;在 Gemfile 中声明好各个 Gem 的版本后, 使用 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle install&lt;/code&gt; 就能自动安装指定版本的依赖, 同时更新 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gemfile.lock&lt;/code&gt; 文件.&lt;/p&gt;
+
+&lt;h2 id=&quot;根据-gemfilelock-安装项目依赖&quot;&gt;根据 Gemfile.lock 安装项目依赖&lt;/h2&gt;
+
+&lt;p&gt;clone 一个项目之后, 首先需要安装该项目的依赖. 根据规范, repository 中应该存在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gemfile.lock&lt;/code&gt; 文件.&lt;/p&gt;
+
+&lt;p&gt;那么 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle install&lt;/code&gt; 会根据 lock 文件中声明的具体版本来安装依赖.&lt;/p&gt;
+
+&lt;p&gt;这里有一个隐含的前提, Gemfile 的声明跟 lock 文件是匹配的 (我们可以信任之前的程序员已经处理好了).&lt;/p&gt;
+
+&lt;h2 id=&quot;依赖计算&quot;&gt;依赖计算&lt;/h2&gt;
+
+&lt;p&gt;依赖计算是 bundle 最核心的功能.&lt;/p&gt;
+
+&lt;p&gt;还是看一个具体的例子: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gem 'actionpack'&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Gemfile.lock 文件的内容为:&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GEM
+  remote: https://rubygems.org/
+  specs:
+    abstract (1.0.0)
+    actionpack (3.0.9)
+      activemodel (= 3.0.9)
+      activesupport (= 3.0.9)
+      builder (~&amp;gt; 2.1.2)
+      erubis (~&amp;gt; 2.6.6)
+      i18n (~&amp;gt; 0.5.0)
+      rack (~&amp;gt; 1.2.1)
+      rack-mount (~&amp;gt; 0.6.14)
+      rack-test (~&amp;gt; 0.5.7)
+      tzinfo (~&amp;gt; 0.3.23)
+    activemodel (3.0.9)
+      activesupport (= 3.0.9)
+      builder (~&amp;gt; 2.1.2)
+      i18n (~&amp;gt; 0.5.0)
+    activesupport (3.0.9)
+    builder (2.1.2)
+    erubis (2.6.6)
+      abstract (&amp;gt;= 1.0.0)
+    i18n (0.5.4)
+    rack (1.2.8)
+    rack-mount (0.6.14)
+      rack (&amp;gt;= 1.0.0)
+    rack-test (0.5.7)
+      rack (&amp;gt;= 1.0)
+    tzinfo (0.3.60)
+
+PLATFORMS
+  x86_64-darwin-20
+
+DEPENDENCIES
+  actionpack
+
+BUNDLED WITH
+   2.2.26
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;可以看到 rack 最终安装的版本是 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rack (1.2.8)&lt;/code&gt;, 但是其他几个组件都声明了不同的 rack 依赖:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rack (~&amp;gt; 1.2.1)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rack (&amp;gt;= 1.0.0)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rack (&amp;gt;= 1.0)&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;bundle 帮我们做的就是综合所有依赖的声明, 计算出一个最合适的兼容版本, 最后把这个版本记录在 lock 文件中.&lt;/p&gt;
+
+&lt;p&gt;那么其他人就可以跳过计算步骤, 直接根据 lock 文件来安装合适的版本.&lt;/p&gt;
+
+&lt;p&gt;遇到冲突时尝试使用 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle update gemA gemB&lt;/code&gt;, 如果自动升级解决不了就需要人工接入选择了.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle update&lt;/code&gt; 会更新所有 gem.&lt;/p&gt;
+
+&lt;p&gt;By the way, npm 就不解决版本冲突, 把所有版本都保存下来. 这也就是它会占用超多的磁盘空间的原因.&lt;/p&gt;
+
+&lt;h2 id=&quot;bundle-exec&quot;&gt;bundle exec&lt;/h2&gt;
+
+&lt;p&gt;使用 bundle 中声明的命令版本来执行, 比如 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle exec rails&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle exec rspec&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;在代码中更精确地控制 bundle , 比如分组:&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'bundler/setup'&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;Bundler&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:default&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:development&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;看看 Rails 是怎么做的, 以下代码来自项目脚手架:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;启动文件 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bin/rails&lt;/code&gt;&lt;/p&gt;
+
+    &lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;c1&quot;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;load&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;expand_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;spring&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__dir__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+ &lt;span class=&quot;no&quot;&gt;APP_PATH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;expand_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'../config/application'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__dir__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require_relative&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;../config/boot&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;rails/commands&quot;&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;config/boot.rb&lt;/code&gt;&lt;/p&gt;
+
+    &lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'BUNDLE_GEMFILE'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;expand_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'../Gemfile'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__dir__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;bundler/setup&quot;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Set up gems listed in the Gemfile.&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;bootsnap/setup&quot;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Speed up boot time by caching expensive operations.&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;config/application.rb&lt;/code&gt;&lt;/p&gt;
+
+    &lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;nb&quot;&gt;require_relative&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;boot&quot;&lt;/span&gt;
+
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;rails&quot;&lt;/span&gt;
+ &lt;span class=&quot;c1&quot;&gt;# Pick the frameworks you want:&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;active_model/railtie&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;active_job/railtie&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;active_record/railtie&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;active_storage/engine&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;action_controller/railtie&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;action_mailer/railtie&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;action_mailbox/engine&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;action_text/engine&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;action_view/railtie&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;action_cable/engine&quot;&lt;/span&gt;
+ &lt;span class=&quot;c1&quot;&gt;# require &quot;sprockets/railtie&quot;&lt;/span&gt;
+ &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;rails/test_unit/railtie&quot;&lt;/span&gt;
+
+ &lt;span class=&quot;c1&quot;&gt;# Require the gems listed in Gemfile, including any gems&lt;/span&gt;
+ &lt;span class=&quot;c1&quot;&gt;# you've limited to :test, :development, or :production.&lt;/span&gt;
+ &lt;span class=&quot;no&quot;&gt;Bundler&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Rails&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;groups&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+ &lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Demoapp&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Application&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Rails&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Application&lt;/span&gt;
+     &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;load_defaults&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;6.1&lt;/span&gt;
+     &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;api_only&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;true&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;其他例子&quot;&gt;其他例子&lt;/h2&gt;
+
+&lt;h3 id=&quot;修改rubygems源&quot;&gt;修改rubygems源&lt;/h3&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bundle config mirror.https://rubygems.org https://gems.ruby-china.com
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://gems.ruby-china.com/&quot;&gt;https://gems.ruby-china.com/&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;安装本地-gem&quot;&gt;安装本地 Gem&lt;/h3&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gem &quot;tacokit&quot;, path: &quot;/path/to/tacokit&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://rossta.net/blog/how-to-specify-local-ruby-gems-in-your-gemfile.html&quot;&gt;https://rossta.net/blog/how-to-specify-local-ruby-gems-in-your-gemfile.html&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;通过-git-repo-安装&quot;&gt;通过 git repo 安装&lt;/h3&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gem 'rack', git: 'https://github.com/rack/rack'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;gem 位于子目录下:&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gem 'cf-copilot', git: 'https://github.com/cloudfoundry/copilot', glob: 'sdk/ruby/*.gemspec'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;指定分支, tag, hash:&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gem 'nokogiri', git: 'https://github.com/sparklemotion/nokogiri.git', ref: '0bd839d'
+gem 'nokogiri', git: 'https://github.com/sparklemotion/nokogiri.git', tag: '2.0.1'
+gem 'nokogiri', git: 'https://github.com/sparklemotion/nokogiri.git', branch: 'rack-1.5'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="Ruby" /><category term="bundle" /><summary type="html">https://bundler.io 最常用的命令是 bundle install 和 bundle exec, 最近遇到了相关问题正好做个整理. 首先需要澄清的是, gem bundle bundler 和 rubygems 的关系. MacOC 随系统默认安装了以下的命令: command version /usr/bin/ruby 2.6.3 /usr/bin/gem 3.0.3 /usr/bin/bundle 1.17.2 /usr/bin/bundler 1.17.2 /usr/bin/ruby 是个二进制文件, 其他几个都是可读的 Ruby 脚本. gem 用来安装和管理单个 Gem 包, 我们暂且不表. bundler 其实是 bundle 的别名: bundler/exe/bundler #!/usr/bin/env ruby # frozen_string_literal: true load File.expand_path(&quot;../bundle&quot;, __FILE__) 没考证过为什么需要这样的 alias, 我的猜测是 bundle 和 bundler 都是单词, 为了不让大家费神记住哪个是正确的命令, 就干脆都实现了, 喜欢哪个用哪个. 大家当然都用短的, 所以后面也就叫它 bundle . 但看起来 bundler 才是更正式的名字, bundle 本身也是一个 gem, 它的名字是 bundler. 默认安装的 bundle 是 1.x 的版本, 目前主流已经升级到 2.x , 需要用 gem 安装最新的包: gem install bundler bundle 原来的 repository 是 https://github.com/rubygems/bundler, 后来 bundle 被收入 rubygems 统一管理, 最新的 repository 是 https://github.com/rubygems/rubygems. rubygems 通常指的是 https://rubygems.org/, 他是一个中心化的 Gem 托管服务. bundle 和 rubygems 都是社区贡献被官方吸纳的例子. Basic flow 以 debug_bundle 项目为例, 它的逻辑代码只有一个 main.rb 文件: (从 /usr/bin/bundle 抄来的) #!/usr/bin/env ruby require 'rubygems' require 'byebug' byebug load Gem.activate_bin_path('bundler', 'bundle', &quot;&amp;gt;= 0.a&quot;) rubygems 不需要额外安装, 已经包含在 Ruby 标准库中了. byebug 是需要安装的第三方库. 初始化 bundle: bundle init 这个命令创建出 Gemfile 和 Gemfile.lock . 把 gem &quot;byebug&quot; 添加到 Gemfile 文件末尾 . 安装依赖: bundle bundle install 可以简写为 bundle. 这个命令安装 Gemfile 中列出的所有依赖, 并更新 Gemfile.lock 文件. Reference More: https://bundler.io/v2.2/guides/using_bundler_in_applications.html 安装新的依赖库 以 byebug 为例, 当前最新的几个版本为: 11.1.3 - April 23, 2020 (82.5 KB) 11.1.2 - April 17, 2020 (82.5 KB) 11.1.1 - January 24, 2020 (82.5 KB) 11.1.0 - January 19, 2020 (82.0 KB) 11.0.1 - March 18, 2019 (82.0 KB) 11.0.0 - February 15, 2019 (81.5 KB) 10.0.2 - March 30, 2018 (80.0 KB) 10.0.1 - March 21, 2018 (80.0 KB) 10.0.0 - January 26, 2018 (80.0 KB) 列举本机某个 Gem 的所有版本: gem list byebug *** LOCAL GEMS *** byebug (11.1.3, 11.1.2, 11.1.1, 11.1.0, 11.0.1, 11.0.0, 10.0.2, 10.0.1, 10.0.0, 9.0.5) 例子 解释 installed version gem “byebug” 安装最新版 11.1.3 gem “byebug”, “11.1.1” 指定版本 11.1.1 gem “byebug”, “11.1” 指定版本, 小版本缺失时补零 11.1.0 gem “byebug”, “11” 指定版本, 小版本缺失时补零 11.0.0 gem ‘byebug’, ‘~&amp;gt; 10.0.1’ 大于等于 10.0.1 , 并且 小于 10.1.0 , 使用符合条件的较新版 10.0.2 gem ‘byebug’, ‘~&amp;gt; 11.0’ 大于等于 11.0.0 , 并且 小于 12.0.0, 使用符合条件的较新版 11.1.3 gem ‘byebug’, ‘~&amp;gt; 11.0’, ‘&amp;lt; 11.1.3’ 在 ~&amp;gt; 11.0 的基础上, 并且小于 11.1.3 11.1.2 gem ‘byebug’, ‘~&amp;gt; 11.0’, ‘&amp;gt;= 11.1.1’ 在 ~&amp;gt; 11.0 的基础上, 并且大于等于 11.1.1 11.1.3 在 Gemfile 中声明好各个 Gem 的版本后, 使用 bundle install 就能自动安装指定版本的依赖, 同时更新 Gemfile.lock 文件. 根据 Gemfile.lock 安装项目依赖 clone 一个项目之后, 首先需要安装该项目的依赖. 根据规范, repository 中应该存在 Gemfile.lock 文件. 那么 bundle install 会根据 lock 文件中声明的具体版本来安装依赖. 这里有一个隐含的前提, Gemfile 的声明跟 lock 文件是匹配的 (我们可以信任之前的程序员已经处理好了). 依赖计算 依赖计算是 bundle 最核心的功能. 还是看一个具体的例子: gem 'actionpack' Gemfile.lock 文件的内容为: GEM remote: https://rubygems.org/ specs: abstract (1.0.0) actionpack (3.0.9) activemodel (= 3.0.9) activesupport (= 3.0.9) builder (~&amp;gt; 2.1.2) erubis (~&amp;gt; 2.6.6) i18n (~&amp;gt; 0.5.0) rack (~&amp;gt; 1.2.1) rack-mount (~&amp;gt; 0.6.14) rack-test (~&amp;gt; 0.5.7) tzinfo (~&amp;gt; 0.3.23) activemodel (3.0.9) activesupport (= 3.0.9) builder (~&amp;gt; 2.1.2) i18n (~&amp;gt; 0.5.0) activesupport (3.0.9) builder (2.1.2) erubis (2.6.6) abstract (&amp;gt;= 1.0.0) i18n (0.5.4) rack (1.2.8) rack-mount (0.6.14) rack (&amp;gt;= 1.0.0) rack-test (0.5.7) rack (&amp;gt;= 1.0) tzinfo (0.3.60) PLATFORMS x86_64-darwin-20 DEPENDENCIES actionpack BUNDLED WITH 2.2.26 可以看到 rack 最终安装的版本是 rack (1.2.8), 但是其他几个组件都声明了不同的 rack 依赖: rack (~&amp;gt; 1.2.1) rack (&amp;gt;= 1.0.0) rack (&amp;gt;= 1.0) bundle 帮我们做的就是综合所有依赖的声明, 计算出一个最合适的兼容版本, 最后把这个版本记录在 lock 文件中. 那么其他人就可以跳过计算步骤, 直接根据 lock 文件来安装合适的版本. 遇到冲突时尝试使用 bundle update gemA gemB, 如果自动升级解决不了就需要人工接入选择了. bundle update 会更新所有 gem. By the way, npm 就不解决版本冲突, 把所有版本都保存下来. 这也就是它会占用超多的磁盘空间的原因. bundle exec 使用 bundle 中声明的命令版本来执行, 比如 bundle exec rails, bundle exec rspec. 在代码中更精确地控制 bundle , 比如分组: require 'bundler/setup' Bundler.require(:default, :development) 看看 Rails 是怎么做的, 以下代码来自项目脚手架: 启动文件 bin/rails #!/usr/bin/env ruby load File.expand_path(&quot;spring&quot;, __dir__) APP_PATH = File.expand_path('../config/application', __dir__) require_relative &quot;../config/boot&quot; require &quot;rails/commands&quot; config/boot.rb ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __dir__) require &quot;bundler/setup&quot; # Set up gems listed in the Gemfile. require &quot;bootsnap/setup&quot; # Speed up boot time by caching expensive operations. config/application.rb require_relative &quot;boot&quot; require &quot;rails&quot; # Pick the frameworks you want: require &quot;active_model/railtie&quot; require &quot;active_job/railtie&quot; require &quot;active_record/railtie&quot; require &quot;active_storage/engine&quot; require &quot;action_controller/railtie&quot; require &quot;action_mailer/railtie&quot; require &quot;action_mailbox/engine&quot; require &quot;action_text/engine&quot; require &quot;action_view/railtie&quot; require &quot;action_cable/engine&quot; # require &quot;sprockets/railtie&quot; require &quot;rails/test_unit/railtie&quot; # Require the gems listed in Gemfile, including any gems # you've limited to :test, :development, or :production. Bundler.require(*Rails.groups) module Demoapp class Application &amp;lt; Rails::Application config.load_defaults 6.1 config.api_only = true end end 其他例子 修改rubygems源 bundle config mirror.https://rubygems.org https://gems.ruby-china.com https://gems.ruby-china.com/ 安装本地 Gem gem &quot;tacokit&quot;, path: &quot;/path/to/tacokit&quot; https://rossta.net/blog/how-to-specify-local-ruby-gems-in-your-gemfile.html 通过 git repo 安装 gem 'rack', git: 'https://github.com/rack/rack' gem 位于子目录下: gem 'cf-copilot', git: 'https://github.com/cloudfoundry/copilot', glob: 'sdk/ruby/*.gemspec' 指定分支, tag, hash: gem 'nokogiri', git: 'https://github.com/sparklemotion/nokogiri.git', ref: '0bd839d' gem 'nokogiri', git: 'https://github.com/sparklemotion/nokogiri.git', tag: '2.0.1' gem 'nokogiri', git: 'https://github.com/sparklemotion/nokogiri.git', branch: 'rack-1.5'</summary></entry></feed>

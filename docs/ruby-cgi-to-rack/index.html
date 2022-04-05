@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Ruby CGI to Rack – CBD Blog – 好记性不如烂笔头,站在岸上学不会游泳</title>
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="1974 年, TCP/IP 诞生;
+
+1991 年 HTTP 0.9 发布;
+
+1995 年 Apache HTTP Server;
+
+Apache 脱胎于 NCSA 的 HTTPd, 是当时 Netscape Web Server 的开源替代产品. 期初的 Web 页面几乎只有文本.
+
+我们在 macOS 15.5 上使用 Apache 2.4.43 来配置一个只能伺服静态资源的 vHost .
+
+文档详见: https://httpd.apache.org/docs/2.4/vhosts/name-based.html
+
+在 /etc/hosts 中添加:
+
+127.0.0.1 archeology.devel
+127.0.0.1 www.archeology.devel
+
+
+打开 httpd.conf 中的注释:
+
+Include /usr/local/etc/httpd/extra/httpd-vhosts.conf
+
+
+编辑 extra/httpd-vhosts.conf:
+
+&lt;VirtualHost *:80&gt;
+    ServerAdmin admin@archeology.devel
+    DocumentRoot "/Users/cbd/Coding/ruby/archeology"
+    ServerName archeology.devel
+    ServerAlias www.archeology.devel
+    ErrorLog "/usr/local/var/log/httpd/archeology.devel-error_log"
+    CustomLog "/usr/local/var/log/httpd/archeology.devel-access_log" common
+&lt;/VirtualHost&gt;
+
+&lt;Directory "/Users/cbd/Coding/ruby/archeology"&gt;
+    AllowOverride None
+    Options None
+    Require all granted
+&lt;/Directory&gt;
+
+
+在 Document Root 的目录里添加静态文件:
+
+.
+├── favicon.ico
+└── index.html
+
+
+
+如此, http://www.archeology.devel/ 就可以访问了.
+
+CGI
+
+https://en.wikipedia.org/wiki/Common_Gateway_Interface
+
+CGI 即 Common Gateway Interface, 1993 就出现在了 NCSA 的 HTTPd 中.
+
+纯静态的页面已经不能满足需求, 大家希望能通过 Server 做定制化的工作, CGI 就是最朴素的解决方案.
+
+CGI 实际上是一个协议:
+
+  URL 路径对应 CGI 脚本的路径;
+  GET 请求参数映射到 Server 的环境变量;
+  POST 请求参数映射到 $stdin;
+  CGI 脚本的响应结果输出到 $stdout 然后返回给客户端;
+
+
+文档详见: https://httpd.apache.org/docs/2.4/howto/cgi.html
+
+为了开启 CGI 功能, 需要调整一下配置.
+
+修改 httpd.conf, 打开注释:
+
+LoadModule cgi_module lib/httpd/modules/mod_cgi.so
+
+
+修改 extra/httpd-vhosts.conf:
+
+允许 Apache 把 .rb 后缀的请求当做 CGI 来解析执行;
+
+&lt;Directory "/Users/cbd/Coding/ruby/archeology"&gt;
+    AllowOverride None
+    Options +ExecCGI
+    AddHandler cgi-script .rb
+    Require all granted
+&lt;/Directory&gt;
+
+
+重启 Apache 并查看配置:
+
+sudo httpd -k restart
+httpd -S
+
+
+添加 cgi 脚本:
+
+.
+├── cgi
+│   └── cgi_server.rb
+├── favicon.ico
+└── index.html
+
+
+
+  cgi_server.rb
+
+
+#!/usr/bin/env ruby
+
+require "cgi"
+require 'json'
+
+cgi = CGI.new
+
+info = {
+  'Process.pid' =&gt; Process.pid,
+  'Thread.current' =&gt; Thread.current,
+  'Time.now' =&gt; Time.now,
+}
+
+puts "Content-Type:application/json\n\n"
+puts info.merge(cgi.params).to_json
+
+
+至此, 访问 http://www.archeology.devel/cgi/cgi_server.rb 就能得到动态的内容了.
+
+cgi_server.rb 其实只是一个脚本, 不限实现的语言. 该脚本也可以直接本地执行. ( Ruby CGI 会提示 offline mode, 键入参数后回车, Ctrl+D 结束输入. )
+
+多次请求会发现每次的 pid 都不同, 也就是说, 每个新的请求都会新开启一个进程来执行脚本, 处理完之后就结束进程.
+
+Fast-CGI
+
+CGI 的问题显而易见, 为每个请求都开启新进程是很大的开销. Fast-CGI 选择用 UNIX Socket 或 TCP 的方式跟一个CGI进程通信, 这个 CGI 进程需要常驻地来处理请求.
+
+文档详见: https://httpd.apache.org/docs/2.4/mod/mod_proxy_fcgi.html
+
+编辑 httpd.conf, 打开注释:
+
+LoadModule proxy_module lib/httpd/modules/mod_proxy.so
+LoadModule proxy_fcgi_module lib/httpd/modules/mod_proxy_fcgi.so
+
+
+.
+├── cgi
+│   ├── cgi_server.rb
+│   └── fcgi_server.rb
+├── favicon.ico
+└── index.html
+
+
+
+  fcgi_server.rb
+
+
+#!/usr/bin/env ruby
+require "fcgi"
+require 'json'
+
+FCGI.each_cgi do |cgi|
+  info = {
+    'Process.pid' =&gt; Process.pid,
+    'Thread.current' =&gt; Thread.current,
+    'Time.now' =&gt; Time.now,
+  }
+  puts "Content-Type:application/json\n\n"
+  puts info.merge(cgi.params).to_json
+end
+
+
+安装工具和依赖:
+
+brew install fcgi spawn-fcgi
+gem install fcgi
+
+
+spawn-fcgi -u _www -U _www  -f /Users/cbd/Coding/ruby/archeology/cgi/fcgi_server.rb -p 3000
+
+
+编辑 extra/httpd-vhosts.conf, 添加 ProxyPass 规则:
+
+&lt;VirtualHost *:80&gt;
+    ServerAdmin admin@archeology.devel
+    DocumentRoot "/Users/cbd/Coding/ruby/archeology"
+    ServerName archeology.devel
+    ServerAlias www.archeology.devel
+    ErrorLog "/usr/local/var/log/httpd/archeology.devel-error_log"
+    CustomLog "/usr/local/var/log/httpd/archeology.devel-access_log" common
+
+    ProxyPass "/fast-cgi/" "fcgi://localhost:3000/"
+&lt;/VirtualHost&gt;
+
+
+至此, 访问 http://www.archeology.devel/fast-cgi/ 就能得到对应的动态内容了.
+
+response 中显示 pid 是固定的.
+
+2005 年, Ruby on Rails 1.0 发布
+
+Rails 初期更像是一组工具包, 还有专门的工具封装 CGI.
+
+2007 年, Rack 发布
+
+Rack 把大家从处理 CGI 的繁琐工作中解放出来, 使得各个组件更加模块化:
+
+
+  
+    Common Web Server (Apache/NGINX) 负责处理静态资源, 转发动态请求;
+  
+  
+    Web Server (PUMA/Thin/Unicorn) 负责把请求调度给 Rack 对象;
+  
+  
+    Rack 负责解析 HTTP 请求;
+  
+  
+    Rack 中间件 (Rails) 负责加工请求, 组织各种功能的Gem;
+  
+  
+    具体的业务逻辑负责拼接功能模块;
+  
+
+
+每个模块各司其职, 也可以根据需求场景替换, 在一致的约定下有序配合工作.
+
+写一个 Rack 支持的 App, 要符合两个要求:
+
+
+  能相应 call 方法, 参数为 env ;
+  返回一个数组, 满足排列 [http_code, http_headers, http_body]
+
+
+.
+├── cgi
+│   ├── cgi_server.rb
+│   └── fcgi_server.rb
+├── favicon.ico
+├── index.html
+└── rack
+    └── rack_server.rb
+
+
+
+  rack/rack_server.rb
+
+
+#!/usr/bin/env ruby
+require 'rack'
+require 'rack/handler/puma'
+require 'json'
+
+app = Proc.new do |env|
+  payload = {
+    'Process.pid' =&gt; Process.pid,
+    'Thread.current' =&gt; Thread.current,
+    'Time.now' =&gt; Time.now,
+    'env' =&gt; env
+  }.to_json
+  ['200', {'Content-Type' =&gt; 'application/json'}, [payload]]
+end
+
+Rack::Handler::Puma.run(app, {Verbose: true, Port: 3000, Threads: '3:3'})
+
+
+编辑 httpd.conf, 打开注释:
+
+LoadModule proxy_http_module lib/httpd/modules/mod_proxy_http.so
+
+
+编辑 extra/httpd-vhosts.conf, 在 VirtualHost 中加入:
+
+ProxyPass "/api/" "http://localhost:3000/"
+
+
+至此, 访问 http://archeology.devel/api/ 就能得到 Rack 的响应了.
+
+Demo Code
+
+https://gitlab.com/Cbd-Focus/ruby-cgi-to-rack
+
+参考
+
+https://insights.thoughtworks.cn/ruby-web-server/
+" />
+    <meta property="og:description" content="1974 年, TCP/IP 诞生;
+
+1991 年 HTTP 0.9 发布;
+
+1995 年 Apache HTTP Server;
+
+Apache 脱胎于 NCSA 的 HTTPd, 是当时 Netscape Web Server 的开源替代产品. 期初的 Web 页面几乎只有文本.
+
+我们在 macOS 15.5 上使用 Apache 2.4.43 来配置一个只能伺服静态资源的 vHost .
+
+文档详见: https://httpd.apache.org/docs/2.4/vhosts/name-based.html
+
+在 /etc/hosts 中添加:
+
+127.0.0.1 archeology.devel
+127.0.0.1 www.archeology.devel
+
+
+打开 httpd.conf 中的注释:
+
+Include /usr/local/etc/httpd/extra/httpd-vhosts.conf
+
+
+编辑 extra/httpd-vhosts.conf:
+
+&lt;VirtualHost *:80&gt;
+    ServerAdmin admin@archeology.devel
+    DocumentRoot "/Users/cbd/Coding/ruby/archeology"
+    ServerName archeology.devel
+    ServerAlias www.archeology.devel
+    ErrorLog "/usr/local/var/log/httpd/archeology.devel-error_log"
+    CustomLog "/usr/local/var/log/httpd/archeology.devel-access_log" common
+&lt;/VirtualHost&gt;
+
+&lt;Directory "/Users/cbd/Coding/ruby/archeology"&gt;
+    AllowOverride None
+    Options None
+    Require all granted
+&lt;/Directory&gt;
+
+
+在 Document Root 的目录里添加静态文件:
+
+.
+├── favicon.ico
+└── index.html
+
+
+
+如此, http://www.archeology.devel/ 就可以访问了.
+
+CGI
+
+https://en.wikipedia.org/wiki/Common_Gateway_Interface
+
+CGI 即 Common Gateway Interface, 1993 就出现在了 NCSA 的 HTTPd 中.
+
+纯静态的页面已经不能满足需求, 大家希望能通过 Server 做定制化的工作, CGI 就是最朴素的解决方案.
+
+CGI 实际上是一个协议:
+
+  URL 路径对应 CGI 脚本的路径;
+  GET 请求参数映射到 Server 的环境变量;
+  POST 请求参数映射到 $stdin;
+  CGI 脚本的响应结果输出到 $stdout 然后返回给客户端;
+
+
+文档详见: https://httpd.apache.org/docs/2.4/howto/cgi.html
+
+为了开启 CGI 功能, 需要调整一下配置.
+
+修改 httpd.conf, 打开注释:
+
+LoadModule cgi_module lib/httpd/modules/mod_cgi.so
+
+
+修改 extra/httpd-vhosts.conf:
+
+允许 Apache 把 .rb 后缀的请求当做 CGI 来解析执行;
+
+&lt;Directory "/Users/cbd/Coding/ruby/archeology"&gt;
+    AllowOverride None
+    Options +ExecCGI
+    AddHandler cgi-script .rb
+    Require all granted
+&lt;/Directory&gt;
+
+
+重启 Apache 并查看配置:
+
+sudo httpd -k restart
+httpd -S
+
+
+添加 cgi 脚本:
+
+.
+├── cgi
+│   └── cgi_server.rb
+├── favicon.ico
+└── index.html
+
+
+
+  cgi_server.rb
+
+
+#!/usr/bin/env ruby
+
+require "cgi"
+require 'json'
+
+cgi = CGI.new
+
+info = {
+  'Process.pid' =&gt; Process.pid,
+  'Thread.current' =&gt; Thread.current,
+  'Time.now' =&gt; Time.now,
+}
+
+puts "Content-Type:application/json\n\n"
+puts info.merge(cgi.params).to_json
+
+
+至此, 访问 http://www.archeology.devel/cgi/cgi_server.rb 就能得到动态的内容了.
+
+cgi_server.rb 其实只是一个脚本, 不限实现的语言. 该脚本也可以直接本地执行. ( Ruby CGI 会提示 offline mode, 键入参数后回车, Ctrl+D 结束输入. )
+
+多次请求会发现每次的 pid 都不同, 也就是说, 每个新的请求都会新开启一个进程来执行脚本, 处理完之后就结束进程.
+
+Fast-CGI
+
+CGI 的问题显而易见, 为每个请求都开启新进程是很大的开销. Fast-CGI 选择用 UNIX Socket 或 TCP 的方式跟一个CGI进程通信, 这个 CGI 进程需要常驻地来处理请求.
+
+文档详见: https://httpd.apache.org/docs/2.4/mod/mod_proxy_fcgi.html
+
+编辑 httpd.conf, 打开注释:
+
+LoadModule proxy_module lib/httpd/modules/mod_proxy.so
+LoadModule proxy_fcgi_module lib/httpd/modules/mod_proxy_fcgi.so
+
+
+.
+├── cgi
+│   ├── cgi_server.rb
+│   └── fcgi_server.rb
+├── favicon.ico
+└── index.html
+
+
+
+  fcgi_server.rb
+
+
+#!/usr/bin/env ruby
+require "fcgi"
+require 'json'
+
+FCGI.each_cgi do |cgi|
+  info = {
+    'Process.pid' =&gt; Process.pid,
+    'Thread.current' =&gt; Thread.current,
+    'Time.now' =&gt; Time.now,
+  }
+  puts "Content-Type:application/json\n\n"
+  puts info.merge(cgi.params).to_json
+end
+
+
+安装工具和依赖:
+
+brew install fcgi spawn-fcgi
+gem install fcgi
+
+
+spawn-fcgi -u _www -U _www  -f /Users/cbd/Coding/ruby/archeology/cgi/fcgi_server.rb -p 3000
+
+
+编辑 extra/httpd-vhosts.conf, 添加 ProxyPass 规则:
+
+&lt;VirtualHost *:80&gt;
+    ServerAdmin admin@archeology.devel
+    DocumentRoot "/Users/cbd/Coding/ruby/archeology"
+    ServerName archeology.devel
+    ServerAlias www.archeology.devel
+    ErrorLog "/usr/local/var/log/httpd/archeology.devel-error_log"
+    CustomLog "/usr/local/var/log/httpd/archeology.devel-access_log" common
+
+    ProxyPass "/fast-cgi/" "fcgi://localhost:3000/"
+&lt;/VirtualHost&gt;
+
+
+至此, 访问 http://www.archeology.devel/fast-cgi/ 就能得到对应的动态内容了.
+
+response 中显示 pid 是固定的.
+
+2005 年, Ruby on Rails 1.0 发布
+
+Rails 初期更像是一组工具包, 还有专门的工具封装 CGI.
+
+2007 年, Rack 发布
+
+Rack 把大家从处理 CGI 的繁琐工作中解放出来, 使得各个组件更加模块化:
+
+
+  
+    Common Web Server (Apache/NGINX) 负责处理静态资源, 转发动态请求;
+  
+  
+    Web Server (PUMA/Thin/Unicorn) 负责把请求调度给 Rack 对象;
+  
+  
+    Rack 负责解析 HTTP 请求;
+  
+  
+    Rack 中间件 (Rails) 负责加工请求, 组织各种功能的Gem;
+  
+  
+    具体的业务逻辑负责拼接功能模块;
+  
+
+
+每个模块各司其职, 也可以根据需求场景替换, 在一致的约定下有序配合工作.
+
+写一个 Rack 支持的 App, 要符合两个要求:
+
+
+  能相应 call 方法, 参数为 env ;
+  返回一个数组, 满足排列 [http_code, http_headers, http_body]
+
+
+.
+├── cgi
+│   ├── cgi_server.rb
+│   └── fcgi_server.rb
+├── favicon.ico
+├── index.html
+└── rack
+    └── rack_server.rb
+
+
+
+  rack/rack_server.rb
+
+
+#!/usr/bin/env ruby
+require 'rack'
+require 'rack/handler/puma'
+require 'json'
+
+app = Proc.new do |env|
+  payload = {
+    'Process.pid' =&gt; Process.pid,
+    'Thread.current' =&gt; Thread.current,
+    'Time.now' =&gt; Time.now,
+    'env' =&gt; env
+  }.to_json
+  ['200', {'Content-Type' =&gt; 'application/json'}, [payload]]
+end
+
+Rack::Handler::Puma.run(app, {Verbose: true, Port: 3000, Threads: '3:3'})
+
+
+编辑 httpd.conf, 打开注释:
+
+LoadModule proxy_http_module lib/httpd/modules/mod_proxy_http.so
+
+
+编辑 extra/httpd-vhosts.conf, 在 VirtualHost 中加入:
+
+ProxyPass "/api/" "http://localhost:3000/"
+
+
+至此, 访问 http://archeology.devel/api/ 就能得到 Rack 的响应了.
+
+Demo Code
+
+https://gitlab.com/Cbd-Focus/ruby-cgi-to-rack
+
+参考
+
+https://insights.thoughtworks.cn/ruby-web-server/
+" />
+    
+    <meta name="author" content="CBD Blog" />
+
+    
+    <meta property="og:title" content="Ruby CGI to Rack" />
+    <meta property="twitter:title" content="Ruby CGI to Rack" />
+    
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="CBD Blog - 好记性不如烂笔头,站在岸上学不会游泳" href="/feed.xml" />
+  <link rel="shortcut icon" href="/images/avatar.jpg">
+<!--  <script src="https://lib.baomitu.com/gitalk/1.6.2/gitalk.min.js"></script>-->
+  <script src="https://lib.baomitu.com/feather-icons/latest/feather.min.js"></script>
+  <script type="text/javascript" async src="https://lib.baomitu.com/mathjax/2.7.7/MathJax.js?...">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?9dfbb5850b35a184a60c9a4a1b08d7e3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+  <meta name="google-site-verification" content="ZqVpjmLHnwuJ0qbh4QrpcofglQe6XEjjF7X1AB7yXus" />
+</head>
+
+  <body>
+    <div class="wrapper-sidebar">
+  <header class="sidebar clearfix">
+    <div class="site-info">
+      
+        <a href="/" class="site-avatar"><img src="/images/avatar.jpg" /></a>
+       
+      <h1 class="site-name"><a href="/">CBD Blog</a></h1>
+      <p class="site-description">好记性不如烂笔头,站在岸上学不会游泳</p>
+    </div>
+  </header>
+
+  <div class="navlist">
+    <nav>
+      
+      
+      <a href="/">首页</a>
+      
+      
+      
+      <a href="/archive">归档</a>
+      
+      
+      
+      <a href="/about">关于</a>
+      
+      
+    </nav>
+  </div>
+
+  <div class="wrapper-footer-desktop">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+  </div>
+</div>
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">Ruby CGI to Rack</a>
+    <ul>
+      <li><a href="#1974-年-tcpip-诞生">1974 年, TCP/IP 诞生;</a></li>
+      <li><a href="#1991-年-http-09-发布">1991 年 HTTP 0.9 发布;</a></li>
+      <li><a href="#1995-年-apache-http-server">1995 年 Apache HTTP Server;</a></li>
+      <li><a href="#cgi">CGI</a></li>
+      <li><a href="#fast-cgi">Fast-CGI</a></li>
+      <li><a href="#2005-年-ruby-on-rails-10-发布">2005 年, Ruby on Rails 1.0 发布</a></li>
+      <li><a href="#2007-年-rack-发布">2007 年, Rack 发布</a></li>
+      <li><a href="#demo-code">Demo Code</a></li>
+      <li><a href="#参考">参考</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <h1>Ruby CGI to Rack</h1>
+
+  <div clsss="meta">
+    <span class="author">
+      
+    </span>
+
+    <span class="date">
+      2020-08-23
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="https://icbd.github.io/tags#Ruby">
+          Ruby
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://icbd.github.io/tags#Server">
+          Server
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <h2 id="1974-年-tcpip-诞生">1974 年, TCP/IP 诞生;</h2>
+
+<h2 id="1991-年-http-09-发布">1991 年 HTTP 0.9 发布;</h2>
+
+<h2 id="1995-年-apache-http-server">1995 年 Apache HTTP Server;</h2>
+
+<p>Apache 脱胎于 NCSA 的 HTTPd, 是当时 Netscape Web Server 的开源替代产品. 期初的 Web 页面几乎只有文本.</p>
+
+<p>我们在 macOS 15.5 上使用 Apache 2.4.43 来配置一个只能伺服静态资源的 vHost .</p>
+
+<p>文档详见: <a href="https://httpd.apache.org/docs/2.4/vhosts/name-based.html">https://httpd.apache.org/docs/2.4/vhosts/name-based.html</a></p>
+
+<p>在 <code class="language-plaintext highlighter-rouge">/etc/hosts</code> 中添加:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>127.0.0.1 archeology.devel
+127.0.0.1 www.archeology.devel
+</code></pre></div></div>
+
+<p>打开 <code class="language-plaintext highlighter-rouge">httpd.conf</code> 中的注释:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Include /usr/local/etc/httpd/extra/httpd-vhosts.conf
+</code></pre></div></div>
+
+<p>编辑 <code class="language-plaintext highlighter-rouge">extra/httpd-vhosts.conf</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;VirtualHost *:80&gt;
+    ServerAdmin admin@archeology.devel
+    DocumentRoot "/Users/cbd/Coding/ruby/archeology"
+    ServerName archeology.devel
+    ServerAlias www.archeology.devel
+    ErrorLog "/usr/local/var/log/httpd/archeology.devel-error_log"
+    CustomLog "/usr/local/var/log/httpd/archeology.devel-access_log" common
+&lt;/VirtualHost&gt;
+
+&lt;Directory "/Users/cbd/Coding/ruby/archeology"&gt;
+    AllowOverride None
+    Options None
+    Require all granted
+&lt;/Directory&gt;
+</code></pre></div></div>
+
+<p>在 Document Root 的目录里添加静态文件:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.
+├── favicon.ico
+└── index.html
+
+</code></pre></div></div>
+
+<p>如此, <a href="http://www.archeology.devel/">http://www.archeology.devel/</a> 就可以访问了.</p>
+
+<h2 id="cgi">CGI</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Common_Gateway_Interface">https://en.wikipedia.org/wiki/Common_Gateway_Interface</a></p>
+
+<p>CGI 即 Common Gateway Interface, 1993 就出现在了 NCSA 的 HTTPd 中.</p>
+
+<p>纯静态的页面已经不能满足需求, 大家希望能通过 Server 做定制化的工作, CGI 就是最朴素的解决方案.</p>
+
+<p>CGI 实际上是一个协议:</p>
+<ul>
+  <li>URL 路径对应 CGI 脚本的路径;</li>
+  <li>GET 请求参数映射到 Server 的环境变量;</li>
+  <li>POST 请求参数映射到 <code class="language-plaintext highlighter-rouge">$stdin</code>;</li>
+  <li>CGI 脚本的响应结果输出到 <code class="language-plaintext highlighter-rouge">$stdout</code> 然后返回给客户端;</li>
+</ul>
+
+<p>文档详见: <a href="https://httpd.apache.org/docs/2.4/howto/cgi.html">https://httpd.apache.org/docs/2.4/howto/cgi.html</a></p>
+
+<p>为了开启 CGI 功能, 需要调整一下配置.</p>
+
+<p>修改 <code class="language-plaintext highlighter-rouge">httpd.conf</code>, 打开注释:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>LoadModule cgi_module lib/httpd/modules/mod_cgi.so
+</code></pre></div></div>
+
+<p>修改 <code class="language-plaintext highlighter-rouge">extra/httpd-vhosts.conf</code>:</p>
+
+<p>允许 Apache 把 <code class="language-plaintext highlighter-rouge">.rb</code> 后缀的请求当做 CGI 来解析执行;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;Directory "/Users/cbd/Coding/ruby/archeology"&gt;
+    AllowOverride None
+    Options +ExecCGI
+    AddHandler cgi-script .rb
+    Require all granted
+&lt;/Directory&gt;
+</code></pre></div></div>
+
+<p>重启 Apache 并查看配置:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>httpd <span class="nt">-k</span> restart
+httpd <span class="nt">-S</span>
+</code></pre></div></div>
+
+<p>添加 cgi 脚本:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.
+├── cgi
+│   └── cgi_server.rb
+├── favicon.ico
+└── index.html
+</code></pre></div></div>
+
+<blockquote>
+  <p>cgi_server.rb</p>
+</blockquote>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env ruby</span>
+
+<span class="nb">require</span> <span class="s2">"cgi"</span>
+<span class="nb">require</span> <span class="s1">'json'</span>
+
+<span class="n">cgi</span> <span class="o">=</span> <span class="no">CGI</span><span class="p">.</span><span class="nf">new</span>
+
+<span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">'Process.pid'</span> <span class="o">=&gt;</span> <span class="no">Process</span><span class="p">.</span><span class="nf">pid</span><span class="p">,</span>
+  <span class="s1">'Thread.current'</span> <span class="o">=&gt;</span> <span class="no">Thread</span><span class="p">.</span><span class="nf">current</span><span class="p">,</span>
+  <span class="s1">'Time.now'</span> <span class="o">=&gt;</span> <span class="no">Time</span><span class="p">.</span><span class="nf">now</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="nb">puts</span> <span class="s2">"Content-Type:application/json</span><span class="se">\n\n</span><span class="s2">"</span>
+<span class="nb">puts</span> <span class="n">info</span><span class="p">.</span><span class="nf">merge</span><span class="p">(</span><span class="n">cgi</span><span class="p">.</span><span class="nf">params</span><span class="p">).</span><span class="nf">to_json</span>
+</code></pre></div></div>
+
+<p>至此, 访问 <a href="http://www.archeology.devel/cgi/cgi_server.rb">http://www.archeology.devel/cgi/cgi_server.rb</a> 就能得到动态的内容了.</p>
+
+<p><code class="language-plaintext highlighter-rouge">cgi_server.rb</code> 其实只是一个脚本, 不限实现的语言. 该脚本也可以直接本地执行. ( Ruby CGI 会提示 <code class="language-plaintext highlighter-rouge">offline mode</code>, 键入参数后回车, <code class="language-plaintext highlighter-rouge">Ctrl+D</code> 结束输入. )</p>
+
+<p>多次请求会发现每次的 pid 都不同, 也就是说, 每个新的请求都会新开启一个进程来执行脚本, 处理完之后就结束进程.</p>
+
+<h2 id="fast-cgi">Fast-CGI</h2>
+
+<p>CGI 的问题显而易见, 为每个请求都开启新进程是很大的开销. Fast-CGI 选择用 UNIX Socket 或 TCP 的方式跟一个CGI进程通信, 这个 CGI 进程需要常驻地来处理请求.</p>
+
+<p>文档详见: <a href="https://httpd.apache.org/docs/2.4/mod/mod_proxy_fcgi.html">https://httpd.apache.org/docs/2.4/mod/mod_proxy_fcgi.html</a></p>
+
+<p>编辑 <code class="language-plaintext highlighter-rouge">httpd.conf</code>, 打开注释:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>LoadModule proxy_module lib/httpd/modules/mod_proxy.so
+LoadModule proxy_fcgi_module lib/httpd/modules/mod_proxy_fcgi.so
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.
+├── cgi
+│   ├── cgi_server.rb
+│   └── fcgi_server.rb
+├── favicon.ico
+└── index.html
+</code></pre></div></div>
+
+<blockquote>
+  <p>fcgi_server.rb</p>
+</blockquote>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env ruby</span>
+<span class="nb">require</span> <span class="s2">"fcgi"</span>
+<span class="nb">require</span> <span class="s1">'json'</span>
+
+<span class="no">FCGI</span><span class="p">.</span><span class="nf">each_cgi</span> <span class="k">do</span> <span class="o">|</span><span class="n">cgi</span><span class="o">|</span>
+  <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'Process.pid'</span> <span class="o">=&gt;</span> <span class="no">Process</span><span class="p">.</span><span class="nf">pid</span><span class="p">,</span>
+    <span class="s1">'Thread.current'</span> <span class="o">=&gt;</span> <span class="no">Thread</span><span class="p">.</span><span class="nf">current</span><span class="p">,</span>
+    <span class="s1">'Time.now'</span> <span class="o">=&gt;</span> <span class="no">Time</span><span class="p">.</span><span class="nf">now</span><span class="p">,</span>
+  <span class="p">}</span>
+  <span class="nb">puts</span> <span class="s2">"Content-Type:application/json</span><span class="se">\n\n</span><span class="s2">"</span>
+  <span class="nb">puts</span> <span class="n">info</span><span class="p">.</span><span class="nf">merge</span><span class="p">(</span><span class="n">cgi</span><span class="p">.</span><span class="nf">params</span><span class="p">).</span><span class="nf">to_json</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>安装工具和依赖:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew install fcgi spawn-fcgi
+gem install fcgi
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>spawn-fcgi -u _www -U _www  -f /Users/cbd/Coding/ruby/archeology/cgi/fcgi_server.rb -p 3000
+</code></pre></div></div>
+
+<p>编辑 <code class="language-plaintext highlighter-rouge">extra/httpd-vhosts.conf</code>, 添加 ProxyPass 规则:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;VirtualHost *:80&gt;
+    ServerAdmin admin@archeology.devel
+    DocumentRoot "/Users/cbd/Coding/ruby/archeology"
+    ServerName archeology.devel
+    ServerAlias www.archeology.devel
+    ErrorLog "/usr/local/var/log/httpd/archeology.devel-error_log"
+    CustomLog "/usr/local/var/log/httpd/archeology.devel-access_log" common
+
+    ProxyPass "/fast-cgi/" "fcgi://localhost:3000/"
+&lt;/VirtualHost&gt;
+</code></pre></div></div>
+
+<p>至此, 访问 <a href="http://www.archeology.devel/fast-cgi/">http://www.archeology.devel/fast-cgi/</a> 就能得到对应的动态内容了.</p>
+
+<p>response 中显示 pid 是固定的.</p>
+
+<h2 id="2005-年-ruby-on-rails-10-发布">2005 年, Ruby on Rails 1.0 发布</h2>
+
+<p>Rails 初期更像是一组工具包, 还有专门的工具封装 CGI.</p>
+
+<h2 id="2007-年-rack-发布">2007 年, Rack 发布</h2>
+
+<p>Rack 把大家从处理 CGI 的繁琐工作中解放出来, 使得各个组件更加模块化:</p>
+
+<ul>
+  <li>
+    <p>Common Web Server (Apache/NGINX) 负责处理静态资源, 转发动态请求;</p>
+  </li>
+  <li>
+    <p>Web Server (PUMA/Thin/Unicorn) 负责把请求调度给 Rack 对象;</p>
+  </li>
+  <li>
+    <p>Rack 负责解析 HTTP 请求;</p>
+  </li>
+  <li>
+    <p>Rack 中间件 (Rails) 负责加工请求, 组织各种功能的Gem;</p>
+  </li>
+  <li>
+    <p>具体的业务逻辑负责拼接功能模块;</p>
+  </li>
+</ul>
+
+<p>每个模块各司其职, 也可以根据需求场景替换, 在一致的约定下有序配合工作.</p>
+
+<p>写一个 Rack 支持的 App, 要符合两个要求:</p>
+
+<ul>
+  <li>能相应 <code class="language-plaintext highlighter-rouge">call</code> 方法, 参数为 env ;</li>
+  <li>返回一个数组, 满足排列 <code class="language-plaintext highlighter-rouge">[http_code, http_headers, http_body]</code></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.
+├── cgi
+│   ├── cgi_server.rb
+│   └── fcgi_server.rb
+├── favicon.ico
+├── index.html
+└── rack
+    └── rack_server.rb
+</code></pre></div></div>
+
+<blockquote>
+  <p>rack/rack_server.rb</p>
+</blockquote>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env ruby</span>
+<span class="nb">require</span> <span class="s1">'rack'</span>
+<span class="nb">require</span> <span class="s1">'rack/handler/puma'</span>
+<span class="nb">require</span> <span class="s1">'json'</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="no">Proc</span><span class="p">.</span><span class="nf">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">env</span><span class="o">|</span>
+  <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'Process.pid'</span> <span class="o">=&gt;</span> <span class="no">Process</span><span class="p">.</span><span class="nf">pid</span><span class="p">,</span>
+    <span class="s1">'Thread.current'</span> <span class="o">=&gt;</span> <span class="no">Thread</span><span class="p">.</span><span class="nf">current</span><span class="p">,</span>
+    <span class="s1">'Time.now'</span> <span class="o">=&gt;</span> <span class="no">Time</span><span class="p">.</span><span class="nf">now</span><span class="p">,</span>
+    <span class="s1">'env'</span> <span class="o">=&gt;</span> <span class="n">env</span>
+  <span class="p">}.</span><span class="nf">to_json</span>
+  <span class="p">[</span><span class="s1">'200'</span><span class="p">,</span> <span class="p">{</span><span class="s1">'Content-Type'</span> <span class="o">=&gt;</span> <span class="s1">'application/json'</span><span class="p">},</span> <span class="p">[</span><span class="n">payload</span><span class="p">]]</span>
+<span class="k">end</span>
+
+<span class="no">Rack</span><span class="o">::</span><span class="no">Handler</span><span class="o">::</span><span class="no">Puma</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="p">{</span><span class="no">Verbose</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="no">Port</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span> <span class="no">Threads</span><span class="p">:</span> <span class="s1">'3:3'</span><span class="p">})</span>
+</code></pre></div></div>
+
+<p>编辑 <code class="language-plaintext highlighter-rouge">httpd.conf</code>, 打开注释:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>LoadModule proxy_http_module lib/httpd/modules/mod_proxy_http.so
+</code></pre></div></div>
+
+<p>编辑 <code class="language-plaintext highlighter-rouge">extra/httpd-vhosts.conf</code>, 在 VirtualHost 中加入:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ProxyPass "/api/" "http://localhost:3000/"
+</code></pre></div></div>
+
+<p>至此, 访问 <a href="http://archeology.devel/api/">http://archeology.devel/api/</a> 就能得到 Rack 的响应了.</p>
+
+<h2 id="demo-code">Demo Code</h2>
+
+<p><a href="https://gitlab.com/Cbd-Focus/ruby-cgi-to-rack">https://gitlab.com/Cbd-Focus/ruby-cgi-to-rack</a></p>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://insights.thoughtworks.cn/ruby-web-server/">https://insights.thoughtworks.cn/ruby-web-server/</a></p>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="icbd/blogs"
+        issue-term="pathname"
+        label="utteranc"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="https://icbd.github.io/connection-pool/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="https://icbd.github.io/rubygem-and-bundler/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+</html>

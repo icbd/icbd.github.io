@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Process Signal in Ruby – CBD Blog – 好记性不如烂笔头,站在岸上学不会游泳</title>
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="引子
+
+虽然 GIL 限制了 Ruby 多线程利用多核的能力, 但还可以通过多进程方式来使用多核资源.
+
+master – worker 是多进程常用的组织方式, 一个 master 进程负责管理调度, 多个 worker 进程处理具体的业务逻辑.
+
+那么, master 和 worker 之间如何通信呢? 除了利用文件,TCP,UNIX Socket这样的共享资源, 其实原始也高效的方式就是利用信号.
+
+本篇主题是 master 进程如何正确处理 worker 的信号, 在介绍主题前, 先回顾一下相关基础.
+
+fork
+
+fork 派生新的进程, 子进程继承了父进程内存中的所有内容，包括已打开的文件描述符.
+
+
+  父进程 fork 返回 子进程的 pid;
+  子进程 fork 返回 nil;
+
+
+wait 和 wait 家族
+
+father_pid = Process.pid
+
+child_pid = fork do
+  puts "child&gt;&gt;"
+  sleep 2
+end
+
+p Process.wait(child_pid)
+p "father: #{father_pid}, child: #{child_pid}"
+=begin
+child&gt;&gt;
+6549
+"father: 6547, child: 6549"
+=end
+
+
+Process.wait(pid) 默认是阻塞的, 等 pid 对应的子进程退出才返回, 返回 pid;
+
+father_pid = Process.pid
+
+child_pid = fork do
+  puts "child&gt;&gt;"
+  sleep 2
+end
+
+p Process.wait(child_pid, Process::WNOHANG)
+p "father: #{father_pid}, child: #{child_pid}"
+=begin
+nil
+"father: 6558, child: 6560"
+child&gt;&gt;
+=end
+
+
+Process.wait(pid, Process::WNOHANG) 是非阻塞的:
+
+
+  如果 pid 对应的子进程已经退出了, 立即返回 pid;
+  如果 pid 对应的子进程还没有退出, 立即返回 nil.
+
+
+wait 的 pid 可以是 -1 或留空, 都表示等待任意子进程.
+
+wait2 跟 wait 的区别在返回值: pid, status =  Process.wait2(pid) .
+
+Signal 与 僵尸进程
+
+Signal.list 可以查看所有信号, 更详细的信息可以查看 man signal 相关的章节.
+
+Signal      Standard   Action   Comment
+────────────────────────────────────────────────────────────────────────
+SIGABRT      P1990      Core    Abort signal from abort(3)
+SIGALRM      P1990      Term    Timer signal from alarm(2)
+SIGBUS       P2001      Core    Bus error (bad memory access)
+SIGCHLD      P1990      Ign     Child stopped or terminated
+SIGCLD         -        Ign     A synonym for SIGCHLD
+SIGCONT      P1990      Cont    Continue if stopped
+SIGEMT         -        Term    Emulator trap
+SIGFPE       P1990      Core    Floating-point exception
+SIGHUP       P1990      Term    Hangup detected on controlling terminal
+                                or death of controlling process
+SIGILL       P1990      Core    Illegal Instruction
+SIGINFO        -                A synonym for SIGPWR
+SIGINT       P1990      Term    Interrupt from keyboard
+SIGIO          -        Term    I/O now possible (4.2BSD)
+SIGIOT         -        Core    IOT trap. A synonym for SIGABRT
+SIGKILL      P1990      Term    Kill signal
+SIGLOST        -        Term    File lock lost (unused)
+SIGPIPE      P1990      Term    Broken pipe: write to pipe with no
+                                readers; see pipe(7)
+SIGPOLL      P2001      Term    Pollable event (Sys V);
+                                synonym for SIGIO
+SIGPROF      P2001      Term    Profiling timer expired
+SIGPWR         -        Term    Power failure (System V)
+SIGQUIT      P1990      Core    Quit from keyboard
+SIGSEGV      P1990      Core    Invalid memory reference
+SIGSTKFLT      -        Term    Stack fault on coprocessor (unused)
+SIGSTOP      P1990      Stop    Stop process
+SIGTSTP      P1990      Stop    Stop typed at terminal
+SIGSYS       P2001      Core    Bad system call (SVr4);
+                                see also seccomp(2)
+SIGTERM      P1990      Term    Termination signal
+SIGTRAP      P2001      Core    Trace/breakpoint trap
+SIGTTIN      P1990      Stop    Terminal input for background process
+SIGTTOU      P1990      Stop    Terminal output for background process
+SIGUNUSED      -        Core    Synonymous with SIGSYS
+SIGURG       P2001      Ign     Urgent condition on socket (4.2BSD)
+SIGUSR1      P1990      Term    User-defined signal 1
+SIGUSR2      P1990      Term    User-defined signal 2
+SIGVTALRM    P2001      Term    Virtual alarm clock (4.2BSD)
+SIGXCPU      P2001      Core    CPU time limit exceeded (4.2BSD);
+                                see setrlimit(2)
+SIGXFSZ      P2001      Core    File size limit exceeded (4.2BSD);
+                                see setrlimit(2)
+
+
+一个进程退出了, 不论是正常退出还是意外退出, 它的退出信息都会被内核收集, 加入到一个队列中交由它的父进程处理.
+
+父进程处理的方式有两种:
+
+
+  wait, 主动收集子进程退出信息;
+  detach, 开一线程再来 wait. Rubinius Process#detach
+
+
+僵尸进程是很形象的描述, 说的是一个进程死了, 但尸体没有消失. 也就是说, 进程死掉后它的父进程一直没有为他收尸, 导致它的退出信息一直残留在内核中, 造成内核资源的浪费.
+
+Demo Code
+
+子进程退出会给父进程发送 CHLD 信号, 但是这个信号是不可靠投递. 如果处理信号的过程中又接收到了另一个信号, 则可能会造成信号丢失, 进而导致 “收尸” 处理的遗漏.
+
+child_count = 3
+dead_count = 0
+
+child_count.times do
+  fork do
+    sleep 1
+    puts "Child #{Process.pid} done."
+  end
+end
+
+trap(:CHLD) do
+  child_pid = Process.wait
+  puts "process child pid: #{child_pid}"
+  dead_count += 1
+  exit if dead_count == child_count
+end
+
+sleep 10
+
+
+
+
+  output
+
+
+Child 5711 done.
+Child 5712 done.
+Child 5713 done.
+process child pid: 5713
+process child pid: 5712
+
+
+这是一个典型输出, 三个子进程结束, 父进程只处理了其中两个, 导致漏掉的那个子进程变成了僵尸进程.
+
+
+
+
+  改进:
+
+
+child_count = 3
+dead_count = 0
+
+child_count.times do
+  fork do
+    sleep 1
+    puts "Child #{Process.pid} done."
+  end
+end
+
+trap(:CHLD) do
+  begin
+    while child_pid = Process.wait(-1, Process::WNOHANG)
+      puts "process child pid: #{child_pid}"
+      dead_count += 1
+      exit if dead_count == child_count
+    end
+  rescue Errno::ECHILD
+  end
+end
+
+sleep 10
+
+
+
+
+  output:
+
+
+Child 5916 done.
+Child 5915 done.
+Child 5914 done.
+process child pid: 5916
+process child pid: 5915
+process child pid: 5914
+
+
+如此修改, 父进程就不会因为信号的不可靠投递而遗漏处理.
+
+trap More
+
+trap 平时很少使用, 几乎只用于常驻后台的程序.
+
+trap(:INT) 实际上是重新定义 :INT 信号的响应方式, 效果是全局的.
+
+如果已经定义了 :INT 的处理方式, 想要在此基础上添加逻辑:
+
+puts "pid: #{Process.pid}"
+
+trap(:INT) do
+  puts "processing&gt;&gt;&gt;"
+  exit
+end
+
+old_sigal = trap(:INT) do
+  puts "new processing..."
+
+  old_sigal.call if old_sigal.respond_to?(:call)
+end
+
+at_exit do
+  puts "Bye~"
+end
+
+sleep 100
+
+
+
+由于 trap 的全局性, 并不推荐对同一个信号多次定义, 如果只想在退出前做点什么, 用 at_exit 就足够了.
+
+另外, 不能用这种方式调用信号的默认处理方式.
+
+
+
+信号经常跟进程的退出过程相关.
+
+Ruby 执行完一段脚本后正常退出, 退出码为 0, 除此之外还有几种显示的退出方式:
+
+
+  
+    
+      方法
+      退出码
+      是否调用at_exit
+      可选
+    
+  
+  
+    
+      exit
+      0
+      √
+      指定退出码 exit(code)
+    
+    
+      exit!
+      1
+      x
+      指定退出码 exit!(code)
+    
+    
+      abort
+      1
+      √
+      打印错误消息 abort(msg)
+    
+    
+      raise(error)
+      1
+      √
+      指定异常 raise(StandardError.new)
+    
+  
+
+
+参考
+
+https://man7.org/linux/man-pages/man2/signal.2.html
+
+https://man7.org/linux/man-pages/man7/signal.7.html
+
+https://github.com/rubinius/rubinius/blob/master/core/process.rb
+" />
+    <meta property="og:description" content="引子
+
+虽然 GIL 限制了 Ruby 多线程利用多核的能力, 但还可以通过多进程方式来使用多核资源.
+
+master – worker 是多进程常用的组织方式, 一个 master 进程负责管理调度, 多个 worker 进程处理具体的业务逻辑.
+
+那么, master 和 worker 之间如何通信呢? 除了利用文件,TCP,UNIX Socket这样的共享资源, 其实原始也高效的方式就是利用信号.
+
+本篇主题是 master 进程如何正确处理 worker 的信号, 在介绍主题前, 先回顾一下相关基础.
+
+fork
+
+fork 派生新的进程, 子进程继承了父进程内存中的所有内容，包括已打开的文件描述符.
+
+
+  父进程 fork 返回 子进程的 pid;
+  子进程 fork 返回 nil;
+
+
+wait 和 wait 家族
+
+father_pid = Process.pid
+
+child_pid = fork do
+  puts "child&gt;&gt;"
+  sleep 2
+end
+
+p Process.wait(child_pid)
+p "father: #{father_pid}, child: #{child_pid}"
+=begin
+child&gt;&gt;
+6549
+"father: 6547, child: 6549"
+=end
+
+
+Process.wait(pid) 默认是阻塞的, 等 pid 对应的子进程退出才返回, 返回 pid;
+
+father_pid = Process.pid
+
+child_pid = fork do
+  puts "child&gt;&gt;"
+  sleep 2
+end
+
+p Process.wait(child_pid, Process::WNOHANG)
+p "father: #{father_pid}, child: #{child_pid}"
+=begin
+nil
+"father: 6558, child: 6560"
+child&gt;&gt;
+=end
+
+
+Process.wait(pid, Process::WNOHANG) 是非阻塞的:
+
+
+  如果 pid 对应的子进程已经退出了, 立即返回 pid;
+  如果 pid 对应的子进程还没有退出, 立即返回 nil.
+
+
+wait 的 pid 可以是 -1 或留空, 都表示等待任意子进程.
+
+wait2 跟 wait 的区别在返回值: pid, status =  Process.wait2(pid) .
+
+Signal 与 僵尸进程
+
+Signal.list 可以查看所有信号, 更详细的信息可以查看 man signal 相关的章节.
+
+Signal      Standard   Action   Comment
+────────────────────────────────────────────────────────────────────────
+SIGABRT      P1990      Core    Abort signal from abort(3)
+SIGALRM      P1990      Term    Timer signal from alarm(2)
+SIGBUS       P2001      Core    Bus error (bad memory access)
+SIGCHLD      P1990      Ign     Child stopped or terminated
+SIGCLD         -        Ign     A synonym for SIGCHLD
+SIGCONT      P1990      Cont    Continue if stopped
+SIGEMT         -        Term    Emulator trap
+SIGFPE       P1990      Core    Floating-point exception
+SIGHUP       P1990      Term    Hangup detected on controlling terminal
+                                or death of controlling process
+SIGILL       P1990      Core    Illegal Instruction
+SIGINFO        -                A synonym for SIGPWR
+SIGINT       P1990      Term    Interrupt from keyboard
+SIGIO          -        Term    I/O now possible (4.2BSD)
+SIGIOT         -        Core    IOT trap. A synonym for SIGABRT
+SIGKILL      P1990      Term    Kill signal
+SIGLOST        -        Term    File lock lost (unused)
+SIGPIPE      P1990      Term    Broken pipe: write to pipe with no
+                                readers; see pipe(7)
+SIGPOLL      P2001      Term    Pollable event (Sys V);
+                                synonym for SIGIO
+SIGPROF      P2001      Term    Profiling timer expired
+SIGPWR         -        Term    Power failure (System V)
+SIGQUIT      P1990      Core    Quit from keyboard
+SIGSEGV      P1990      Core    Invalid memory reference
+SIGSTKFLT      -        Term    Stack fault on coprocessor (unused)
+SIGSTOP      P1990      Stop    Stop process
+SIGTSTP      P1990      Stop    Stop typed at terminal
+SIGSYS       P2001      Core    Bad system call (SVr4);
+                                see also seccomp(2)
+SIGTERM      P1990      Term    Termination signal
+SIGTRAP      P2001      Core    Trace/breakpoint trap
+SIGTTIN      P1990      Stop    Terminal input for background process
+SIGTTOU      P1990      Stop    Terminal output for background process
+SIGUNUSED      -        Core    Synonymous with SIGSYS
+SIGURG       P2001      Ign     Urgent condition on socket (4.2BSD)
+SIGUSR1      P1990      Term    User-defined signal 1
+SIGUSR2      P1990      Term    User-defined signal 2
+SIGVTALRM    P2001      Term    Virtual alarm clock (4.2BSD)
+SIGXCPU      P2001      Core    CPU time limit exceeded (4.2BSD);
+                                see setrlimit(2)
+SIGXFSZ      P2001      Core    File size limit exceeded (4.2BSD);
+                                see setrlimit(2)
+
+
+一个进程退出了, 不论是正常退出还是意外退出, 它的退出信息都会被内核收集, 加入到一个队列中交由它的父进程处理.
+
+父进程处理的方式有两种:
+
+
+  wait, 主动收集子进程退出信息;
+  detach, 开一线程再来 wait. Rubinius Process#detach
+
+
+僵尸进程是很形象的描述, 说的是一个进程死了, 但尸体没有消失. 也就是说, 进程死掉后它的父进程一直没有为他收尸, 导致它的退出信息一直残留在内核中, 造成内核资源的浪费.
+
+Demo Code
+
+子进程退出会给父进程发送 CHLD 信号, 但是这个信号是不可靠投递. 如果处理信号的过程中又接收到了另一个信号, 则可能会造成信号丢失, 进而导致 “收尸” 处理的遗漏.
+
+child_count = 3
+dead_count = 0
+
+child_count.times do
+  fork do
+    sleep 1
+    puts "Child #{Process.pid} done."
+  end
+end
+
+trap(:CHLD) do
+  child_pid = Process.wait
+  puts "process child pid: #{child_pid}"
+  dead_count += 1
+  exit if dead_count == child_count
+end
+
+sleep 10
+
+
+
+
+  output
+
+
+Child 5711 done.
+Child 5712 done.
+Child 5713 done.
+process child pid: 5713
+process child pid: 5712
+
+
+这是一个典型输出, 三个子进程结束, 父进程只处理了其中两个, 导致漏掉的那个子进程变成了僵尸进程.
+
+
+
+
+  改进:
+
+
+child_count = 3
+dead_count = 0
+
+child_count.times do
+  fork do
+    sleep 1
+    puts "Child #{Process.pid} done."
+  end
+end
+
+trap(:CHLD) do
+  begin
+    while child_pid = Process.wait(-1, Process::WNOHANG)
+      puts "process child pid: #{child_pid}"
+      dead_count += 1
+      exit if dead_count == child_count
+    end
+  rescue Errno::ECHILD
+  end
+end
+
+sleep 10
+
+
+
+
+  output:
+
+
+Child 5916 done.
+Child 5915 done.
+Child 5914 done.
+process child pid: 5916
+process child pid: 5915
+process child pid: 5914
+
+
+如此修改, 父进程就不会因为信号的不可靠投递而遗漏处理.
+
+trap More
+
+trap 平时很少使用, 几乎只用于常驻后台的程序.
+
+trap(:INT) 实际上是重新定义 :INT 信号的响应方式, 效果是全局的.
+
+如果已经定义了 :INT 的处理方式, 想要在此基础上添加逻辑:
+
+puts "pid: #{Process.pid}"
+
+trap(:INT) do
+  puts "processing&gt;&gt;&gt;"
+  exit
+end
+
+old_sigal = trap(:INT) do
+  puts "new processing..."
+
+  old_sigal.call if old_sigal.respond_to?(:call)
+end
+
+at_exit do
+  puts "Bye~"
+end
+
+sleep 100
+
+
+
+由于 trap 的全局性, 并不推荐对同一个信号多次定义, 如果只想在退出前做点什么, 用 at_exit 就足够了.
+
+另外, 不能用这种方式调用信号的默认处理方式.
+
+
+
+信号经常跟进程的退出过程相关.
+
+Ruby 执行完一段脚本后正常退出, 退出码为 0, 除此之外还有几种显示的退出方式:
+
+
+  
+    
+      方法
+      退出码
+      是否调用at_exit
+      可选
+    
+  
+  
+    
+      exit
+      0
+      √
+      指定退出码 exit(code)
+    
+    
+      exit!
+      1
+      x
+      指定退出码 exit!(code)
+    
+    
+      abort
+      1
+      √
+      打印错误消息 abort(msg)
+    
+    
+      raise(error)
+      1
+      √
+      指定异常 raise(StandardError.new)
+    
+  
+
+
+参考
+
+https://man7.org/linux/man-pages/man2/signal.2.html
+
+https://man7.org/linux/man-pages/man7/signal.7.html
+
+https://github.com/rubinius/rubinius/blob/master/core/process.rb
+" />
+    
+    <meta name="author" content="CBD Blog" />
+
+    
+    <meta property="og:title" content="Process Signal in Ruby" />
+    <meta property="twitter:title" content="Process Signal in Ruby" />
+    
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="CBD Blog - 好记性不如烂笔头,站在岸上学不会游泳" href="/feed.xml" />
+  <link rel="shortcut icon" href="/images/avatar.jpg">
+<!--  <script src="https://lib.baomitu.com/gitalk/1.6.2/gitalk.min.js"></script>-->
+  <script src="https://lib.baomitu.com/feather-icons/latest/feather.min.js"></script>
+  <script type="text/javascript" async src="https://lib.baomitu.com/mathjax/2.7.7/MathJax.js?...">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?9dfbb5850b35a184a60c9a4a1b08d7e3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+  <meta name="google-site-verification" content="ZqVpjmLHnwuJ0qbh4QrpcofglQe6XEjjF7X1AB7yXus" />
+</head>
+
+  <body>
+    <div class="wrapper-sidebar">
+  <header class="sidebar clearfix">
+    <div class="site-info">
+      
+        <a href="/" class="site-avatar"><img src="/images/avatar.jpg" /></a>
+       
+      <h1 class="site-name"><a href="/">CBD Blog</a></h1>
+      <p class="site-description">好记性不如烂笔头,站在岸上学不会游泳</p>
+    </div>
+  </header>
+
+  <div class="navlist">
+    <nav>
+      
+      
+      <a href="/">首页</a>
+      
+      
+      
+      <a href="/archive">归档</a>
+      
+      
+      
+      <a href="/about">关于</a>
+      
+      
+    </nav>
+  </div>
+
+  <div class="wrapper-footer-desktop">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+  </div>
+</div>
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">Process Signal in Ruby</a>
+    <ul>
+      <li><a href="#引子">引子</a></li>
+      <li><a href="#fork">fork</a></li>
+      <li><a href="#wait-和-wait-家族">wait 和 wait 家族</a></li>
+      <li><a href="#signal-与-僵尸进程">Signal 与 僵尸进程</a></li>
+      <li><a href="#demo-code">Demo Code</a></li>
+      <li><a href="#trap-more"><code class="language-plaintext highlighter-rouge">trap</code> More</a></li>
+      <li><a href="#参考">参考</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <h1>Process Signal in Ruby</h1>
+
+  <div clsss="meta">
+    <span class="author">
+      
+    </span>
+
+    <span class="date">
+      2020-08-31
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="https://icbd.github.io/tags#Ruby">
+          Ruby
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://icbd.github.io/tags#Signal">
+          Signal
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <h2 id="引子">引子</h2>
+
+<p>虽然 GIL 限制了 Ruby 多线程利用多核的能力, 但还可以通过多进程方式来使用多核资源.</p>
+
+<p>master – worker 是多进程常用的组织方式, 一个 master 进程负责管理调度, 多个 worker 进程处理具体的业务逻辑.</p>
+
+<p>那么, master 和 worker 之间如何通信呢? 除了利用文件,TCP,UNIX Socket这样的共享资源, 其实原始也高效的方式就是利用信号.</p>
+
+<p>本篇主题是 <strong>master 进程如何正确处理 worker 的信号</strong>, 在介绍主题前, 先回顾一下相关基础.</p>
+
+<h2 id="fork">fork</h2>
+
+<p>fork 派生新的进程, 子进程继承了父进程内存中的所有内容，包括已打开的文件描述符.</p>
+
+<ul>
+  <li>父进程 fork 返回 子进程的 pid;</li>
+  <li>子进程 fork 返回 nil;</li>
+</ul>
+
+<h2 id="wait-和-wait-家族">wait 和 wait 家族</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">father_pid</span> <span class="o">=</span> <span class="no">Process</span><span class="p">.</span><span class="nf">pid</span>
+
+<span class="n">child_pid</span> <span class="o">=</span> <span class="nb">fork</span> <span class="k">do</span>
+  <span class="nb">puts</span> <span class="s2">"child&gt;&gt;"</span>
+  <span class="nb">sleep</span> <span class="mi">2</span>
+<span class="k">end</span>
+
+<span class="nb">p</span> <span class="no">Process</span><span class="p">.</span><span class="nf">wait</span><span class="p">(</span><span class="n">child_pid</span><span class="p">)</span>
+<span class="nb">p</span> <span class="s2">"father: </span><span class="si">#{</span><span class="n">father_pid</span><span class="si">}</span><span class="s2">, child: </span><span class="si">#{</span><span class="n">child_pid</span><span class="si">}</span><span class="s2">"</span>
+<span class="cm">=begin
+child&gt;&gt;
+6549
+"father: 6547, child: 6549"
+=end</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Process.wait(pid)</code> 默认是阻塞的, 等 pid 对应的子进程退出才返回, 返回 pid;</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">father_pid</span> <span class="o">=</span> <span class="no">Process</span><span class="p">.</span><span class="nf">pid</span>
+
+<span class="n">child_pid</span> <span class="o">=</span> <span class="nb">fork</span> <span class="k">do</span>
+  <span class="nb">puts</span> <span class="s2">"child&gt;&gt;"</span>
+  <span class="nb">sleep</span> <span class="mi">2</span>
+<span class="k">end</span>
+
+<span class="nb">p</span> <span class="no">Process</span><span class="p">.</span><span class="nf">wait</span><span class="p">(</span><span class="n">child_pid</span><span class="p">,</span> <span class="no">Process</span><span class="o">::</span><span class="no">WNOHANG</span><span class="p">)</span>
+<span class="nb">p</span> <span class="s2">"father: </span><span class="si">#{</span><span class="n">father_pid</span><span class="si">}</span><span class="s2">, child: </span><span class="si">#{</span><span class="n">child_pid</span><span class="si">}</span><span class="s2">"</span>
+<span class="cm">=begin
+nil
+"father: 6558, child: 6560"
+child&gt;&gt;
+=end</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Process.wait(pid, Process::WNOHANG)</code> 是非阻塞的:</p>
+
+<ul>
+  <li>如果 pid 对应的子进程已经退出了, 立即返回 pid;</li>
+  <li>如果 pid 对应的子进程还没有退出, 立即返回 nil.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">wait</code> 的 pid 可以是 <code class="language-plaintext highlighter-rouge">-1</code> 或留空, 都表示等待任意子进程.</p>
+
+<p><code class="language-plaintext highlighter-rouge">wait2</code> 跟 <code class="language-plaintext highlighter-rouge">wait</code> 的区别在返回值: <code class="language-plaintext highlighter-rouge">pid, status =  Process.wait2(pid)</code> .</p>
+
+<h2 id="signal-与-僵尸进程">Signal 与 僵尸进程</h2>
+
+<p><code class="language-plaintext highlighter-rouge">Signal.list</code> 可以查看所有信号, 更详细的信息可以查看 <code class="language-plaintext highlighter-rouge">man signal</code> 相关的章节.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Signal      Standard   Action   Comment
+────────────────────────────────────────────────────────────────────────
+SIGABRT      P1990      Core    Abort signal from abort(3)
+SIGALRM      P1990      Term    Timer signal from alarm(2)
+SIGBUS       P2001      Core    Bus error (bad memory access)
+SIGCHLD      P1990      Ign     Child stopped or terminated
+SIGCLD         -        Ign     A synonym for SIGCHLD
+SIGCONT      P1990      Cont    Continue if stopped
+SIGEMT         -        Term    Emulator trap
+SIGFPE       P1990      Core    Floating-point exception
+SIGHUP       P1990      Term    Hangup detected on controlling terminal
+                                or death of controlling process
+SIGILL       P1990      Core    Illegal Instruction
+SIGINFO        -                A synonym for SIGPWR
+SIGINT       P1990      Term    Interrupt from keyboard
+SIGIO          -        Term    I/O now possible (4.2BSD)
+SIGIOT         -        Core    IOT trap. A synonym for SIGABRT
+SIGKILL      P1990      Term    Kill signal
+SIGLOST        -        Term    File lock lost (unused)
+SIGPIPE      P1990      Term    Broken pipe: write to pipe with no
+                                readers; see pipe(7)
+SIGPOLL      P2001      Term    Pollable event (Sys V);
+                                synonym for SIGIO
+SIGPROF      P2001      Term    Profiling timer expired
+SIGPWR         -        Term    Power failure (System V)
+SIGQUIT      P1990      Core    Quit from keyboard
+SIGSEGV      P1990      Core    Invalid memory reference
+SIGSTKFLT      -        Term    Stack fault on coprocessor (unused)
+SIGSTOP      P1990      Stop    Stop process
+SIGTSTP      P1990      Stop    Stop typed at terminal
+SIGSYS       P2001      Core    Bad system call (SVr4);
+                                see also seccomp(2)
+SIGTERM      P1990      Term    Termination signal
+SIGTRAP      P2001      Core    Trace/breakpoint trap
+SIGTTIN      P1990      Stop    Terminal input for background process
+SIGTTOU      P1990      Stop    Terminal output for background process
+SIGUNUSED      -        Core    Synonymous with SIGSYS
+SIGURG       P2001      Ign     Urgent condition on socket (4.2BSD)
+SIGUSR1      P1990      Term    User-defined signal 1
+SIGUSR2      P1990      Term    User-defined signal 2
+SIGVTALRM    P2001      Term    Virtual alarm clock (4.2BSD)
+SIGXCPU      P2001      Core    CPU time limit exceeded (4.2BSD);
+                                see setrlimit(2)
+SIGXFSZ      P2001      Core    File size limit exceeded (4.2BSD);
+                                see setrlimit(2)
+</code></pre></div></div>
+
+<p>一个进程退出了, 不论是正常退出还是意外退出, 它的退出信息都会被内核收集, 加入到一个队列中交由它的父进程处理.</p>
+
+<p>父进程处理的方式有两种:</p>
+
+<ul>
+  <li>wait, 主动收集子进程退出信息;</li>
+  <li>detach, 开一线程再来 wait. <a href="https://github.com/rubinius/rubinius/blob/master/core/process.rb#L443-L458">Rubinius Process#detach</a></li>
+</ul>
+
+<p>僵尸进程是很形象的描述, 说的是一个进程死了, 但尸体没有消失. 也就是说, 进程死掉后它的父进程一直没有为他收尸, 导致它的退出信息一直残留在内核中, 造成内核资源的浪费.</p>
+
+<h2 id="demo-code">Demo Code</h2>
+
+<p>子进程退出会给父进程发送 <code class="language-plaintext highlighter-rouge">CHLD</code> 信号, 但是这个信号是不可靠投递. 如果处理信号的过程中又接收到了另一个信号, 则可能会造成信号丢失, 进而导致 “收尸” 处理的遗漏.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">child_count</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">dead_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">child_count</span><span class="p">.</span><span class="nf">times</span> <span class="k">do</span>
+  <span class="nb">fork</span> <span class="k">do</span>
+    <span class="nb">sleep</span> <span class="mi">1</span>
+    <span class="nb">puts</span> <span class="s2">"Child </span><span class="si">#{</span><span class="no">Process</span><span class="p">.</span><span class="nf">pid</span><span class="si">}</span><span class="s2"> done."</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="nb">trap</span><span class="p">(</span><span class="ss">:CHLD</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">child_pid</span> <span class="o">=</span> <span class="no">Process</span><span class="p">.</span><span class="nf">wait</span>
+  <span class="nb">puts</span> <span class="s2">"process child pid: </span><span class="si">#{</span><span class="n">child_pid</span><span class="si">}</span><span class="s2">"</span>
+  <span class="n">dead_count</span> <span class="o">+=</span> <span class="mi">1</span>
+  <span class="nb">exit</span> <span class="k">if</span> <span class="n">dead_count</span> <span class="o">==</span> <span class="n">child_count</span>
+<span class="k">end</span>
+
+<span class="nb">sleep</span> <span class="mi">10</span>
+
+</code></pre></div></div>
+
+<blockquote>
+  <p>output</p>
+</blockquote>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Child 5711 done.
+Child 5712 done.
+Child 5713 done.
+process child pid: 5713
+process child pid: 5712
+</code></pre></div></div>
+
+<p>这是一个典型输出, 三个子进程结束, 父进程只处理了其中两个, 导致漏掉的那个子进程变成了僵尸进程.</p>
+
+<p><br /></p>
+
+<blockquote>
+  <p>改进:</p>
+</blockquote>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">child_count</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">dead_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">child_count</span><span class="p">.</span><span class="nf">times</span> <span class="k">do</span>
+  <span class="nb">fork</span> <span class="k">do</span>
+    <span class="nb">sleep</span> <span class="mi">1</span>
+    <span class="nb">puts</span> <span class="s2">"Child </span><span class="si">#{</span><span class="no">Process</span><span class="p">.</span><span class="nf">pid</span><span class="si">}</span><span class="s2"> done."</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="nb">trap</span><span class="p">(</span><span class="ss">:CHLD</span><span class="p">)</span> <span class="k">do</span>
+  <span class="k">begin</span>
+    <span class="k">while</span> <span class="n">child_pid</span> <span class="o">=</span> <span class="no">Process</span><span class="p">.</span><span class="nf">wait</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="no">Process</span><span class="o">::</span><span class="no">WNOHANG</span><span class="p">)</span>
+      <span class="nb">puts</span> <span class="s2">"process child pid: </span><span class="si">#{</span><span class="n">child_pid</span><span class="si">}</span><span class="s2">"</span>
+      <span class="n">dead_count</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="nb">exit</span> <span class="k">if</span> <span class="n">dead_count</span> <span class="o">==</span> <span class="n">child_count</span>
+    <span class="k">end</span>
+  <span class="k">rescue</span> <span class="no">Errno</span><span class="o">::</span><span class="no">ECHILD</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="nb">sleep</span> <span class="mi">10</span>
+
+</code></pre></div></div>
+
+<blockquote>
+  <p>output:</p>
+</blockquote>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Child 5916 done.
+Child 5915 done.
+Child 5914 done.
+process child pid: 5916
+process child pid: 5915
+process child pid: 5914
+</code></pre></div></div>
+
+<p>如此修改, 父进程就不会因为信号的不可靠投递而遗漏处理.</p>
+
+<h2 id="trap-more"><code class="language-plaintext highlighter-rouge">trap</code> More</h2>
+
+<p>trap 平时很少使用, 几乎只用于常驻后台的程序.</p>
+
+<p><code class="language-plaintext highlighter-rouge">trap(:INT)</code> 实际上是重新定义 <code class="language-plaintext highlighter-rouge">:INT</code> 信号的响应方式, 效果是全局的.</p>
+
+<p>如果已经定义了 <code class="language-plaintext highlighter-rouge">:INT</code> 的处理方式, 想要在此基础上添加逻辑:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">puts</span> <span class="s2">"pid: </span><span class="si">#{</span><span class="no">Process</span><span class="p">.</span><span class="nf">pid</span><span class="si">}</span><span class="s2">"</span>
+
+<span class="nb">trap</span><span class="p">(</span><span class="ss">:INT</span><span class="p">)</span> <span class="k">do</span>
+  <span class="nb">puts</span> <span class="s2">"processing&gt;&gt;&gt;"</span>
+  <span class="nb">exit</span>
+<span class="k">end</span>
+
+<span class="n">old_sigal</span> <span class="o">=</span> <span class="nb">trap</span><span class="p">(</span><span class="ss">:INT</span><span class="p">)</span> <span class="k">do</span>
+  <span class="nb">puts</span> <span class="s2">"new processing..."</span>
+
+  <span class="n">old_sigal</span><span class="p">.</span><span class="nf">call</span> <span class="k">if</span> <span class="n">old_sigal</span><span class="p">.</span><span class="nf">respond_to?</span><span class="p">(</span><span class="ss">:call</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="nb">at_exit</span> <span class="k">do</span>
+  <span class="nb">puts</span> <span class="s2">"Bye~"</span>
+<span class="k">end</span>
+
+<span class="nb">sleep</span> <span class="mi">100</span>
+
+</code></pre></div></div>
+
+<p>由于 trap 的全局性, 并不推荐对同一个信号多次定义, 如果只想在退出前做点什么, 用 <code class="language-plaintext highlighter-rouge">at_exit</code> 就足够了.</p>
+
+<p>另外, 不能用这种方式调用信号的默认处理方式.</p>
+
+<p><br /></p>
+
+<p>信号经常跟进程的退出过程相关.</p>
+
+<p>Ruby 执行完一段脚本后正常退出, 退出码为 <code class="language-plaintext highlighter-rouge">0</code>, 除此之外还有几种显示的退出方式:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>方法</th>
+      <th>退出码</th>
+      <th>是否调用<code class="language-plaintext highlighter-rouge">at_exit</code></th>
+      <th>可选</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>exit</td>
+      <td>0</td>
+      <td>√</td>
+      <td>指定退出码 <code class="language-plaintext highlighter-rouge">exit(code)</code></td>
+    </tr>
+    <tr>
+      <td>exit!</td>
+      <td>1</td>
+      <td>x</td>
+      <td>指定退出码 <code class="language-plaintext highlighter-rouge">exit!(code)</code></td>
+    </tr>
+    <tr>
+      <td>abort</td>
+      <td>1</td>
+      <td>√</td>
+      <td>打印错误消息 <code class="language-plaintext highlighter-rouge">abort(msg)</code></td>
+    </tr>
+    <tr>
+      <td>raise(error)</td>
+      <td>1</td>
+      <td>√</td>
+      <td>指定异常 <code class="language-plaintext highlighter-rouge">raise(StandardError.new)</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://man7.org/linux/man-pages/man2/signal.2.html">https://man7.org/linux/man-pages/man2/signal.2.html</a></p>
+
+<p><a href="https://man7.org/linux/man-pages/man7/signal.7.html">https://man7.org/linux/man-pages/man7/signal.7.html</a></p>
+
+<p><a href="https://github.com/rubinius/rubinius/blob/master/core/process.rb#L443-L458">https://github.com/rubinius/rubinius/blob/master/core/process.rb</a></p>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="icbd/blogs"
+        issue-term="pathname"
+        label="utteranc"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="https://icbd.github.io/Newton-Iteration-Method/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="https://icbd.github.io/orphan-process-and-daemon-process-in-ruby/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+</html>

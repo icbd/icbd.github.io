@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Ruby ThreadPool – CBD Blog – 好记性不如烂笔头,站在岸上学不会游泳</title>
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="引子
+
+PUMA 是一个调度 Rack 应用的多线程服务器, 它的每个工作进程中都有一个线程池来处理请求.
+
+SimpleThreadPool 是以 PUMA::ThreadPool 为蓝本的简易版本, 只保留了满足最基本功能的方法.
+
+用法
+
+pool = SimpleThreadPool.new(1, 3) do |num|
+  puts "start task &gt; num: #{num}"
+  sleep 2
+  puts "100 / #{num} = #{100 / num}"
+end
+
+def busy_threads
+  Thread.list.count { |thr| thr.status == 'run' }
+end
+
+9.times { |i| pool &lt;&lt; i }
+puts "[After pushing] busy_threads:#{busy_threads}"
+pool.trim
+puts "[After triming] busy_threads:#{busy_threads}"
+pool.shutdown
+puts "[After shutdown]  busy_threads:#{busy_threads}"
+
+
+ThreadPool 支持动态调整线程数量, 工作线程数量范围: [MIN, MAX].
+一般场景下会有一个 loop , 使用 &lt;&lt; 不停地塞入任务, 任务由线程池自动调度执行.
+shutdown 会等任务都执行完再推出.
+
+Source Code
+
+class SimpleThreadPool
+  class SimpleThreadPoolError &lt; RuntimeError
+  end
+
+  def initialize(min, max, &amp;block)
+    raise SimpleThreadPoolError.new("Init Need Block") unless block_given?
+
+    init_brace_variables
+
+    @handler = block
+    @thread_min_count = Integer(min)
+    @thread_max_count = Integer(max)
+
+    @lock.synchronize do
+      @thread_min_count.times do
+        spawn_thread
+        @go_to_spawn.wait(@lock)
+      end
+    end
+  end
+
+  def &lt;&lt; (task_args)
+    @lock.synchronize do
+      if @shutdown_flag
+        STDERR.puts "[Add Task Error] Ready to Shutdown."
+        return
+      end
+
+      @task_args_queue.push(task_args)
+
+      if (@leisure_thread_count &lt; @task_args_queue.size) &amp;&amp; (@spawned_thread_count &lt; @thread_max_count)
+        spawn_thread
+      end
+
+      @go_to_work.signal
+    end
+  end
+
+  def spawn_thread
+    @spawned_thread_count += 1
+    if @spawned_thread_count &gt; @thread_max_count
+      STDERR.puts "[Spawn Error] Too Many Threads."
+    end
+
+    worker_thread = Thread.new do
+      loop do
+        task_args = nil
+        with_mutex do
+          while @task_args_queue.empty?
+            # deal with trim
+            if @trim_request_count &gt; 0
+              @trim_request_count -= 1
+              @spawned_thread_count -= 1
+              @worker_threads_queue.delete Thread.current
+              Thread.exit
+            end
+            # deal with spawn
+            @leisure_thread_count += 1
+            @go_to_spawn.signal
+            @go_to_work.wait(@lock)
+            @leisure_thread_count -= 1
+          end
+          task_args = @task_args_queue.shift
+        end
+
+        # deal with task
+        begin
+          @handler.call(task_args)
+        rescue Exception =&gt; e
+          STDERR.puts "[Task Execution Error] #{e}"
+        end
+      end
+    end
+
+    @worker_threads_queue.push worker_thread
+    worker_thread
+  end
+
+  def trim(force = false)
+    @lock.synchronize do
+      need_trim = (@leisure_thread_count - @task_args_queue.size &gt; 0)
+      if (force || need_trim) &amp;&amp; (@spawned_thread_count - @trim_request_count &gt; @thread_min_count)
+        @trim_request_count += 1
+        @go_to_work.signal
+      end
+    end
+  end
+
+  def shutdown
+    @lock.synchronize do
+      @shutdown_flag = true
+      @trim_request_count = @spawned_thread_count
+      @go_to_work.broadcast
+    end
+
+    @worker_threads_queue.each(&amp;:join)
+    puts "[Shutdown]"
+  end
+
+  private
+
+  def init_brace_variables
+    @lock = Mutex.new
+    @go_to_work = ConditionVariable.new
+    @go_to_spawn = ConditionVariable.new
+
+    @worker_threads_queue = []
+    @task_args_queue = []
+    @spawned_thread_count = 0
+    @leisure_thread_count = 0
+    @trim_request_count = 0
+    @shutdown_flag = false
+  end
+
+  def with_mutex
+    @lock.owned? ? yield : @lock.synchronize { yield }
+  end
+end
+
+
+核心方法
+
+线程池最核心的三个方法: initialize, spawn_thread, &lt;&lt; 要协同在一起看.
+
+initialize 的 min/max 参数指明线程池的最小/最大工作线程数;
+
+初始化了一个锁: @lock.
+
+初始化了两个条件变量:
+
+  @go_to_work, 当待办任务不为空的时候发送信号, 用来触发新任务的开始执行;
+  @go_to_spawn, 用来控制派生新工作线程.
+
+
+初始化了三个计数器:
+
+  @spawned_thread_count 已经派生出的线程数;
+  @leisure_thread_count 等待执行任务的空闲的线程数;
+  @trim_request_count 剪枝请求数;(只有该值大于 0 才会清理空闲线程)
+
+
+初始化了两个列表:
+
+  @worker_threads_queue 工作线程的列表;
+  @task_args_queue 待办任务参数的列表;
+
+
+def spawn_thread
+  @spawned_thread_count += 1
+  worker_thread = Thread.new do
+    # ...
+  end
+  @worker_threads_queue.push worker_thread
+  worker_thread
+end
+
+def initialize
+  # ...
+  @lock.synchronize do
+    @thread_min_count.times do
+      spawn_thread
+      @go_to_spawn.wait(@lock)
+    end
+  end
+  # ...
+end
+
+
+初始化
+
+直观的看, 这部分会初始化 @thread_min_count 个工作线程, 但实现细节要复杂一点, 使用了两个 ConditionVariable 来交替线程的执行权.
+
+在 @lock 锁内, 进入 @thread_min_count 的第一次的循环.
+
+(初始化时没有竞争条件, 本不需要在锁内执行, 为了使用 wait 所以包装在锁内.)
+
+调用 spawn_thread 方法, 派生新的工作线程.
+
+主线程继续执行, 遇到了 @go_to_spawn.wait(@lock), wait 会让主线程立即释放锁, 并进入阻塞的同步等待.
+
+此时 @thread_min_count 的第一次循环还没有结束, @lock 的控制权流转到 spawn_thread 派生的子线程上.
+
+子进程进入锁, 如果有待办任务就取出第一个任务来执行.
+
+如果没有待办任务, 说明这个线程已经空闲了.
+
+空闲线程依次执行:
+
+  剪枝任务, 如果有剪枝需求的话;
+  唤醒主线程;
+  释放锁, 阻塞等待 @go_to_work 的召唤.
+
+
+主线程获得锁后终于结束了第一次循环, 同样的流程一共执行 @thread_min_count 次, 线程池初始化结束.
+
+添加任务
+
+得到 pool 对象之后, pool &lt;&lt; args 把任务的参数加入 @task_args_queue 队列中.
+
+如果现有的工作线程已经在饱和运转, 就可以考虑新增工作线程了.
+
+@go_to_work.signal 信号激活了第一个休息的空闲线程, 醒来的子线程把空闲线程数减一, 通过 @handler.call(task_args) 执行了具体的任务.
+
+loop, 周而复始.
+
+其他
+
+
+  
+    spawn_thread 方法通过 with_metux 的包装来使用 @lock, 一个目的是避免锁重入, 另一个目的是避免死锁.
+  
+  
+    PUMA 线程池里有一个内部类: Automaton, 可以新开一个线程来专门收割多余的线程或终止的线程.
+  
+  
+    PUMA 参数中的 timeout 是精确的时间差计算, 使用 CLOCK_MONOTONIC 而不是 CLOCK_REALTIME:
+  
+
+
+Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
+
+
+  CLOCK_REALTIME  不能保证单调递增, 从 1970 年算起;
+  CLOCK_MONOTONIC 可以保证单调递增, 从本机开机算起;
+
+
+参考
+
+https://github.com/puma/puma/blob/master/lib/puma/thread_pool.rb
+" />
+    <meta property="og:description" content="引子
+
+PUMA 是一个调度 Rack 应用的多线程服务器, 它的每个工作进程中都有一个线程池来处理请求.
+
+SimpleThreadPool 是以 PUMA::ThreadPool 为蓝本的简易版本, 只保留了满足最基本功能的方法.
+
+用法
+
+pool = SimpleThreadPool.new(1, 3) do |num|
+  puts "start task &gt; num: #{num}"
+  sleep 2
+  puts "100 / #{num} = #{100 / num}"
+end
+
+def busy_threads
+  Thread.list.count { |thr| thr.status == 'run' }
+end
+
+9.times { |i| pool &lt;&lt; i }
+puts "[After pushing] busy_threads:#{busy_threads}"
+pool.trim
+puts "[After triming] busy_threads:#{busy_threads}"
+pool.shutdown
+puts "[After shutdown]  busy_threads:#{busy_threads}"
+
+
+ThreadPool 支持动态调整线程数量, 工作线程数量范围: [MIN, MAX].
+一般场景下会有一个 loop , 使用 &lt;&lt; 不停地塞入任务, 任务由线程池自动调度执行.
+shutdown 会等任务都执行完再推出.
+
+Source Code
+
+class SimpleThreadPool
+  class SimpleThreadPoolError &lt; RuntimeError
+  end
+
+  def initialize(min, max, &amp;block)
+    raise SimpleThreadPoolError.new("Init Need Block") unless block_given?
+
+    init_brace_variables
+
+    @handler = block
+    @thread_min_count = Integer(min)
+    @thread_max_count = Integer(max)
+
+    @lock.synchronize do
+      @thread_min_count.times do
+        spawn_thread
+        @go_to_spawn.wait(@lock)
+      end
+    end
+  end
+
+  def &lt;&lt; (task_args)
+    @lock.synchronize do
+      if @shutdown_flag
+        STDERR.puts "[Add Task Error] Ready to Shutdown."
+        return
+      end
+
+      @task_args_queue.push(task_args)
+
+      if (@leisure_thread_count &lt; @task_args_queue.size) &amp;&amp; (@spawned_thread_count &lt; @thread_max_count)
+        spawn_thread
+      end
+
+      @go_to_work.signal
+    end
+  end
+
+  def spawn_thread
+    @spawned_thread_count += 1
+    if @spawned_thread_count &gt; @thread_max_count
+      STDERR.puts "[Spawn Error] Too Many Threads."
+    end
+
+    worker_thread = Thread.new do
+      loop do
+        task_args = nil
+        with_mutex do
+          while @task_args_queue.empty?
+            # deal with trim
+            if @trim_request_count &gt; 0
+              @trim_request_count -= 1
+              @spawned_thread_count -= 1
+              @worker_threads_queue.delete Thread.current
+              Thread.exit
+            end
+            # deal with spawn
+            @leisure_thread_count += 1
+            @go_to_spawn.signal
+            @go_to_work.wait(@lock)
+            @leisure_thread_count -= 1
+          end
+          task_args = @task_args_queue.shift
+        end
+
+        # deal with task
+        begin
+          @handler.call(task_args)
+        rescue Exception =&gt; e
+          STDERR.puts "[Task Execution Error] #{e}"
+        end
+      end
+    end
+
+    @worker_threads_queue.push worker_thread
+    worker_thread
+  end
+
+  def trim(force = false)
+    @lock.synchronize do
+      need_trim = (@leisure_thread_count - @task_args_queue.size &gt; 0)
+      if (force || need_trim) &amp;&amp; (@spawned_thread_count - @trim_request_count &gt; @thread_min_count)
+        @trim_request_count += 1
+        @go_to_work.signal
+      end
+    end
+  end
+
+  def shutdown
+    @lock.synchronize do
+      @shutdown_flag = true
+      @trim_request_count = @spawned_thread_count
+      @go_to_work.broadcast
+    end
+
+    @worker_threads_queue.each(&amp;:join)
+    puts "[Shutdown]"
+  end
+
+  private
+
+  def init_brace_variables
+    @lock = Mutex.new
+    @go_to_work = ConditionVariable.new
+    @go_to_spawn = ConditionVariable.new
+
+    @worker_threads_queue = []
+    @task_args_queue = []
+    @spawned_thread_count = 0
+    @leisure_thread_count = 0
+    @trim_request_count = 0
+    @shutdown_flag = false
+  end
+
+  def with_mutex
+    @lock.owned? ? yield : @lock.synchronize { yield }
+  end
+end
+
+
+核心方法
+
+线程池最核心的三个方法: initialize, spawn_thread, &lt;&lt; 要协同在一起看.
+
+initialize 的 min/max 参数指明线程池的最小/最大工作线程数;
+
+初始化了一个锁: @lock.
+
+初始化了两个条件变量:
+
+  @go_to_work, 当待办任务不为空的时候发送信号, 用来触发新任务的开始执行;
+  @go_to_spawn, 用来控制派生新工作线程.
+
+
+初始化了三个计数器:
+
+  @spawned_thread_count 已经派生出的线程数;
+  @leisure_thread_count 等待执行任务的空闲的线程数;
+  @trim_request_count 剪枝请求数;(只有该值大于 0 才会清理空闲线程)
+
+
+初始化了两个列表:
+
+  @worker_threads_queue 工作线程的列表;
+  @task_args_queue 待办任务参数的列表;
+
+
+def spawn_thread
+  @spawned_thread_count += 1
+  worker_thread = Thread.new do
+    # ...
+  end
+  @worker_threads_queue.push worker_thread
+  worker_thread
+end
+
+def initialize
+  # ...
+  @lock.synchronize do
+    @thread_min_count.times do
+      spawn_thread
+      @go_to_spawn.wait(@lock)
+    end
+  end
+  # ...
+end
+
+
+初始化
+
+直观的看, 这部分会初始化 @thread_min_count 个工作线程, 但实现细节要复杂一点, 使用了两个 ConditionVariable 来交替线程的执行权.
+
+在 @lock 锁内, 进入 @thread_min_count 的第一次的循环.
+
+(初始化时没有竞争条件, 本不需要在锁内执行, 为了使用 wait 所以包装在锁内.)
+
+调用 spawn_thread 方法, 派生新的工作线程.
+
+主线程继续执行, 遇到了 @go_to_spawn.wait(@lock), wait 会让主线程立即释放锁, 并进入阻塞的同步等待.
+
+此时 @thread_min_count 的第一次循环还没有结束, @lock 的控制权流转到 spawn_thread 派生的子线程上.
+
+子进程进入锁, 如果有待办任务就取出第一个任务来执行.
+
+如果没有待办任务, 说明这个线程已经空闲了.
+
+空闲线程依次执行:
+
+  剪枝任务, 如果有剪枝需求的话;
+  唤醒主线程;
+  释放锁, 阻塞等待 @go_to_work 的召唤.
+
+
+主线程获得锁后终于结束了第一次循环, 同样的流程一共执行 @thread_min_count 次, 线程池初始化结束.
+
+添加任务
+
+得到 pool 对象之后, pool &lt;&lt; args 把任务的参数加入 @task_args_queue 队列中.
+
+如果现有的工作线程已经在饱和运转, 就可以考虑新增工作线程了.
+
+@go_to_work.signal 信号激活了第一个休息的空闲线程, 醒来的子线程把空闲线程数减一, 通过 @handler.call(task_args) 执行了具体的任务.
+
+loop, 周而复始.
+
+其他
+
+
+  
+    spawn_thread 方法通过 with_metux 的包装来使用 @lock, 一个目的是避免锁重入, 另一个目的是避免死锁.
+  
+  
+    PUMA 线程池里有一个内部类: Automaton, 可以新开一个线程来专门收割多余的线程或终止的线程.
+  
+  
+    PUMA 参数中的 timeout 是精确的时间差计算, 使用 CLOCK_MONOTONIC 而不是 CLOCK_REALTIME:
+  
+
+
+Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
+
+
+  CLOCK_REALTIME  不能保证单调递增, 从 1970 年算起;
+  CLOCK_MONOTONIC 可以保证单调递增, 从本机开机算起;
+
+
+参考
+
+https://github.com/puma/puma/blob/master/lib/puma/thread_pool.rb
+" />
+    
+    <meta name="author" content="CBD Blog" />
+
+    
+    <meta property="og:title" content="Ruby ThreadPool" />
+    <meta property="twitter:title" content="Ruby ThreadPool" />
+    
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="CBD Blog - 好记性不如烂笔头,站在岸上学不会游泳" href="/feed.xml" />
+  <link rel="shortcut icon" href="/images/avatar.jpg">
+<!--  <script src="https://lib.baomitu.com/gitalk/1.6.2/gitalk.min.js"></script>-->
+  <script src="https://lib.baomitu.com/feather-icons/latest/feather.min.js"></script>
+  <script type="text/javascript" async src="https://lib.baomitu.com/mathjax/2.7.7/MathJax.js?...">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?9dfbb5850b35a184a60c9a4a1b08d7e3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+  <meta name="google-site-verification" content="ZqVpjmLHnwuJ0qbh4QrpcofglQe6XEjjF7X1AB7yXus" />
+</head>
+
+  <body>
+    <div class="wrapper-sidebar">
+  <header class="sidebar clearfix">
+    <div class="site-info">
+      
+        <a href="/" class="site-avatar"><img src="/images/avatar.jpg" /></a>
+       
+      <h1 class="site-name"><a href="/">CBD Blog</a></h1>
+      <p class="site-description">好记性不如烂笔头,站在岸上学不会游泳</p>
+    </div>
+  </header>
+
+  <div class="navlist">
+    <nav>
+      
+      
+      <a href="/">首页</a>
+      
+      
+      
+      <a href="/archive">归档</a>
+      
+      
+      
+      <a href="/about">关于</a>
+      
+      
+    </nav>
+  </div>
+
+  <div class="wrapper-footer-desktop">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+  </div>
+</div>
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">Ruby ThreadPool</a>
+    <ul>
+      <li><a href="#引子">引子</a></li>
+      <li><a href="#用法">用法</a></li>
+      <li><a href="#source-code">Source Code</a></li>
+      <li><a href="#核心方法">核心方法</a>
+        <ul>
+          <li><a href="#初始化">初始化</a></li>
+          <li><a href="#添加任务">添加任务</a></li>
+        </ul>
+      </li>
+      <li><a href="#其他">其他</a></li>
+      <li><a href="#参考">参考</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <h1>Ruby ThreadPool</h1>
+
+  <div clsss="meta">
+    <span class="author">
+      
+    </span>
+
+    <span class="date">
+      2020-08-17
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="https://icbd.github.io/tags#Ruby">
+          Ruby
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://icbd.github.io/tags#Thread">
+          Thread
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://icbd.github.io/tags#ThreadPool">
+          ThreadPool
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <h2 id="引子">引子</h2>
+
+<p>PUMA 是一个调度 Rack 应用的多线程服务器, 它的每个工作进程中都有一个线程池来处理请求.</p>
+
+<p><code class="language-plaintext highlighter-rouge">SimpleThreadPool</code> 是以 <code class="language-plaintext highlighter-rouge">PUMA::ThreadPool</code> 为蓝本的简易版本, 只保留了满足最基本功能的方法.</p>
+
+<h2 id="用法">用法</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pool</span> <span class="o">=</span> <span class="no">SimpleThreadPool</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">num</span><span class="o">|</span>
+  <span class="nb">puts</span> <span class="s2">"start task &gt; num: </span><span class="si">#{</span><span class="n">num</span><span class="si">}</span><span class="s2">"</span>
+  <span class="nb">sleep</span> <span class="mi">2</span>
+  <span class="nb">puts</span> <span class="s2">"100 / </span><span class="si">#{</span><span class="n">num</span><span class="si">}</span><span class="s2"> = </span><span class="si">#{</span><span class="mi">100</span> <span class="o">/</span> <span class="n">num</span><span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">busy_threads</span>
+  <span class="no">Thread</span><span class="p">.</span><span class="nf">list</span><span class="p">.</span><span class="nf">count</span> <span class="p">{</span> <span class="o">|</span><span class="n">thr</span><span class="o">|</span> <span class="n">thr</span><span class="p">.</span><span class="nf">status</span> <span class="o">==</span> <span class="s1">'run'</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="mi">9</span><span class="p">.</span><span class="nf">times</span> <span class="p">{</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span> <span class="n">pool</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="p">}</span>
+<span class="nb">puts</span> <span class="s2">"[After pushing] busy_threads:</span><span class="si">#{</span><span class="n">busy_threads</span><span class="si">}</span><span class="s2">"</span>
+<span class="n">pool</span><span class="p">.</span><span class="nf">trim</span>
+<span class="nb">puts</span> <span class="s2">"[After triming] busy_threads:</span><span class="si">#{</span><span class="n">busy_threads</span><span class="si">}</span><span class="s2">"</span>
+<span class="n">pool</span><span class="p">.</span><span class="nf">shutdown</span>
+<span class="nb">puts</span> <span class="s2">"[After shutdown]  busy_threads:</span><span class="si">#{</span><span class="n">busy_threads</span><span class="si">}</span><span class="s2">"</span>
+</code></pre></div></div>
+
+<p>ThreadPool 支持动态调整线程数量, 工作线程数量范围: [MIN, MAX].
+一般场景下会有一个 loop , 使用 <code class="language-plaintext highlighter-rouge">&lt;&lt;</code> 不停地塞入任务, 任务由线程池自动调度执行.
+shutdown 会等任务都执行完再推出.</p>
+
+<h2 id="source-code">Source Code</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SimpleThreadPool</span>
+  <span class="k">class</span> <span class="nc">SimpleThreadPoolError</span> <span class="o">&lt;</span> <span class="no">RuntimeError</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">min</span><span class="p">,</span> <span class="n">max</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="no">SimpleThreadPoolError</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"Init Need Block"</span><span class="p">)</span> <span class="k">unless</span> <span class="nb">block_given?</span>
+
+    <span class="n">init_brace_variables</span>
+
+    <span class="vi">@handler</span> <span class="o">=</span> <span class="n">block</span>
+    <span class="vi">@thread_min_count</span> <span class="o">=</span> <span class="no">Integer</span><span class="p">(</span><span class="n">min</span><span class="p">)</span>
+    <span class="vi">@thread_max_count</span> <span class="o">=</span> <span class="no">Integer</span><span class="p">(</span><span class="n">max</span><span class="p">)</span>
+
+    <span class="vi">@lock</span><span class="p">.</span><span class="nf">synchronize</span> <span class="k">do</span>
+      <span class="vi">@thread_min_count</span><span class="p">.</span><span class="nf">times</span> <span class="k">do</span>
+        <span class="n">spawn_thread</span>
+        <span class="vi">@go_to_spawn</span><span class="p">.</span><span class="nf">wait</span><span class="p">(</span><span class="vi">@lock</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">&lt;&lt;</span> <span class="p">(</span><span class="n">task_args</span><span class="p">)</span>
+    <span class="vi">@lock</span><span class="p">.</span><span class="nf">synchronize</span> <span class="k">do</span>
+      <span class="k">if</span> <span class="vi">@shutdown_flag</span>
+        <span class="no">STDERR</span><span class="p">.</span><span class="nf">puts</span> <span class="s2">"[Add Task Error] Ready to Shutdown."</span>
+        <span class="k">return</span>
+      <span class="k">end</span>
+
+      <span class="vi">@task_args_queue</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="n">task_args</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="vi">@leisure_thread_count</span> <span class="o">&lt;</span> <span class="vi">@task_args_queue</span><span class="p">.</span><span class="nf">size</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="vi">@spawned_thread_count</span> <span class="o">&lt;</span> <span class="vi">@thread_max_count</span><span class="p">)</span>
+        <span class="n">spawn_thread</span>
+      <span class="k">end</span>
+
+      <span class="vi">@go_to_work</span><span class="p">.</span><span class="nf">signal</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">spawn_thread</span>
+    <span class="vi">@spawned_thread_count</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="vi">@spawned_thread_count</span> <span class="o">&gt;</span> <span class="vi">@thread_max_count</span>
+      <span class="no">STDERR</span><span class="p">.</span><span class="nf">puts</span> <span class="s2">"[Spawn Error] Too Many Threads."</span>
+    <span class="k">end</span>
+
+    <span class="n">worker_thread</span> <span class="o">=</span> <span class="no">Thread</span><span class="p">.</span><span class="nf">new</span> <span class="k">do</span>
+      <span class="kp">loop</span> <span class="k">do</span>
+        <span class="n">task_args</span> <span class="o">=</span> <span class="kp">nil</span>
+        <span class="n">with_mutex</span> <span class="k">do</span>
+          <span class="k">while</span> <span class="vi">@task_args_queue</span><span class="p">.</span><span class="nf">empty?</span>
+            <span class="c1"># deal with trim</span>
+            <span class="k">if</span> <span class="vi">@trim_request_count</span> <span class="o">&gt;</span> <span class="mi">0</span>
+              <span class="vi">@trim_request_count</span> <span class="o">-=</span> <span class="mi">1</span>
+              <span class="vi">@spawned_thread_count</span> <span class="o">-=</span> <span class="mi">1</span>
+              <span class="vi">@worker_threads_queue</span><span class="p">.</span><span class="nf">delete</span> <span class="no">Thread</span><span class="p">.</span><span class="nf">current</span>
+              <span class="no">Thread</span><span class="p">.</span><span class="nf">exit</span>
+            <span class="k">end</span>
+            <span class="c1"># deal with spawn</span>
+            <span class="vi">@leisure_thread_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="vi">@go_to_spawn</span><span class="p">.</span><span class="nf">signal</span>
+            <span class="vi">@go_to_work</span><span class="p">.</span><span class="nf">wait</span><span class="p">(</span><span class="vi">@lock</span><span class="p">)</span>
+            <span class="vi">@leisure_thread_count</span> <span class="o">-=</span> <span class="mi">1</span>
+          <span class="k">end</span>
+          <span class="n">task_args</span> <span class="o">=</span> <span class="vi">@task_args_queue</span><span class="p">.</span><span class="nf">shift</span>
+        <span class="k">end</span>
+
+        <span class="c1"># deal with task</span>
+        <span class="k">begin</span>
+          <span class="vi">@handler</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">task_args</span><span class="p">)</span>
+        <span class="k">rescue</span> <span class="no">Exception</span> <span class="o">=&gt;</span> <span class="n">e</span>
+          <span class="no">STDERR</span><span class="p">.</span><span class="nf">puts</span> <span class="s2">"[Task Execution Error] </span><span class="si">#{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+
+    <span class="vi">@worker_threads_queue</span><span class="p">.</span><span class="nf">push</span> <span class="n">worker_thread</span>
+    <span class="n">worker_thread</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">trim</span><span class="p">(</span><span class="n">force</span> <span class="o">=</span> <span class="kp">false</span><span class="p">)</span>
+    <span class="vi">@lock</span><span class="p">.</span><span class="nf">synchronize</span> <span class="k">do</span>
+      <span class="n">need_trim</span> <span class="o">=</span> <span class="p">(</span><span class="vi">@leisure_thread_count</span> <span class="o">-</span> <span class="vi">@task_args_queue</span><span class="p">.</span><span class="nf">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">force</span> <span class="o">||</span> <span class="n">need_trim</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="vi">@spawned_thread_count</span> <span class="o">-</span> <span class="vi">@trim_request_count</span> <span class="o">&gt;</span> <span class="vi">@thread_min_count</span><span class="p">)</span>
+        <span class="vi">@trim_request_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="vi">@go_to_work</span><span class="p">.</span><span class="nf">signal</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">shutdown</span>
+    <span class="vi">@lock</span><span class="p">.</span><span class="nf">synchronize</span> <span class="k">do</span>
+      <span class="vi">@shutdown_flag</span> <span class="o">=</span> <span class="kp">true</span>
+      <span class="vi">@trim_request_count</span> <span class="o">=</span> <span class="vi">@spawned_thread_count</span>
+      <span class="vi">@go_to_work</span><span class="p">.</span><span class="nf">broadcast</span>
+    <span class="k">end</span>
+
+    <span class="vi">@worker_threads_queue</span><span class="p">.</span><span class="nf">each</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:join</span><span class="p">)</span>
+    <span class="nb">puts</span> <span class="s2">"[Shutdown]"</span>
+  <span class="k">end</span>
+
+  <span class="kp">private</span>
+
+  <span class="k">def</span> <span class="nf">init_brace_variables</span>
+    <span class="vi">@lock</span> <span class="o">=</span> <span class="no">Mutex</span><span class="p">.</span><span class="nf">new</span>
+    <span class="vi">@go_to_work</span> <span class="o">=</span> <span class="no">ConditionVariable</span><span class="p">.</span><span class="nf">new</span>
+    <span class="vi">@go_to_spawn</span> <span class="o">=</span> <span class="no">ConditionVariable</span><span class="p">.</span><span class="nf">new</span>
+
+    <span class="vi">@worker_threads_queue</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="vi">@task_args_queue</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="vi">@spawned_thread_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="vi">@leisure_thread_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="vi">@trim_request_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="vi">@shutdown_flag</span> <span class="o">=</span> <span class="kp">false</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">with_mutex</span>
+    <span class="vi">@lock</span><span class="p">.</span><span class="nf">owned?</span> <span class="p">?</span> <span class="k">yield</span> <span class="p">:</span> <span class="vi">@lock</span><span class="p">.</span><span class="nf">synchronize</span> <span class="p">{</span> <span class="k">yield</span> <span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="核心方法">核心方法</h2>
+
+<p>线程池最核心的三个方法: <code class="language-plaintext highlighter-rouge">initialize</code>, <code class="language-plaintext highlighter-rouge">spawn_thread</code>, <code class="language-plaintext highlighter-rouge">&lt;&lt;</code> 要协同在一起看.</p>
+
+<p><code class="language-plaintext highlighter-rouge">initialize</code> 的 min/max 参数指明线程池的最小/最大工作线程数;</p>
+
+<p>初始化了一个锁: <code class="language-plaintext highlighter-rouge">@lock</code>.</p>
+
+<p>初始化了两个条件变量:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@go_to_work</code>, 当待办任务不为空的时候发送信号, 用来触发新任务的开始执行;</li>
+  <li><code class="language-plaintext highlighter-rouge">@go_to_spawn</code>, 用来控制派生新工作线程.</li>
+</ul>
+
+<p>初始化了三个计数器:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@spawned_thread_count</code> 已经派生出的线程数;</li>
+  <li><code class="language-plaintext highlighter-rouge">@leisure_thread_count</code> 等待执行任务的空闲的线程数;</li>
+  <li><code class="language-plaintext highlighter-rouge">@trim_request_count</code> 剪枝请求数;(只有该值大于 0 才会清理空闲线程)</li>
+</ul>
+
+<p>初始化了两个列表:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@worker_threads_queue</code> 工作线程的列表;</li>
+  <li><code class="language-plaintext highlighter-rouge">@task_args_queue</code> 待办任务参数的列表;</li>
+</ul>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">spawn_thread</span>
+  <span class="vi">@spawned_thread_count</span> <span class="o">+=</span> <span class="mi">1</span>
+  <span class="n">worker_thread</span> <span class="o">=</span> <span class="no">Thread</span><span class="p">.</span><span class="nf">new</span> <span class="k">do</span>
+    <span class="c1"># ...</span>
+  <span class="k">end</span>
+  <span class="vi">@worker_threads_queue</span><span class="p">.</span><span class="nf">push</span> <span class="n">worker_thread</span>
+  <span class="n">worker_thread</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">initialize</span>
+  <span class="c1"># ...</span>
+  <span class="vi">@lock</span><span class="p">.</span><span class="nf">synchronize</span> <span class="k">do</span>
+    <span class="vi">@thread_min_count</span><span class="p">.</span><span class="nf">times</span> <span class="k">do</span>
+      <span class="n">spawn_thread</span>
+      <span class="vi">@go_to_spawn</span><span class="p">.</span><span class="nf">wait</span><span class="p">(</span><span class="vi">@lock</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+  <span class="c1"># ...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h4 id="初始化">初始化</h4>
+
+<p>直观的看, 这部分会初始化 <code class="language-plaintext highlighter-rouge">@thread_min_count</code> 个工作线程, 但实现细节要复杂一点, 使用了两个 <code class="language-plaintext highlighter-rouge">ConditionVariable</code> 来交替线程的执行权.</p>
+
+<p>在 <code class="language-plaintext highlighter-rouge">@lock</code> 锁内, 进入 <code class="language-plaintext highlighter-rouge">@thread_min_count</code> 的第一次的循环.</p>
+
+<p>(初始化时没有竞争条件, 本不需要在锁内执行, 为了使用 <code class="language-plaintext highlighter-rouge">wait</code> 所以包装在锁内.)</p>
+
+<p>调用 <code class="language-plaintext highlighter-rouge">spawn_thread</code> 方法, 派生新的工作线程.</p>
+
+<p>主线程继续执行, 遇到了 <code class="language-plaintext highlighter-rouge">@go_to_spawn.wait(@lock)</code>, wait 会让主线程立即释放锁, 并进入阻塞的同步等待.</p>
+
+<p>此时 <code class="language-plaintext highlighter-rouge">@thread_min_count</code> 的第一次循环还没有结束, <code class="language-plaintext highlighter-rouge">@lock</code> 的控制权流转到 <code class="language-plaintext highlighter-rouge">spawn_thread</code> 派生的子线程上.</p>
+
+<p>子进程进入锁, 如果有待办任务就取出第一个任务来执行.</p>
+
+<p>如果没有待办任务, 说明这个线程已经空闲了.</p>
+
+<p>空闲线程依次执行:</p>
+<ol>
+  <li>剪枝任务, 如果有剪枝需求的话;</li>
+  <li>唤醒主线程;</li>
+  <li>释放锁, 阻塞等待 <code class="language-plaintext highlighter-rouge">@go_to_work</code> 的召唤.</li>
+</ol>
+
+<p>主线程获得锁后终于结束了第一次循环, 同样的流程一共执行 <code class="language-plaintext highlighter-rouge">@thread_min_count</code> 次, 线程池初始化结束.</p>
+
+<h4 id="添加任务">添加任务</h4>
+
+<p>得到 pool 对象之后, <code class="language-plaintext highlighter-rouge">pool &lt;&lt; args</code> 把任务的参数加入 <code class="language-plaintext highlighter-rouge">@task_args_queue</code> 队列中.</p>
+
+<p>如果现有的工作线程已经在饱和运转, 就可以考虑新增工作线程了.</p>
+
+<p><code class="language-plaintext highlighter-rouge">@go_to_work.signal</code> 信号激活了第一个休息的空闲线程, 醒来的子线程把空闲线程数减一, 通过 <code class="language-plaintext highlighter-rouge">@handler.call(task_args)</code> 执行了具体的任务.</p>
+
+<p>loop, 周而复始.</p>
+
+<h2 id="其他">其他</h2>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">spawn_thread</code> 方法通过 <code class="language-plaintext highlighter-rouge">with_metux</code> 的包装来使用 <code class="language-plaintext highlighter-rouge">@lock</code>, 一个目的是避免锁重入, 另一个目的是避免死锁.</p>
+  </li>
+  <li>
+    <p>PUMA 线程池里有一个内部类: <code class="language-plaintext highlighter-rouge">Automaton</code>, 可以新开一个线程来专门收割多余的线程或终止的线程.</p>
+  </li>
+  <li>
+    <p>PUMA 参数中的 timeout 是精确的时间差计算, 使用 <code class="language-plaintext highlighter-rouge">CLOCK_MONOTONIC</code> 而不是 <code class="language-plaintext highlighter-rouge">CLOCK_REALTIME</code>:</p>
+  </li>
+</ul>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Process</span><span class="p">.</span><span class="nf">clock_gettime</span><span class="p">(</span><span class="no">Process</span><span class="o">::</span><span class="no">CLOCK_MONOTONIC</span><span class="p">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">CLOCK_REALTIME</code>  不能保证单调递增, 从 1970 年算起;</li>
+  <li><code class="language-plaintext highlighter-rouge">CLOCK_MONOTONIC</code> 可以保证单调递增, 从本机开机算起;</li>
+</ul>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://github.com/puma/puma/blob/master/lib/puma/thread_pool.rb">https://github.com/puma/puma/blob/master/lib/puma/thread_pool.rb</a></p>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="icbd/blogs"
+        issue-term="pathname"
+        label="utteranc"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="https://icbd.github.io/make-win10-usb-on-mac/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="https://icbd.github.io/connection-pool/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+</html>

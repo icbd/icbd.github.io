@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Go Code Fragment – CBD Blog – 好记性不如烂笔头,站在岸上学不会游泳</title>
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="收集了一些 Golang 代码片段.
+
+强类型语言的鸭子类型
+
+https://books.studygolang.com/gopl-zh/ch7/ch7-12.html
+
+// writeString writes s to w.
+// If w has a WriteString method, it is invoked instead of w.Write.
+func writeString(w io.Writer, s string) (n int, err error) {
+    type stringWriter interface {
+        WriteString(string) (n int, err error)
+    }
+    if sw, ok := w.(stringWriter); ok {
+        return sw.WriteString(s) // avoid a copy
+    }
+    return w.Write([]byte(s)) // allocate temporary copy
+}
+
+
+package 级别变量, 首字母大写暗示常量的语义
+
+https://github.com/golang/go/blob/release-branch.go1.15/src/flag/flag.go#L1010-L1013
+
+
+// CommandLine is the default set of command-line flags, parsed from os.Args.
+// The top-level functions such as BoolVar, Arg, and so on are wrappers for the
+// methods of CommandLine.
+var CommandLine = NewFlagSet(os.Args[0], ExitOnError)
+
+
+公开方法包装私有属性
+
+https://github.com/golang/go/blob/release-branch.go1.15/src/flag/flag.go#L993-L996
+
+// Parsed reports whether f.Parse has been called.
+func (f *FlagSet) Parsed() bool {
+	return f.parsed
+}
+
+
+组合 goroutine 的返回
+
+https://github.com/adonovan/gopl.io/blob/b725d6015f980e94734da37e35ba0d943fc7532f/ch8/thumbnail/thumbnail_test.go#L114-L148
+
+// makeThumbnails6 makes thumbnails for each file received from the channel.
+// It returns the number of bytes occupied by the files it creates.
+func makeThumbnails6(filenames &lt;-chan string) int64 {
+	sizes := make(chan int64)
+	var wg sync.WaitGroup // number of working goroutines
+	for f := range filenames {
+		wg.Add(1)
+		// worker
+		go func(f string) {
+			defer wg.Done()
+			thumb, err := thumbnail.ImageFile(f)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			info, _ := os.Stat(thumb) // OK to ignore error
+			sizes &lt;- info.Size()
+		}(f)
+	}
+
+	// closer
+	go func() {
+		wg.Wait()
+		close(sizes)
+	}()
+
+	var total int64
+	for size := range sizes {
+		total += size
+	}
+	return total
+}
+
+
+
+sizes 是一个 channel, goroutine 中每计算完一项, 都把各自部分的 size 塞入 sizes.
+
+对 sizes 使用 range 迭代, 计算 sizes 的总和, 待 sizes 被 close 的时候迭代结束.
+
+在单独的 goroutine 中 wg.Wait(), 等各个部分结束后 close(sizes), 主 goroutine 的 range 从而得以退出.
+
+这个例子之所以使用如此复杂的多个 goroutine 相互交织, 根本原因是我们不知道 filenames 的规模.
+
+如果入参是一个明确 cap 的 slice, 我们就可以使用 buffer 先收集结果, 在主 goroutine 中 wait, 最后统一计算总和.
+
+用 channel 并发限流
+
+https://github.com/adonovan/gopl.io/blob/master/ch8/crawl2/findlinks.go#L20-L37
+
+// tokens is a counting semaphore used to
+// enforce a limit of 20 concurrent requests.
+var tokens = make(chan struct{}, 20)
+
+func crawl(url string) []string {
+	tokens &lt;- struct{}{} // acquire a token
+
+	list, err := links.Extract(url)
+
+	&lt;-tokens // release the token
+
+	return list
+}
+
+
+带容量的 channel 是天然的限流工具, 当容量满了之后, 再加入则会等待.
+" />
+    <meta property="og:description" content="收集了一些 Golang 代码片段.
+
+强类型语言的鸭子类型
+
+https://books.studygolang.com/gopl-zh/ch7/ch7-12.html
+
+// writeString writes s to w.
+// If w has a WriteString method, it is invoked instead of w.Write.
+func writeString(w io.Writer, s string) (n int, err error) {
+    type stringWriter interface {
+        WriteString(string) (n int, err error)
+    }
+    if sw, ok := w.(stringWriter); ok {
+        return sw.WriteString(s) // avoid a copy
+    }
+    return w.Write([]byte(s)) // allocate temporary copy
+}
+
+
+package 级别变量, 首字母大写暗示常量的语义
+
+https://github.com/golang/go/blob/release-branch.go1.15/src/flag/flag.go#L1010-L1013
+
+
+// CommandLine is the default set of command-line flags, parsed from os.Args.
+// The top-level functions such as BoolVar, Arg, and so on are wrappers for the
+// methods of CommandLine.
+var CommandLine = NewFlagSet(os.Args[0], ExitOnError)
+
+
+公开方法包装私有属性
+
+https://github.com/golang/go/blob/release-branch.go1.15/src/flag/flag.go#L993-L996
+
+// Parsed reports whether f.Parse has been called.
+func (f *FlagSet) Parsed() bool {
+	return f.parsed
+}
+
+
+组合 goroutine 的返回
+
+https://github.com/adonovan/gopl.io/blob/b725d6015f980e94734da37e35ba0d943fc7532f/ch8/thumbnail/thumbnail_test.go#L114-L148
+
+// makeThumbnails6 makes thumbnails for each file received from the channel.
+// It returns the number of bytes occupied by the files it creates.
+func makeThumbnails6(filenames &lt;-chan string) int64 {
+	sizes := make(chan int64)
+	var wg sync.WaitGroup // number of working goroutines
+	for f := range filenames {
+		wg.Add(1)
+		// worker
+		go func(f string) {
+			defer wg.Done()
+			thumb, err := thumbnail.ImageFile(f)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			info, _ := os.Stat(thumb) // OK to ignore error
+			sizes &lt;- info.Size()
+		}(f)
+	}
+
+	// closer
+	go func() {
+		wg.Wait()
+		close(sizes)
+	}()
+
+	var total int64
+	for size := range sizes {
+		total += size
+	}
+	return total
+}
+
+
+
+sizes 是一个 channel, goroutine 中每计算完一项, 都把各自部分的 size 塞入 sizes.
+
+对 sizes 使用 range 迭代, 计算 sizes 的总和, 待 sizes 被 close 的时候迭代结束.
+
+在单独的 goroutine 中 wg.Wait(), 等各个部分结束后 close(sizes), 主 goroutine 的 range 从而得以退出.
+
+这个例子之所以使用如此复杂的多个 goroutine 相互交织, 根本原因是我们不知道 filenames 的规模.
+
+如果入参是一个明确 cap 的 slice, 我们就可以使用 buffer 先收集结果, 在主 goroutine 中 wait, 最后统一计算总和.
+
+用 channel 并发限流
+
+https://github.com/adonovan/gopl.io/blob/master/ch8/crawl2/findlinks.go#L20-L37
+
+// tokens is a counting semaphore used to
+// enforce a limit of 20 concurrent requests.
+var tokens = make(chan struct{}, 20)
+
+func crawl(url string) []string {
+	tokens &lt;- struct{}{} // acquire a token
+
+	list, err := links.Extract(url)
+
+	&lt;-tokens // release the token
+
+	return list
+}
+
+
+带容量的 channel 是天然的限流工具, 当容量满了之后, 再加入则会等待.
+" />
+    
+    <meta name="author" content="CBD Blog" />
+
+    
+    <meta property="og:title" content="Go Code Fragment" />
+    <meta property="twitter:title" content="Go Code Fragment" />
+    
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="CBD Blog - 好记性不如烂笔头,站在岸上学不会游泳" href="/feed.xml" />
+  <link rel="shortcut icon" href="/images/avatar.jpg">
+<!--  <script src="https://lib.baomitu.com/gitalk/1.6.2/gitalk.min.js"></script>-->
+  <script src="https://lib.baomitu.com/feather-icons/latest/feather.min.js"></script>
+  <script type="text/javascript" async src="https://lib.baomitu.com/mathjax/2.7.7/MathJax.js?...">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?9dfbb5850b35a184a60c9a4a1b08d7e3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+  <meta name="google-site-verification" content="ZqVpjmLHnwuJ0qbh4QrpcofglQe6XEjjF7X1AB7yXus" />
+</head>
+
+  <body>
+    <div class="wrapper-sidebar">
+  <header class="sidebar clearfix">
+    <div class="site-info">
+      
+        <a href="/" class="site-avatar"><img src="/images/avatar.jpg" /></a>
+       
+      <h1 class="site-name"><a href="/">CBD Blog</a></h1>
+      <p class="site-description">好记性不如烂笔头,站在岸上学不会游泳</p>
+    </div>
+  </header>
+
+  <div class="navlist">
+    <nav>
+      
+      
+      <a href="/">首页</a>
+      
+      
+      
+      <a href="/archive">归档</a>
+      
+      
+      
+      <a href="/about">关于</a>
+      
+      
+    </nav>
+  </div>
+
+  <div class="wrapper-footer-desktop">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+  </div>
+</div>
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">Go Code Fragment</a>
+    <ul>
+      <li><a href="#强类型语言的鸭子类型">强类型语言的鸭子类型</a></li>
+      <li><a href="#package-级别变量-首字母大写暗示常量的语义">package 级别变量, 首字母大写暗示常量的语义</a></li>
+      <li><a href="#公开方法包装私有属性">公开方法包装私有属性</a></li>
+      <li><a href="#组合-goroutine-的返回">组合 goroutine 的返回</a></li>
+      <li><a href="#用-channel-并发限流">用 channel 并发限流</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <h1>Go Code Fragment</h1>
+
+  <div clsss="meta">
+    <span class="author">
+      
+    </span>
+
+    <span class="date">
+      2020-10-20
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="https://icbd.github.io/tags#Golang">
+          Golang
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <p>收集了一些 Golang 代码片段.</p>
+
+<h2 id="强类型语言的鸭子类型">强类型语言的鸭子类型</h2>
+
+<p><a href="https://books.studygolang.com/gopl-zh/ch7/ch7-12.html">https://books.studygolang.com/gopl-zh/ch7/ch7-12.html</a></p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// writeString writes s to w.</span>
+<span class="c">// If w has a WriteString method, it is invoked instead of w.Write.</span>
+<span class="k">func</span> <span class="n">writeString</span><span class="p">(</span><span class="n">w</span> <span class="n">io</span><span class="o">.</span><span class="n">Writer</span><span class="p">,</span> <span class="n">s</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="n">n</span> <span class="kt">int</span><span class="p">,</span> <span class="n">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">type</span> <span class="n">stringWriter</span> <span class="k">interface</span> <span class="p">{</span>
+        <span class="n">WriteString</span><span class="p">(</span><span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="n">n</span> <span class="kt">int</span><span class="p">,</span> <span class="n">err</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">sw</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="n">w</span><span class="o">.</span><span class="p">(</span><span class="n">stringWriter</span><span class="p">);</span> <span class="n">ok</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">sw</span><span class="o">.</span><span class="n">WriteString</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="c">// avoid a copy</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">w</span><span class="o">.</span><span class="n">Write</span><span class="p">([]</span><span class="kt">byte</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="c">// allocate temporary copy</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="package-级别变量-首字母大写暗示常量的语义">package 级别变量, 首字母大写暗示常量的语义</h2>
+
+<p><a href="https://github.com/golang/go/blob/release-branch.go1.15/src/flag/flag.go#L1010-L1013">https://github.com/golang/go/blob/release-branch.go1.15/src/flag/flag.go#L1010-L1013</a></p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c">// CommandLine is the default set of command-line flags, parsed from os.Args.</span>
+<span class="c">// The top-level functions such as BoolVar, Arg, and so on are wrappers for the</span>
+<span class="c">// methods of CommandLine.</span>
+<span class="k">var</span> <span class="n">CommandLine</span> <span class="o">=</span> <span class="n">NewFlagSet</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">Args</span><span class="p">[</span><span class="m">0</span><span class="p">],</span> <span class="n">ExitOnError</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="公开方法包装私有属性">公开方法包装私有属性</h2>
+
+<p><a href="https://github.com/golang/go/blob/release-branch.go1.15/src/flag/flag.go#L993-L996">https://github.com/golang/go/blob/release-branch.go1.15/src/flag/flag.go#L993-L996</a></p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Parsed reports whether f.Parse has been called.</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">f</span> <span class="o">*</span><span class="n">FlagSet</span><span class="p">)</span> <span class="n">Parsed</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">parsed</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="组合-goroutine-的返回">组合 goroutine 的返回</h2>
+
+<p><a href="https://github.com/adonovan/gopl.io/blob/b725d6015f980e94734da37e35ba0d943fc7532f/ch8/thumbnail/thumbnail_test.go#L114-L148">https://github.com/adonovan/gopl.io/blob/b725d6015f980e94734da37e35ba0d943fc7532f/ch8/thumbnail/thumbnail_test.go#L114-L148</a></p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// makeThumbnails6 makes thumbnails for each file received from the channel.</span>
+<span class="c">// It returns the number of bytes occupied by the files it creates.</span>
+<span class="k">func</span> <span class="n">makeThumbnails6</span><span class="p">(</span><span class="n">filenames</span> <span class="o">&lt;-</span><span class="k">chan</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">int64</span> <span class="p">{</span>
+	<span class="n">sizes</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="kt">int64</span><span class="p">)</span>
+	<span class="k">var</span> <span class="n">wg</span> <span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span> <span class="c">// number of working goroutines</span>
+	<span class="k">for</span> <span class="n">f</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">filenames</span> <span class="p">{</span>
+		<span class="n">wg</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
+		<span class="c">// worker</span>
+		<span class="k">go</span> <span class="k">func</span><span class="p">(</span><span class="n">f</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+			<span class="k">defer</span> <span class="n">wg</span><span class="o">.</span><span class="n">Done</span><span class="p">()</span>
+			<span class="n">thumb</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">thumbnail</span><span class="o">.</span><span class="n">ImageFile</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+				<span class="k">return</span>
+			<span class="p">}</span>
+			<span class="n">info</span><span class="p">,</span> <span class="n">_</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">Stat</span><span class="p">(</span><span class="n">thumb</span><span class="p">)</span> <span class="c">// OK to ignore error</span>
+			<span class="n">sizes</span> <span class="o">&lt;-</span> <span class="n">info</span><span class="o">.</span><span class="n">Size</span><span class="p">()</span>
+		<span class="p">}(</span><span class="n">f</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c">// closer</span>
+	<span class="k">go</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span>
+		<span class="n">wg</span><span class="o">.</span><span class="n">Wait</span><span class="p">()</span>
+		<span class="nb">close</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span>
+	<span class="p">}()</span>
+
+	<span class="k">var</span> <span class="n">total</span> <span class="kt">int64</span>
+	<span class="k">for</span> <span class="n">size</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">sizes</span> <span class="p">{</span>
+		<span class="n">total</span> <span class="o">+=</span> <span class="n">size</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">total</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">sizes</code> 是一个 channel, goroutine 中每计算完一项, 都把各自部分的 size 塞入 <code class="language-plaintext highlighter-rouge">sizes</code>.</p>
+
+<p>对 <code class="language-plaintext highlighter-rouge">sizes</code> 使用 range 迭代, 计算 <code class="language-plaintext highlighter-rouge">sizes</code> 的总和, 待 <code class="language-plaintext highlighter-rouge">sizes</code> 被 close 的时候迭代结束.</p>
+
+<p>在单独的 goroutine 中 <code class="language-plaintext highlighter-rouge">wg.Wait()</code>, 等各个部分结束后 <code class="language-plaintext highlighter-rouge">close(sizes)</code>, 主 goroutine 的 range 从而得以退出.</p>
+
+<p>这个例子之所以使用如此复杂的多个 goroutine 相互交织, 根本原因是我们不知道 filenames 的规模.</p>
+
+<p>如果入参是一个明确 cap 的 slice, 我们就可以使用 buffer 先收集结果, 在主 goroutine 中 wait, 最后统一计算总和.</p>
+
+<h2 id="用-channel-并发限流">用 channel 并发限流</h2>
+
+<p><a href="https://github.com/adonovan/gopl.io/blob/master/ch8/crawl2/findlinks.go#L20-L37">https://github.com/adonovan/gopl.io/blob/master/ch8/crawl2/findlinks.go#L20-L37</a></p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// tokens is a counting semaphore used to</span>
+<span class="c">// enforce a limit of 20 concurrent requests.</span>
+<span class="k">var</span> <span class="n">tokens</span> <span class="o">=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="k">struct</span><span class="p">{},</span> <span class="m">20</span><span class="p">)</span>
+
+<span class="k">func</span> <span class="n">crawl</span><span class="p">(</span><span class="n">url</span> <span class="kt">string</span><span class="p">)</span> <span class="p">[]</span><span class="kt">string</span> <span class="p">{</span>
+	<span class="n">tokens</span> <span class="o">&lt;-</span> <span class="k">struct</span><span class="p">{}{}</span> <span class="c">// acquire a token</span>
+
+	<span class="n">list</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">links</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+	<span class="o">&lt;-</span><span class="n">tokens</span> <span class="c">// release the token</span>
+
+	<span class="k">return</span> <span class="n">list</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>带容量的 channel 是天然的限流工具, 当容量满了之后, 再加入则会等待.</p>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="icbd/blogs"
+        issue-term="pathname"
+        label="utteranc"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="https://icbd.github.io/go-lib-flag/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="https://icbd.github.io/go-implement-chatting-room/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+</html>

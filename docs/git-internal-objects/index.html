@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Git internal objects – CBD Blog – 好记性不如烂笔头,站在岸上学不会游泳</title>
+      <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="示例项目
+
+https://jihulab.com/show/git_objects_demo
+
+该项目共包含一个 commit, 包含的文件结构如下:
+
+.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+
+
+
+git objects 目录下, 共 8 个文件:
+
+
+  find .git/objects -type f
+
+
+.git/objects/69/15089af93052dc6f67fd7245037230a6b1894b
+.git/objects/67/89c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+.git/objects/d0/38440f5c27d52fed6b6c5eb7d180f1645ab724
+.git/objects/f2/0b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+.git/objects/20/61bac5e1a292b380f98072ef5ffbc2fc3eefa9
+.git/objects/11/ef4924f8f1e21e6d7412040973f5e868559ac7
+.git/objects/16/796efecb4599c92244ac8bafb217e20009008e
+.git/objects/53/33c1763419c89486091d80b6ba430d30b321a0
+
+
+
+  
+    
+      Hash
+      Type
+      Content
+    
+  
+  
+    
+      6915089af93052dc6f67fd7245037230a6b1894b
+      commit
+       
+
+tree 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+author Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+committer Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+
+Init
+
+      
+    
+    
+      6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+      tree
+      
+
+040000 tree d038440f5c27d52fed6b6c5eb7d180f1645ab724	doc
+100644 blob 5333c1763419c89486091d80b6ba430d30b321a0	readme.md
+040000 tree 11ef4924f8f1e21e6d7412040973f5e868559ac7	wiki
+
+      
+    
+    
+      d038440f5c27d52fed6b6c5eb7d180f1645ab724
+      tree
+      
+
+100644 blob 2061bac5e1a292b380f98072ef5ffbc2fc3eefa9	index.md
+
+      
+    
+    
+      f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+      blob
+      
+
+# Info
+
+      
+    
+    
+      2061bac5e1a292b380f98072ef5ffbc2fc3eefa9
+      blob
+      
+
+# Index
+
+
+      
+    
+    
+      11ef4924f8f1e21e6d7412040973f5e868559ac7
+      tree
+      
+
+100644 blob 16796efecb4599c92244ac8bafb217e20009008e	help.md
+100644 blob f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5	info.md
+
+      
+    
+    
+      16796efecb4599c92244ac8bafb217e20009008e
+      blob
+      
+
+# Help
+
+
+      
+    
+    
+      5333c1763419c89486091d80b6ba430d30b321a0
+      blob
+      
+
+# Readme
+
+```text
+.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+```
+
+      
+    
+  
+
+
+上面 8 个 Hash 中,
+
+有 1 个 commit 类型的, 对应 repo 中唯一的 commit;
+
+有 3 个 tree 类型的, 对应 repo 中 3 个目录: 根目录 / doc 目录 / wiki 目录.
+
+有 4 个 blob 类型的, 对应 repo 中 4 个 md 文件.
+
+文件修改
+
+在上面的 repo 的基础上, 对 readme 新加一行, 并提交到了新的 repo:
+
+https://jihulab.com/show/git_objects_demo_2
+
+此时, objects 新增了三个 Hash:
+
+.git/objects/92/60de33334266d9ab1e8c8333ccc0898865748f
+.git/objects/b3/c84f0cfa3b38c0bd9f8c1713536dc144077199
+.git/objects/cb/e1f2b84138ece7363749e9a31193a62104262d
+
+
+
+  
+    
+      Hash
+      Type
+      Content
+    
+  
+  
+    
+      9260de33334266d9ab1e8c8333ccc0898865748f
+      commit
+       
+
+tree cbe1f2b84138ece7363749e9a31193a62104262d
+parent 6915089af93052dc6f67fd7245037230a6b1894b
+author Baodong &lt;wwwicbd@gmail.com&gt; 1645018274 +0800
+committer Baodong &lt;wwwicbd@gmail.com&gt; 1645018274 +0800
+
+Add blog link
+
+      
+    
+
+        
+      b3c84f0cfa3b38c0bd9f8c1713536dc144077199
+      blob
+       
+
+# Readme
+
+[https://icbd.github.io/git-internal-objects/](https://icbd.github.io/git-internal-objects/)
+
+```text
+.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+```
+
+      
+    
+
+        
+      cbe1f2b84138ece7363749e9a31193a62104262d
+      tree
+       
+
+040000 tree d038440f5c27d52fed6b6c5eb7d180f1645ab724	doc
+100644 blob b3c84f0cfa3b38c0bd9f8c1713536dc144077199	readme.md
+040000 tree 11ef4924f8f1e21e6d7412040973f5e868559ac7	wiki
+
+      
+    
+  
+
+
+该 repo 共包含 11 个 git objects, 相比于之前新增了 3 个,
+
+有 1 个 commit 类型的, 对应新增的 commit;
+
+有 1 个 tree 类型的, 对应被修改的 readme.md 所在的目录 (目录下有文件发送变化, 目录本身的 tree 也发送变化);
+
+有 1 个 blob 类型的, 对应被修改的 readme.md 文件 (虽然只修改了其中一行, blob 还是保存了完整的文件内容).
+" />
+    <meta property="og:description" content="示例项目
+
+https://jihulab.com/show/git_objects_demo
+
+该项目共包含一个 commit, 包含的文件结构如下:
+
+.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+
+
+
+git objects 目录下, 共 8 个文件:
+
+
+  find .git/objects -type f
+
+
+.git/objects/69/15089af93052dc6f67fd7245037230a6b1894b
+.git/objects/67/89c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+.git/objects/d0/38440f5c27d52fed6b6c5eb7d180f1645ab724
+.git/objects/f2/0b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+.git/objects/20/61bac5e1a292b380f98072ef5ffbc2fc3eefa9
+.git/objects/11/ef4924f8f1e21e6d7412040973f5e868559ac7
+.git/objects/16/796efecb4599c92244ac8bafb217e20009008e
+.git/objects/53/33c1763419c89486091d80b6ba430d30b321a0
+
+
+
+  
+    
+      Hash
+      Type
+      Content
+    
+  
+  
+    
+      6915089af93052dc6f67fd7245037230a6b1894b
+      commit
+       
+
+tree 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+author Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+committer Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+
+Init
+
+      
+    
+    
+      6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+      tree
+      
+
+040000 tree d038440f5c27d52fed6b6c5eb7d180f1645ab724	doc
+100644 blob 5333c1763419c89486091d80b6ba430d30b321a0	readme.md
+040000 tree 11ef4924f8f1e21e6d7412040973f5e868559ac7	wiki
+
+      
+    
+    
+      d038440f5c27d52fed6b6c5eb7d180f1645ab724
+      tree
+      
+
+100644 blob 2061bac5e1a292b380f98072ef5ffbc2fc3eefa9	index.md
+
+      
+    
+    
+      f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+      blob
+      
+
+# Info
+
+      
+    
+    
+      2061bac5e1a292b380f98072ef5ffbc2fc3eefa9
+      blob
+      
+
+# Index
+
+
+      
+    
+    
+      11ef4924f8f1e21e6d7412040973f5e868559ac7
+      tree
+      
+
+100644 blob 16796efecb4599c92244ac8bafb217e20009008e	help.md
+100644 blob f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5	info.md
+
+      
+    
+    
+      16796efecb4599c92244ac8bafb217e20009008e
+      blob
+      
+
+# Help
+
+
+      
+    
+    
+      5333c1763419c89486091d80b6ba430d30b321a0
+      blob
+      
+
+# Readme
+
+```text
+.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+```
+
+      
+    
+  
+
+
+上面 8 个 Hash 中,
+
+有 1 个 commit 类型的, 对应 repo 中唯一的 commit;
+
+有 3 个 tree 类型的, 对应 repo 中 3 个目录: 根目录 / doc 目录 / wiki 目录.
+
+有 4 个 blob 类型的, 对应 repo 中 4 个 md 文件.
+
+文件修改
+
+在上面的 repo 的基础上, 对 readme 新加一行, 并提交到了新的 repo:
+
+https://jihulab.com/show/git_objects_demo_2
+
+此时, objects 新增了三个 Hash:
+
+.git/objects/92/60de33334266d9ab1e8c8333ccc0898865748f
+.git/objects/b3/c84f0cfa3b38c0bd9f8c1713536dc144077199
+.git/objects/cb/e1f2b84138ece7363749e9a31193a62104262d
+
+
+
+  
+    
+      Hash
+      Type
+      Content
+    
+  
+  
+    
+      9260de33334266d9ab1e8c8333ccc0898865748f
+      commit
+       
+
+tree cbe1f2b84138ece7363749e9a31193a62104262d
+parent 6915089af93052dc6f67fd7245037230a6b1894b
+author Baodong &lt;wwwicbd@gmail.com&gt; 1645018274 +0800
+committer Baodong &lt;wwwicbd@gmail.com&gt; 1645018274 +0800
+
+Add blog link
+
+      
+    
+
+        
+      b3c84f0cfa3b38c0bd9f8c1713536dc144077199
+      blob
+       
+
+# Readme
+
+[https://icbd.github.io/git-internal-objects/](https://icbd.github.io/git-internal-objects/)
+
+```text
+.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+```
+
+      
+    
+
+        
+      cbe1f2b84138ece7363749e9a31193a62104262d
+      tree
+       
+
+040000 tree d038440f5c27d52fed6b6c5eb7d180f1645ab724	doc
+100644 blob b3c84f0cfa3b38c0bd9f8c1713536dc144077199	readme.md
+040000 tree 11ef4924f8f1e21e6d7412040973f5e868559ac7	wiki
+
+      
+    
+  
+
+
+该 repo 共包含 11 个 git objects, 相比于之前新增了 3 个,
+
+有 1 个 commit 类型的, 对应新增的 commit;
+
+有 1 个 tree 类型的, 对应被修改的 readme.md 所在的目录 (目录下有文件发送变化, 目录本身的 tree 也发送变化);
+
+有 1 个 blob 类型的, 对应被修改的 readme.md 文件 (虽然只修改了其中一行, blob 还是保存了完整的文件内容).
+" />
+    
+    <meta name="author" content="CBD Blog" />
+
+    
+    <meta property="og:title" content="Git internal objects" />
+    <meta property="twitter:title" content="Git internal objects" />
+    
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="CBD Blog - 好记性不如烂笔头,站在岸上学不会游泳" href="/feed.xml" />
+  <link rel="shortcut icon" href="/images/avatar.jpg">
+<!--  <script src="https://lib.baomitu.com/gitalk/1.6.2/gitalk.min.js"></script>-->
+  <script src="https://lib.baomitu.com/feather-icons/latest/feather.min.js"></script>
+  <script type="text/javascript" async src="https://lib.baomitu.com/mathjax/2.7.7/MathJax.js?...">
+  </script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?9dfbb5850b35a184a60c9a4a1b08d7e3";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+  <meta name="google-site-verification" content="ZqVpjmLHnwuJ0qbh4QrpcofglQe6XEjjF7X1AB7yXus" />
+</head>
+
+  <body>
+    <div class="wrapper-sidebar">
+  <header class="sidebar clearfix">
+    <div class="site-info">
+      
+        <a href="/" class="site-avatar"><img src="/images/avatar.jpg" /></a>
+       
+      <h1 class="site-name"><a href="/">CBD Blog</a></h1>
+      <p class="site-description">好记性不如烂笔头,站在岸上学不会游泳</p>
+    </div>
+  </header>
+
+  <div class="navlist">
+    <nav>
+      
+      
+      <a href="/">首页</a>
+      
+      
+      
+      <a href="/archive">归档</a>
+      
+      
+      
+      <a href="/about">关于</a>
+      
+      
+    </nav>
+  </div>
+
+  <div class="wrapper-footer-desktop">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+  </div>
+</div>
+
+    
+      <aside class="toc">
+        <ul>
+  <li><a href="#">Git internal objects</a>
+    <ul>
+      <li><a href="#示例项目">示例项目</a></li>
+      <li><a href="#文件修改">文件修改</a></li>
+    </ul>
+  </li>
+</ul>
+      </aside>
+    
+
+    <div id="main" role="main" class="wrapper-content">
+      <div class="container">
+        <article class="posts">
+  <h1>Git internal objects</h1>
+
+  <div clsss="meta">
+    <span class="author">
+      
+    </span>
+
+    <span class="date">
+      2022-02-16
+    </span>
+
+    <ul class="tag">
+      
+      <li>
+        <a href="https://icbd.github.io/tags#Git">
+          Git
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+
+  <div class="entry">
+    <h2 id="示例项目">示例项目</h2>
+
+<p><a href="https://jihulab.com/show/git_objects_demo">https://jihulab.com/show/git_objects_demo</a></p>
+
+<p>该项目共包含一个 commit, 包含的文件结构如下:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+
+</code></pre></div></div>
+
+<p>git objects 目录下, 共 8 个文件:</p>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">find .git/objects -type f</code></p>
+</blockquote>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.git/objects/69/15089af93052dc6f67fd7245037230a6b1894b
+.git/objects/67/89c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+.git/objects/d0/38440f5c27d52fed6b6c5eb7d180f1645ab724
+.git/objects/f2/0b9ed4f8ba4e99df6a2491bbed85e8daf526d5
+.git/objects/20/61bac5e1a292b380f98072ef5ffbc2fc3eefa9
+.git/objects/11/ef4924f8f1e21e6d7412040973f5e868559ac7
+.git/objects/16/796efecb4599c92244ac8bafb217e20009008e
+.git/objects/53/33c1763419c89486091d80b6ba430d30b321a0
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Hash</th>
+      <th>Type</th>
+      <th>Content</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>6915089af93052dc6f67fd7245037230a6b1894b</td>
+      <td>commit</td>
+      <td> 
+<pre>
+tree 6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5
+author Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+committer Baodong &lt;wwwicbd@gmail.com&gt; 1645015448 +0800
+
+Init
+</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>6789c99cbe4a25ecc9e69eb1e66df819ddfab2e5</td>
+      <td>tree</td>
+      <td>
+<pre>
+040000 tree d038440f5c27d52fed6b6c5eb7d180f1645ab724	doc
+100644 blob 5333c1763419c89486091d80b6ba430d30b321a0	readme.md
+040000 tree 11ef4924f8f1e21e6d7412040973f5e868559ac7	wiki
+</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>d038440f5c27d52fed6b6c5eb7d180f1645ab724</td>
+      <td>tree</td>
+      <td>
+<pre>
+100644 blob 2061bac5e1a292b380f98072ef5ffbc2fc3eefa9	index.md
+</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5</td>
+      <td>blob</td>
+      <td>
+<pre>
+# Info
+</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>2061bac5e1a292b380f98072ef5ffbc2fc3eefa9</td>
+      <td>blob</td>
+      <td>
+<pre>
+# Index
+
+</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>11ef4924f8f1e21e6d7412040973f5e868559ac7</td>
+      <td>tree</td>
+      <td>
+<pre>
+100644 blob 16796efecb4599c92244ac8bafb217e20009008e	help.md
+100644 blob f20b9ed4f8ba4e99df6a2491bbed85e8daf526d5	info.md
+</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>16796efecb4599c92244ac8bafb217e20009008e</td>
+      <td>blob</td>
+      <td>
+<pre>
+# Help
+
+</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>5333c1763419c89486091d80b6ba430d30b321a0</td>
+      <td>blob</td>
+      <td>
+<pre>
+# Readme
+
+```text
+.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+```
+</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>上面 8 个 Hash 中,</p>
+
+<p>有 1 个 <code class="language-plaintext highlighter-rouge">commit</code> 类型的, 对应 repo 中唯一的 commit;</p>
+
+<p>有 3 个 <code class="language-plaintext highlighter-rouge">tree</code> 类型的, 对应 repo 中 3 个目录: 根目录 / doc 目录 / wiki 目录.</p>
+
+<p>有 4 个 <code class="language-plaintext highlighter-rouge">blob</code> 类型的, 对应 repo 中 4 个 md 文件.</p>
+
+<h2 id="文件修改">文件修改</h2>
+
+<p>在上面的 repo 的基础上, 对 readme 新加一行, 并提交到了新的 repo:</p>
+
+<p><a href="https://jihulab.com/show/git_objects_demo_2">https://jihulab.com/show/git_objects_demo_2</a></p>
+
+<p>此时, objects 新增了三个 Hash:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.git/objects/92/60de33334266d9ab1e8c8333ccc0898865748f
+.git/objects/b3/c84f0cfa3b38c0bd9f8c1713536dc144077199
+.git/objects/cb/e1f2b84138ece7363749e9a31193a62104262d
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Hash</th>
+      <th>Type</th>
+      <th>Content</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>9260de33334266d9ab1e8c8333ccc0898865748f</td>
+      <td>commit</td>
+      <td> 
+<pre>
+tree cbe1f2b84138ece7363749e9a31193a62104262d
+parent 6915089af93052dc6f67fd7245037230a6b1894b
+author Baodong &lt;wwwicbd@gmail.com&gt; 1645018274 +0800
+committer Baodong &lt;wwwicbd@gmail.com&gt; 1645018274 +0800
+
+Add blog link
+</pre>
+      </td>
+    </tr>
+
+        <tr>
+      <td>b3c84f0cfa3b38c0bd9f8c1713536dc144077199</td>
+      <td>blob</td>
+      <td> 
+<pre>
+# Readme
+
+[https://icbd.github.io/git-internal-objects/](https://icbd.github.io/git-internal-objects/)
+
+```text
+.
+├── doc
+│   └── index.md
+├── readme.md
+└── wiki
+    ├── help.md
+    └── info.md
+```
+</pre>
+      </td>
+    </tr>
+
+        <tr>
+      <td>cbe1f2b84138ece7363749e9a31193a62104262d</td>
+      <td>tree</td>
+      <td> 
+<pre>
+040000 tree d038440f5c27d52fed6b6c5eb7d180f1645ab724	doc
+100644 blob b3c84f0cfa3b38c0bd9f8c1713536dc144077199	readme.md
+040000 tree 11ef4924f8f1e21e6d7412040973f5e868559ac7	wiki
+</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>该 repo 共包含 11 个 git objects, 相比于之前新增了 3 个,</p>
+
+<p>有 1 个 <code class="language-plaintext highlighter-rouge">commit</code> 类型的, 对应新增的 commit;</p>
+
+<p>有 1 个 <code class="language-plaintext highlighter-rouge">tree</code> 类型的, 对应被修改的 <code class="language-plaintext highlighter-rouge">readme.md</code> 所在的目录 (目录下有文件发送变化, 目录本身的 tree 也发送变化);</p>
+
+<p>有 1 个 <code class="language-plaintext highlighter-rouge">blob</code> 类型的, 对应被修改的 <code class="language-plaintext highlighter-rouge">readme.md</code> 文件 (虽然只修改了其中一行, blob 还是保存了完整的文件内容).</p>
+
+  </div>
+
+  
+  
+<script src="https://utteranc.es/client.js"
+        repo="icbd/blogs"
+        issue-term="pathname"
+        label="utteranc"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+  
+</article>
+
+<div class="pagination">
+  
+    <span class="prev" >
+      <a href="https://icbd.github.io/prepend-private-method/">
+        ← 上一篇
+      </a>
+    </span>
+  
+  
+    <span class="next" >
+      <a href="https://icbd.github.io/gitrepository-layout/">
+        下一篇 →
+      </a>
+    </span>
+  
+</div>
+
+      </div>
+    </div>
+  </body>
+
+  
+  <script>
+    document.getElementById("main").classList.add("withtoc");
+  </script>
+  
+
+  <div class="wrapper-footer-mobile">
+    <footer class="footer">
+      <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+  
+  
+
+  
+
+  
+  <li><a href="mailto:wwwicbd@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/icbd" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+  <li><a href="/feed.xml" class="icon-21 rss" title="RSS"><svg viewBox="0 0 512 512"><path d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM112 416c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm157.533 0h-34.335c-6.011 0-11.051-4.636-11.442-10.634-5.214-80.05-69.243-143.92-149.123-149.123-5.997-.39-10.633-5.431-10.633-11.441v-34.335c0-6.535 5.468-11.777 11.994-11.425 110.546 5.974 198.997 94.536 204.964 204.964.352 6.526-4.89 11.994-11.425 11.994zm103.027 0h-34.334c-6.161 0-11.175-4.882-11.427-11.038-5.598-136.535-115.204-246.161-251.76-251.76C68.882 152.949 64 147.935 64 141.774V107.44c0-6.454 5.338-11.664 11.787-11.432 167.83 6.025 302.21 141.191 308.205 308.205.232 6.449-4.978 11.787-11.432 11.787z"/></svg><!--[if lt IE 9]><em>RSS</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.twitter.com/CbdFocus" class="icon-26 twitter" title="Twitter"><svg viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg><!--[if lt IE 9]><em>Twitter</em><![endif]--></a></li>
+  
+
+  
+
+</ul>
+
+
+
+<p>Copyright (c) 2020 CBD Blog</p>
+
+    </footer>
+</html>
