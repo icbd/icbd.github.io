@@ -4,6 +4,7 @@ url: https://icbd.github.io
 baseurl: ""
 avatar: /images/avatar.jpg
 favicon: /images/avatar.jpg
+destination: docs
 navigation:
   - name: 首页
     url: /
