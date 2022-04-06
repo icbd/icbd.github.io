@@ -14,7 +14,7 @@
         <section data-markdown
                  data-separator="^\n\n"
                  data-separator-vertical="^\n\n\n">
-            <script type="text/template">{{ page.raw_content }}</script>
+            <script type="text/template">{% include_relative _slides/{{ page.content_file }} %}</script>
         </section>
     </div>
 </div>
