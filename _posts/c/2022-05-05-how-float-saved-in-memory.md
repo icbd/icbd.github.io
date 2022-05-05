@@ -1,11 +1,11 @@
 ---
 layout: post
-title:  C 在内存里如何保存
+title:  C 在内存里如何保存 float
 Author: CBD
 tags:   [C]
 ---
 
-```C
+```cpp
 #include <stdio.h>
 #include <stdlib.h>
 
