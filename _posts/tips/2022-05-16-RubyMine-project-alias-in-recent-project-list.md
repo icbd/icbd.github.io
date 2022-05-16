@@ -6,4 +6,6 @@ Author: CBD
 tags:   [IntelliJ]
 ---
 
-Save alias name to `.idea/.name` .
+1. Close RubyMine
+1. cd repo folder
+1. Create a file `.idea/.name` and save alias name to it .
