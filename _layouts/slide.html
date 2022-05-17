@@ -6,15 +6,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/theme/serif.min.css">
     {% include baidutongji.html %}
     <meta name="google-site-verification" content="ZqVpjmLHnwuJ0qbh4QrpcofglQe6XEjjF7X1AB7yXus"/>
+    <style>
+        div, img {
+            display: inline-block;
+        }
+
+        /*https://revealjs.com/*/
+        .slides {
+            /*move up 10%*/
+            transform: translate(-50%, -60%) scale(0.8) !important;
+        }
+    </style>
 </head>
 <body>
-<a href="{{ site.url }}" style="position: absolute;">Esc</a>
+<a href="{{ site.url }}" style="position: absolute; margin: 5px; cursor: pointer; z-index: 100;">Esc</a>
 <div class="reveal">
     <div class="slides">
-        <section data-markdown
-                 data-separator="^\n\n"
-                 data-separator-vertical="^\n\n\n">
-            <script type="text/template">{% include_relative _slides/{{ page.content_file }} %}</script>
+        <section data-markdown data-separator="^---">
+            <textarea data-template>{% include_relative _slides/{{ page.content_file }} %}</textarea>
         </section>
     </div>
 </div>
@@ -22,6 +31,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/js/head.min.js"></script>
 <script>
     Reveal.initialize({
+        width: 1280,
+        height: 800,
+        slideNumber: true,
+        minScale: 0.8,
+        maxScale: 0.8,
+        navigationMode: 'linear',
         dependencies: [
             {
                 src: "https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/markdown/marked.min.js",
