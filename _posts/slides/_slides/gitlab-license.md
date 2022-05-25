@@ -1,4 +1,4 @@
-# GitLab License 101
+## GitLab License & Features 101
 
 [@icbd](https://gitlab.com/icbd)
 
@@ -10,17 +10,27 @@
 
 ---
 
+## License Info
+
+* licensee
+* plan
+* active_user_count
+* starts_at
+* expires_at
+
+---
+
 ## Activate license
 
-1. validity of license
-1. license details
+1. SaaS
+1. Self-managed
 
 ---
 
 ## Activate license for self-managed without network
 
-1. validity of license ( sign & verify )
-1. license details ( encrypt & decrypt )
+1. decrypt license info
+1. can't reveal secret key
 
 ---
 
@@ -28,14 +38,24 @@
 
 ![encrypt-decrypt](https://upload.wikimedia.org/wikipedia/commons/f/f9/Public_key_encryption.svg)
 
-- Bob: GitLab LicenseDot 
-- Alice: A GitLab instance installed by users in their intranet
-
 ---
 
 ## Asymmetric cryptographic algorithm
 
 ![sign-verify](https://upload.wikimedia.org/wikipedia/commons/7/78/Private_key_signing.svg)
+
+---
+
+## TLS Handshake (RSA)
+
+![ssl handshake rsa](https://blog.cloudflare.com/content/images/2014/Sep/ssl_handshake_rsa.jpg)
+
+---
+
+## Bob Alice Duality
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Public_key_encryption.svg">
+<img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Private_key_signing.svg">
 
 - Bob: GitLab LicenseDot
 - Alice: A GitLab instance installed by users in their intranet
@@ -82,9 +102,49 @@ gem open gitlab-license
 
 ---
 
+## RSA & AES
+
+```ruby
+# gitlab/license/encryptor.rb
+
+  attr_accessor :key
+
+  def initialize(key)
+    raise KeyError, 'No RSA encryption key provided.' if key && !key.is_a?(OpenSSL::PKey::RSA)
+
+    @key = key
+  end
+
+  def encrypt(data)
+    raise KeyError, 'Provided key is not a private key.' unless key.private?
+
+    # Encrypt the data using symmetric AES encryption.
+    cipher = OpenSSL::Cipher::AES128.new(:CBC)
+    cipher.encrypt
+    aes_key = cipher.random_key
+    aes_iv  = cipher.random_iv
+
+    encrypted_data = cipher.update(data) + cipher.final
+
+    # Encrypt the AES key using asymmetric RSA encryption.
+    encrypted_key = key.private_encrypt(aes_key)
+
+    encryption_data = {
+      'data' => Base64.encode64(encrypted_data),
+      'key' => Base64.encode64(encrypted_key),
+      'iv' => Base64.encode64(aes_iv)
+    }
+
+    json_data = JSON.dump(encryption_data)
+    Base64.encode64(json_data)
+  end
+```
+
+---
+
 ## Code & Demo
 
-[ba026ab3](https://jihulab.com/gitlab-cn/gitlab/-/commit/ba026ab3224f1b4811c719dec6ac88137512c11f)
+[4dc413a6f1a391e73a3eb322aa3cf6d0b3091225](https://jihulab.com/gitlab-cn/gitlab/-/commit/4dc413a6f1a391e73a3eb322aa3cf6d0b3091225)
 
 ---
 
