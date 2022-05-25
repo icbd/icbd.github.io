@@ -150,9 +150,11 @@ gem open gitlab-license
 
 ## License & GitlabSubscriptions::Features
 
-- [ee/app/models/license.rb](https://jihulab.com/gitlab-cn/gitlab/-/blob/main-jh/ee/app/models/license.rb)
+- [ee/app/models/license.rb#feature_available?](https://jihulab.com/gitlab-cn/gitlab/-/blob/main-jh/ee/app/models/license.rb#L70)
 - [ee/app/models/gitlab_subscriptions/features.rb](https://jihulab.com/gitlab-cn/gitlab/-/blob/main-jh/ee/app/models/gitlab_subscriptions/features.rb)
 - [jh/app/models/jh/gitlab_subscriptions/features.rb](https://jihulab.com/gitlab-cn/gitlab/-/blob/main-jh/jh/app/models/jh/gitlab_subscriptions/features.rb)
+- [ee/app/models/ee/project.rb#licensed_feature_available?](https://jihulab.com/gitlab-cn/gitlab/-/blob/main-jh/ee/app/models/ee/project.rb#L809)
+- [ee/app/models/ee/namespace.rb#licensed_feature_available?](https://jihulab.com/gitlab-cn/gitlab/-/blob/main-jh/ee/app/models/ee/namespace.rb#L170)
 - [ee/spec/support/helpers/ee/license_helpers.rb](https://jihulab.com/gitlab-cn/gitlab/-/blob/main-jh/ee/spec/support/helpers/ee/license_helpers.rb)
 
 [MR: Allows JH to independently control the feature license level](https://jihulab.com/gitlab-cn/gitlab/-/merge_requests/381/diffs)
