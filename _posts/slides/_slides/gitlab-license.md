@@ -34,6 +34,48 @@
 
 ---
 
+## OpenSSL::PKey::RSA
+
+```ruby
+  # rsa.public_encrypt(string)          => String
+  # rsa.public_encrypt(string, padding) => String
+  # 
+  # Encrypt _string_ with the public key.  _padding_ defaults to PKCS1_PADDING.
+  # The encrypted string output can be decrypted using #private_decrypt.
+  def public_encrypt(*several_variants)
+    # This is a stub, used for indexing
+  end
+
+  # rsa.private_decrypt(string)          => String
+  # rsa.private_decrypt(string, padding) => String
+  # 
+  # Decrypt _string_, which has been encrypted with the public key, with the
+  # private key.  _padding_ defaults to PKCS1_PADDING.
+  def private_decrypt(*several_variants)
+    # This is a stub, used for indexing
+  end
+
+  # rsa.private_encrypt(string)          => String
+  # rsa.private_encrypt(string, padding) => String
+  # 
+  # Encrypt _string_ with the private key.  _padding_ defaults to PKCS1_PADDING.
+  # The encrypted string output can be decrypted using #public_decrypt.
+  def private_encrypt(*several_variants)
+    # This is a stub, used for indexing
+  end
+
+  # rsa.public_decrypt(string)          => String
+  # rsa.public_decrypt(string, padding) => String
+  # 
+  # Decrypt _string_, which has been encrypted with the private key, with the
+  # public key.  _padding_ defaults to PKCS1_PADDING.
+  def public_decrypt(*several_variants)
+    # This is a stub, used for indexing
+  end
+```
+
+---
+
 ## Asymmetric cryptographic algorithm
 
 ![encrypt-decrypt](https://upload.wikimedia.org/wikipedia/commons/f/f9/Public_key_encryption.svg)
