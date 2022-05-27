@@ -186,7 +186,7 @@ gem open gitlab-license
 
 ## Code & Demo
 
-[4dc413a6f1a391e73a3eb322aa3cf6d0b3091225](https://jihulab.com/gitlab-cn/gitlab/-/commit/4dc413a6f1a391e73a3eb322aa3cf6d0b3091225)
+[dddcbb0ec20](https://jihulab.com/gitlab-cn/gitlab/-/commit/dddcbb0ec20)
 
 ---
 
