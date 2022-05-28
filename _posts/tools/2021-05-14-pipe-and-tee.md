@@ -2,7 +2,7 @@
 layout: post
 title:  pipe and tee
 Author: CBD
-tags:   [tee, tools]
+tags:   [Tools]
 ---
 
 tee command reads the standard input and writes it to both the standard output and one or more files.

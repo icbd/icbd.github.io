@@ -3,7 +3,7 @@ layout: post
 title:  New Mac Essential Tools
 date:   2021-04-29
 Author: CBD
-tags:   [tools]
+tags:   [Tools]
 ---
 
 ## Terminal  tools
