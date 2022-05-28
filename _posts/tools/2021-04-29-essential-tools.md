@@ -56,3 +56,5 @@ brew install direnv
 - [ ] Charles
 - [ ] IINA
 - [ ] direnv
+- [ ] QuickShade
+- [ ] EasyRes
