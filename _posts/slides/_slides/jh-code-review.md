@@ -1,3 +1,7 @@
+[如何书写高质量的 MR / 如何做优秀的 Code Review](https://gitlab.cn/handbook/engineering/code-review/how-to-write-great-mr-and-code-review)
+
+---
+
 ## 缘起
 
 Code Review 对于 MR 来说，不仅是一个工作流程，还是团队成员为了达到共同目标而一起努力的过程。
@@ -25,7 +29,7 @@ Code Review 对于 MR 来说，不仅是一个工作流程，还是团队成员�
 
 - **Maintainable**
 
-  “可维护的”的代码最能提现贡献者的编码水平。
+  “可维护的”的代码最能体现贡献者的编码水平。
   这里隐含了一些要求，代码的组织方式是否符合约定，方法的颗粒度如何，是否可重用，代码是否容易扩展，是否容易测试，异常处理是否合适等等。
   这需要 Reviewer 发挥自己的经验和智慧，引导贡献者向着更好的方向改进。
 
@@ -129,6 +133,8 @@ Code Review 对于 MR 来说，不仅是一个工作流程，还是团队成员�
 
 如果 MR 对用户的使用有影响，无论是新增去除或者修改功能，都应该书写 `Changelog`，
 详见 [更新日志条目](https://docs.gitlab.cn/jh/development/changelog.html) 。
+
+---
 
 ## MR Review 流程
 
