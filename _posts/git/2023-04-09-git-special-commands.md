@@ -42,16 +42,29 @@ git reset HEAD -- && git checkout . && git clean -fd
 git log `git branch --show-current` --not `git symbolic-ref refs/remotes/origin/HEAD | sed "s@^refs/remotes/origin/@@"`
 ```
 
+#### 通过 diff 文件传递修改
+
+```sh
+git diff HEAD^ > changes.diff
+
+git diff master...HEAD > changes.diff
+
+git apply changes.diff
+```
+
 #### 将本地提交打包成 patch 文件
+
+diff 文件只包含修改, patch 还包含 author 信息.
+
+可以追加参数改变输出 `--stdout`
 
 ```sh
 // 打包最新的一个提交
-git format-patch HEAD^ --stdout
+git format-patch HEAD^
 
 // 打包当前分支的所有提交
 git format-patch `git merge-base master HEAD`
 
-// 应用 patch 文件
-// git apply sth.diff
+// 应用 patch 文件 (如果不需要author信息可以使用 `apply`)
 git am 0001-Edit-Readme.patch
 ```
