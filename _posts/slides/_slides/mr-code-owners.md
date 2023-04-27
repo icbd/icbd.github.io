@@ -8,6 +8,10 @@ https://jihulab.com/gitlab-cn/gitlab/-/issues/2791
 
 ---
 
+![issue-from](/images/slides/mr-code-owners/qa-diff-1587.png)
+
+---
+
 https://gitlab.com/gitlab-org/gitlab/-/merge_requests/117020/diffs
 
 ```yaml
