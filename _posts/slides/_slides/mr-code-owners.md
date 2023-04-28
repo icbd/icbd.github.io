@@ -18,18 +18,19 @@ https://gitlab.com/gitlab-org/gitlab/-/merge_requests/117020/diffs
 # .gitlab/CODEOWNERS
 
 [JH Frontend] @jihulab/maintainers/frontend
-/jh/app/assets/
-/jh/*.scss
-/jh/*.js
-/jh/*.vue
+  /jh/app/assets/
+  /jh/**/*.scss
+  /jh/**/*.js
+  /jh/**/*.vue
 
-[JH Rails Backend] @jihulab/maintainers/rails-backend
-/jh/*.rb
-/jh/*.rake
-/jh/qa/ @jihulab/maintainers/quality
+  [JH Rails Backend] @jihulab/maintainers/rails-backend
+  /jh/**/*.rb
+  /jh/**/*.rake
+  /jh/qa/ @jihulab/maintainers/quality
 
-[JH Technical Writer] @jihulab/maintainers/technical-writer
-/jh/doc/
+  [JH Technical Writer] @jihulab/maintainers/technical-writer
+  /jh/doc/
+
 ```
 
 ---
