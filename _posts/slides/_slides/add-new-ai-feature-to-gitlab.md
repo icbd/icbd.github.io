@@ -2,6 +2,14 @@
 
 ---
 
+> AI is moving very quickly, and we need to be able to keep pace with changes in the area. We have built an `abstraction layer` to do this, allowing us to take a more "pluggable" approach to the underlying models, data stores, and other technologies.
+
+---
+
+![UML](https://plantuml.gitlab-static.net/png/U9oDKyjImZ0KtUShxjIDBlW15qe7aAa38r865uwBjBsM39XWaWBAyEycVQOL6JUPzEJUSyvzjAyqbJhxs12rPXoaK4Z8biPhcY9u0v4WX5cQej9CSEN1aG1mYtfJSsvWJ3NkwPTNmml9jE0Gy7UKo6EJZdA7qWEge7WZfmiAaDCQ8Hi_2AUEO6pE57aZDQEJgTTYAuamWJdk6EvH_cqPhiFvJKCsEcX9Oora0rddZAU5fRQG7u0_2_AY_E31aNZQ8lU3XcE9KkC1BEJaZvcUq0YEKCUzO0J1SEGHWzGg1YpiLr7pKRZ8XHriBEbszJonqAcL_IWYrKuFMO9hzbc4EdQ6LDE8AbHE8KkqpQYVdAuBfLE9ePKq76LqQ0Tft7VM0dgzkshivMPOn0oMb3smdxK-ANXoiBjWTOl-yretfOCt3VnbzFKgscJurWwxXKoX19hfbP3i6vDxKsBLnfpIZ9zOZUfEpctPPN4tfhDppbfs2skvEBlQf8yyiR_s3ydW9zG0)
+
+---
+
 ## Debug in GDK
 
 [Example: Generate test in MR](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/118365)
@@ -20,9 +28,10 @@ Gitlab::CurrentSettings.update(openai_api_key: "<open-ai-key>")
 
 ---
 
-## pgvector
+## pgvector (Optional)
 
-https://github.com/pgvector/pgvector
+- https://github.com/pgvector/pgvector
+- https://github.com/ankane/neighbor
 
 ```sh
 gdk config set gitlab.rails.databases.embedding.enabled true
@@ -30,6 +39,9 @@ gdk config set pgvector.enabled true
 gdk reconfigure
 
 ```
+
+- [MR: Add Tanuki Bot model](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/118195)
+- [Tanuki Bot Repo](https://gitlab.com/gitlab-org/enablement-section/tanuki-bot/)
 
 ---
 
@@ -178,10 +190,10 @@ TODO
 
 ---
 
-## Other Details
+## More Details
 
 - `ExponentialBackoff` and `CircuitBreaker` ( error with `Maximum number of retries`)
-- todo
+- Tracking of Token Spent on Prometheus
 
 ---
 
@@ -189,6 +201,7 @@ TODO
 
 - https://about.gitlab.com/blog/2023/05/03/gitlab-ai-assisted-features
 - https://about.gitlab.com/blog/2023/04/27/merge-request-suggest-a-test
+- https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/development/ai_architecture.md
 - https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/development/ai_features.md
 - https://gitlab.com/gitlab-org/gitlab/-/merge_requests/118365
 - https://github.com/alexrudall/ruby-openai
