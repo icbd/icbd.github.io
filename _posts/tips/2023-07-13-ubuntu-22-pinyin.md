@@ -3,7 +3,7 @@ layout: post
 title:  Ubuntu 22.04 yinpin
 date:   2023-07-13
 Author: CBD
-tags: [ubuntu]
+tags: [Ubuntu]
 ---
 
 安装帮助参考官方文档：
@@ -18,7 +18,7 @@ fcitx-config-gtk3
 
 ## vscode 中搜狗输入法失效
 
-如果是从 ubuntu 的应用市场安装的 vs code，搜狗拼音的提示框会失效， 如果执行 `fcitx-config-gtk3` 还会报错。
+如果是从 Ubuntu 的应用市场安装的 vs code，搜狗拼音的提示框会失效， 如果执行 `fcitx-config-gtk3` 还会报错。
 
 ```log
 /snap/core20/current/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by /lib/x86_64-linux-gnu/libproxy.so.1)

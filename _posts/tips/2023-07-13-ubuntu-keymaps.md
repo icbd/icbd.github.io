@@ -3,23 +3,23 @@ layout: post
 title:  Ubuntu keymap
 date:   2023-07-13
 Author: CBD
-tags: [ubuntu]
+tags: [Ubuntu]
 ---
 
 ## 基本需求
 
-从 macos 迁移到 Ubuntu 之后，尽量保持快捷键键位一致。
+从 macOS 迁移到 Ubuntu 之后，尽量保持快捷键键位一致。
 
 在使用相同的键盘时，IDE 的快捷键键位一致。
 
 ## 背景分析
 
-需求中讲的都是 “键位一致”，是因为 macos 跟 linux、windows 在 command 键的使用上有很大不同。
+需求中讲的都是 “键位一致”，是因为 macOS 跟 Linux、Windows 在 Command 键的使用上有很大不同。
 
-- mac 以 command 为中心，用左大拇指为中心去操控；
+- mac 以 Command 为中心，用左大拇指为中心去操控；
 - windows、linux 以 ctrl 为中心，用左小拇指为中心去操控。
 
-ubuntu 的 command 键叫 super 键，布局如下：
+Ubuntu 的 Command 键叫 Super 键，布局如下：
 
 ![](/images/ubuntu-us.png)
 
@@ -27,26 +27,26 @@ ubuntu 的 command 键叫 super 键，布局如下：
 
 ![](/images/keyboard.png)
 
-很自然的，就考虑用来代替 command 键。
+很自然的，就考虑用 alt 来代替 Command 键。
 
-（最开始的想法是先把 super 和 alt 的键帽互换，然后功能互换，然后用 super 代替 command。实际操作下来效果很不好，super有很多全局的冲突。所以退而求其次的只要求在IDE中的键位保持一致。）
+（ 最开始的想法是先把 Super 和 alt 的键帽互换，然后功能互换，然后用 Super 代替 Command。实际操作下来效果很不好，Super 有很多全局的冲突。所以退而求其次的只要求在 IDE 中的键位保持一致。）
 
 ## 实操
 
-这里只考虑 JetBrains 的 IDE。
+这里以 JetBrains 的 IDE 为例。
 
 ### 导出快捷键配置文件
 
 IDE 中自带了配置文件备份的功能，但这里导出的是增量的修改，我们需要全量的 mapping。
 
 - 安装插件 `macOS Keymap`
-- Settings - keymap - select `macOS` - Duplicate - Save
+- Settings - Keymap - select `macOS` - Duplicate - Save
 - 安装插件 [Keymap XML Exporter)](https://plugins.jetbrains.com/plugin/18927-keymap-xml-exporter)
 - Help - Export keymap to XML
 
 ### XML 配置文件
 
-位于目录 `~/.config/JetBrains/RubyMine2023.1/keymaps`， 最终处理好的文件要覆盖掉这里的xml文件。
+位于目录 `~/.config/JetBrains/RubyMine2023.1/keymaps`， 最终处理好的文件要覆盖掉这里的 xml 文件。
 
 修改前的样子，有 parent 元素，action 内容是增量的：
 
@@ -79,13 +79,13 @@ XML 的解析比较繁琐，先做一下预处理，把每个 action formate 到
 require 'byebug'
 
 # delete conflict alt keys with meta
-# ubuntu 22
+# Ubuntu 22
 # ~/.config/JetBrains/RubyMine2023.1/keymaps
 
 result = ''
-full = File.read('macos.xml')
+full = File.read('macOS.xml')
 
-File.readlines('m.xml').each do |line|
+File.readlines('macOS.xml').each do |line|
   keys = line.scan(/keystroke=\"([^"]*)\"/).flatten
 
   skip = false
@@ -110,7 +110,7 @@ puts 'end'
 
 ```
 
-对于被去除的快捷键中有个别还是非常常用，就手动加回来，处理完的结果如下，
+被去除的快捷键中有个别还是很常用的，就手动加回来，处理完的结果如下，
 
 写回到配置文件中 `~/.config/JetBrains/RubyMine2023.1/keymaps/macOS-ubuntu.xml`:
 
