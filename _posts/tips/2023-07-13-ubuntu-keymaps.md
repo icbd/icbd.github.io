@@ -434,3 +434,7 @@ puts 'end'
 <action id="Terminal.SwitchFocusToEditor"><keyboard-shortcut first-keystroke="escape"/></action>
 </keymap>
 ```
+
+## 苹果键盘的功能键行为
+
+https://help.ubuntu.com/community/AppleKeyboard#Change_Function_Key_behavior
