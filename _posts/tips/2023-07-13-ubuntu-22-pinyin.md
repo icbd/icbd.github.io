@@ -1,4 +1,3 @@
-
 ---
 layout: post
 title:  Ubuntu 22.04 yinpin
