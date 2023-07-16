@@ -6,6 +6,14 @@ Author: CBD
 tags: [Ubuntu]
 ---
 
+## Update
+
+Swap Ctrl with Alt on layout level.
+
+![](/images/layout-options.png)
+
+-----
+
 ## 基本需求
 
 从 macOS 迁移到 Ubuntu 之后，尽量保持快捷键键位一致。
