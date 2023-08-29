@@ -1,6 +1,6 @@
 ---
 layout: slide
-title: Git Internal Puzzle Game
+title: Draft Git Internal Puzzle Game
 date: 2023-08-09
 Author: CBD
 tags: [Slide]
