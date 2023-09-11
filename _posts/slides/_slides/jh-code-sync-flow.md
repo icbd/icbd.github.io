@@ -61,7 +61,7 @@
 
 
 <table>
-<tr><th>优势</th><th>劣势</th></tr>
+<tr><th>劣势</th><th>优势</th></tr>
 <tr><td>引入新的过度分支</td><td>很容易模拟 main-jh 的 Pipeline</td></tr>
 <tr><td>Git Graph 发生变化</td><td>Fix pipeline 流程简单</td></tr>
 <tr><td>合并流程略复杂</td><td>方便实现自动流程</td></tr>
