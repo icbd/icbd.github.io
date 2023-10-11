@@ -123,3 +123,74 @@ hostname: "192.168.0.132"
 修改之后记得刷新配置: `gdk reconfigure`.
 
 Ref: [Using GitLab Runner with GDK](https://gitlab.devworks.gr/gitlab-org/gitlab-development-kit/blob/f2247534217d23523f0e3495ad72162805dc7b38/doc/howto/runner.md)
+
+## 小结
+
+准备 bundle 脚本:
+
+```bash
+mkdir -p ~/.config/git/hooks
+
+cat << EOF >  ~/.config/git/hooks/post-checkout
+#!/bin/bash
+#
+# chmod +x .git/hooks/post-checkout
+#
+# Auto config gemfile path for JiHu repo when git checkout
+
+current_dir=${PWD##*/}
+
+if [ "$current_dir" != "gitlab" ]; then
+    exit 0
+fi
+
+echo "Execute bundle config through hooks/post-checkout"
+
+BUNDLE_CONFIG_FILE="./.bundle/config"
+
+gsed -i '/^BUNDLE_GEMFILE: /d' "$BUNDLE_CONFIG_FILE"
+
+if [[ -f "jh/Gemfile" ]]; then
+  echo 'BUNDLE_GEMFILE: "jh/Gemfile"' >> "$BUNDLE_CONFIG_FILE"
+else
+  echo 'BUNDLE_GEMFILE: "Gemfile"' >> "$BUNDLE_CONFIG_FILE"
+fi
+
+#bundle config get gemfile
+
+EOF
+
+chmod +x  ~/.config/git/hooks/post-checkout
+
+```
+
+GDK 安装
+
+```bash
+git clone git@gitlab.com:gitlab-org/gitlab-development-kit.git gdk
+
+cd gdk
+
+touch gdk.yml
+
+cat << EOF > gdk.yml
+---
+repositories:
+  gitlab: git@jihulab.com:gitlab-cn/gitlab.git
+gitlab:
+  default_branch: main-jh
+  rails:
+    allowed_hosts: []
+    puma:
+      threads_max: 16
+      threads_min: 4
+      workers: 2
+rails_web:
+  enabled: false
+
+EOF
+
+bundle
+
+gdk install gitlab_repo=git@jihulab.com:gitlab-cn/gitlab.git
+```
