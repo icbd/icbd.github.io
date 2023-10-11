@@ -57,4 +57,8 @@ brew install direnv
 - [ ] IINA
 - [ ] direnv
 - [ ] QuickShade
-- [ ] EasyRes
+- [ ] monitorcontrol
+- [ ] startship
+- [ ] typora
+- [ ] autojump
+- [ ] asdf
