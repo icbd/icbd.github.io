@@ -6,21 +6,10 @@ Author: CBD
 tags:   [GitLab]
 ---
 
-使用这个脚本会全自动安装和配置 GDK, 建议在新机器上使用.
-
-自动安装借助 [asdf](https://asdf-vm.com/#/core-manage-asdf) 来安装依赖, 如果跟现有环境冲突请参考: [Install and configure GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/index.md)
+[Install and configure GDK DOC](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/index.md)
 
 ```sh
 #! /bin/bash
-echo "Check basic tools:"
-if !( type git >/dev/null 2>&1 ); then
-  echo 'git not exist';
-  exit 1;
-fi
-if !( type make >/dev/null 2>&1 ); then
-  echo 'make not exist';
-  exit 1;
-fi
 
 echo "Install dependencies:"
 git clone https://gitlab.com/gitlab-org/gitlab-development-kit.git
@@ -124,73 +113,92 @@ hostname: "192.168.0.132"
 
 Ref: [Using GitLab Runner with GDK](https://gitlab.devworks.gr/gitlab-org/gitlab-development-kit/blob/f2247534217d23523f0e3495ad72162805dc7b38/doc/howto/runner.md)
 
-## 小结
+# FAST GUIDE
 
-准备 bundle 脚本:
-
-```bash
-mkdir -p ~/.config/git/hooks
-
-cat << EOF >  ~/.config/git/hooks/post-checkout
-#!/bin/bash
-#
-# chmod +x .git/hooks/post-checkout
-#
-# Auto config gemfile path for JiHu repo when git checkout
-
-current_dir=${PWD##*/}
-
-if [ "$current_dir" != "gitlab" ]; then
-    exit 0
-fi
-
-echo "Execute bundle config through hooks/post-checkout"
-
-BUNDLE_CONFIG_FILE="./.bundle/config"
-
-gsed -i '/^BUNDLE_GEMFILE: /d' "$BUNDLE_CONFIG_FILE"
-
-if [[ -f "jh/Gemfile" ]]; then
-  echo 'BUNDLE_GEMFILE: "jh/Gemfile"' >> "$BUNDLE_CONFIG_FILE"
-else
-  echo 'BUNDLE_GEMFILE: "Gemfile"' >> "$BUNDLE_CONFIG_FILE"
-fi
-
-#bundle config get gemfile
-
-EOF
-
-chmod +x  ~/.config/git/hooks/post-checkout
-
-```
-
-GDK 安装
+## General install
 
 ```bash
 git clone git@gitlab.com:gitlab-org/gitlab-development-kit.git gdk
 
 cd gdk
 
-touch gdk.yml
+bundle
 
-cat << EOF > gdk.yml
+gem install gitlab-development-kit
+
+make bootstrap
+
+gdk install
+```
+
+## JiHu install
+
+```bash
+gdk stop
+
+rm -rf gitlab
+git clone git@jihulab.com:gitlab-cn/gitlab.git
+brew install gnu-sed
+cat << 'EOF' > gitlab/.git/hooks/post-checkout
+#!/bin/bash
+#
+# Auto config Gemfile path for JiHu repo when git checkout.
+#
+# Dependency: brew install gnu-sed
+#
+# chmod +x ./.git/hooks/post-checkout
+#
+
+current_dir=${PWD##*/}
+bundle_config_file="./.bundle/config"
+
+if [[ "$current_dir" != "gitlab" ]]; then
+    exit 0
+fi
+
+echo "Execute bundle config through hooks/post-checkout"
+
+if [[ ! -f "$bundle_config_file" ]]; then
+    echo "Make new file: $bundle_config_file"
+    mkdir ".bundle"
+    echo "---\n" > "$bundle_config_file"
+fi
+
+gsed -i '/^BUNDLE_GEMFILE: /d' "$bundle_config_file"
+
+if [[ -f "jh/Gemfile" ]]; then
+  echo 'BUNDLE_GEMFILE: "jh/Gemfile"' >> "$bundle_config_file"
+else
+  echo 'BUNDLE_GEMFILE: "Gemfile"' >> "$bundle_config_file"
+fi
+
+bundle config get gemfile
+
+EOF
+
+chmod +x gitlab/.git/hooks/post-checkout
+
+cd gitlab
+git checkout pre-main-jh
+bundle
+cd ..
+
+cat << 'EOF' > gdk.yml
 ---
 repositories:
   gitlab: git@jihulab.com:gitlab-cn/gitlab.git
 gitlab:
-  default_branch: main-jh
+  default_branch: pre-main-jh
   rails:
-    allowed_hosts: []
     puma:
       threads_max: 16
-      threads_min: 4
+      threads_min: 8
       workers: 2
 rails_web:
   enabled: false
 
 EOF
 
-bundle
-
-gdk install gitlab_repo=git@jihulab.com:gitlab-cn/gitlab.git
+gdk reconfigure
+gdk update
 ```
