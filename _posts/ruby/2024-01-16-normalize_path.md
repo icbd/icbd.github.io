@@ -71,5 +71,22 @@ puts path.encoding # UTF-8
 
 ```
 
+```ruby
+require 'socket'
+
+req = TCPServer.new('localhost', 3001).accept
+
+line = req.gets
+puts "-----#{line}", line.encoding
+# ASCII-8BIT
+
+line = "#{line}"
+puts "-----#{line}", line.encoding
+# UTF-8
+
+req.close
+
+```
+
 Ref commit:
 - https://github.com/rails/rails/commit/8607c25ba7810573733d9b37d0015154ba059f5e
