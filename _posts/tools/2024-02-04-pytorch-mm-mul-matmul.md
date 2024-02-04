@@ -62,8 +62,8 @@ print(c)
 
 - 如果两个一维张量相乘, 得到 Dot Product, 即 `torch.dot`;
 - 如果两个二维张量相乘, 得到 matrix-matrix Product, 即 `torch.mm`;
-- 一维张量乘以二维张量, 先将一维张量提升为二维张量然后进行 matrix-matrix product, 再将结果降维为一维张量;
-- 二维张量乘以一维张量, 得到 matrix-vector product, 即 `torch.mv`;
+- 一维张量乘以二维张量, 先将一维张量 prepended 提升为二维张量然后进行 matrix-matrix product, 再将结果降维为一维张量;
+- 二维张量乘以一维张量, 先将一维张量 appended  提升为二维张量然后进行 matrix-matrix product, 再将结果降维为一维张量, 即 matrix-vector product, 即 `torch.mv`;
 - **高维张量乘法**: `ax(nxm) * ax(mxp) = ax(nxp)`, 批处理的二维张量相乘.
 
 
