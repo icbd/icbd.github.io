@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  Pytorch 的各种乘法
+title:  Pytorch 张量乘法
 date:   2024-02-04
 Author: CBD
 tags:   [Pytorch]
@@ -12,11 +12,34 @@ tags:   [Pytorch]
 - https://pytorch.org/docs/stable/generated/torch.matmul.html
 - https://pytorch.org/docs/stable/generated/torch.mul.html
 
+
+mm/matmul/mul 是在 Pytorch 的 tensor 的概念下的计算.
+
+`torch.tensor([1,2,3])` 的形状是 `torch.Size([3])`,
+表示一个一维张量, 也表示一个向量, 在表示向量时不区分行向量和列向量.
+
+
+
+
+```python
+print(torch.tensor([1,2,3]).size()) # 一维张量
+print(torch.tensor([[1,2,3]]).size()) # 二维张量
+```
+
+
+
+
+    torch.Size([3])
+    torch.Size([1, 3])
+
+
+
+
 ```python
 import torch
 ```
 
-# 二维矩阵乘法 mm
+# 二维张量乘法 mm
 
 nxm * mxp = nxp
 
@@ -35,11 +58,14 @@ print(c)
             [ 2.0103,  1.3551, -0.4776, -0.3899]])
 
 
-# 高维矩阵乘法 matmul
+# 高维张量乘法 matmul
 
-axnxm * axmxp = axnxp
+- 如果两个一维张量相乘, 得到 Dot Product, 即 `torch.dot`;
+- 如果两个二维张量相乘, 得到 matrix-matrix Product, 即 `torch.mm`;
+- 一维张量乘以二维张量, 先将一维张量提升为二维张量然后进行 matrix-matrix product, 再将结果降维为一维张量;
+- 二维张量乘以一维张量, 得到 matrix-vector product, 即 `torch.mv`;
+- **高维张量乘法**: `ax(nxm) * ax(mxp) = ax(nxp)`, 批处理的二维张量相乘.
 
-（ a 的部分适用于广播， 见下面 mul 的规则）
 
 
 
@@ -53,7 +79,7 @@ print(c.size())
     torch.Size([5, 2, 4])
 
 
-# 点乘 mul (*乘法，广播)
+# 哈达玛乘积 mul (*乘法，广播)
 
 axnxm * axnxp = axnxp
 
@@ -64,6 +90,9 @@ axnxp * 1xnxp = axnxp
 axnxp * axnx1 = axnxp
 
 axnxp * 1x1x1 = axnxp
+
+
+也支持张量跟一个标量相乘.
 
 
 ```python
