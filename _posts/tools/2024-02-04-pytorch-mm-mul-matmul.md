@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  Pytorch 的各种乘法
-date:   2022-02-04
+date:   2024-02-04
 Author: CBD
 tags:   [Pytorch]
 ---
