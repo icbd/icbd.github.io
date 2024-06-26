@@ -9,15 +9,6 @@
 
 ---
 
-## INFJ
-
-- Introversion
-- Intuition
-- Feeling
-- Judging
-
----
-
 ## Done Before
 
 - First Package Release
@@ -31,6 +22,14 @@
 
 ## New Journey
 
-- Surfing through Knowledge
-- Rise to the Occasion
-- Impart Experience
+- GitLab Workflow Integration in ~~2months~~ 2weeks
+- System Design with GitLab
+
+---
+
+## INFJ
+
+- Introversion
+- Intuition
+- Feeling
+- Judging
