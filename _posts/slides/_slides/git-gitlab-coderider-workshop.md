@@ -75,13 +75,21 @@ Commit Object
 
 ## Git Internal
 
-https://gitlab.com/-/project/60030792/uploads/b29eb2c2e09c1003f1362575de8a98c8/objects-example.png
+![](https://gitlab.com/-/project/60030792/uploads/b29eb2c2e09c1003f1362575de8a98c8/objects-example.png)
 
 ---
 
 ## Implementation
 
 See IDE
+
+---
+
+## Learn more
+
+- [docs.gitlab.com/ee/topics/git](https://docs.gitlab.com/ee/topics/git)
+- [Pro Git 2nd Edition](https://git-scm.com/book/en/v2)
+- [Learning through game](https://learngitbranching.js.org/)
 
 ---
 
