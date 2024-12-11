@@ -62,3 +62,4 @@ brew install direnv
 - [ ] typora
 - [ ] autojump
 - [ ] asdf
+- [ ] BetterDisplay
